@@ -4,8 +4,6 @@
 Author: Joe Rechenmacher
 
 """
-import requests
-
 from .mlb import Player
 from .mlb import Team
 from .mlb import Franchise
@@ -99,33 +97,13 @@ from .updatedb import update_people
 from .updatedb import update_venues
 from .updatedb import update_yby_records
 
-from .transactions import draft as get_draft
-from .transactions import prospects as get_prospects
-from .transactions import free_agents as get_free_agents
-from .transactions import transactions as get_transactions
+# from .transactions import draft as get_draft
+# from .transactions import prospects as get_prospects
+# from .transactions import free_agents as get_free_agents
+# from .transactions import transactions as get_transactions
 
-
-
-# class StatsAPI:
-#     class stats:
-#         pass
-
-#     class people:
-#         def __new__(cls,mlbam):
-#             self = object.__new__(cls)
-#             self.mlbam = mlbam
-#             return self
-
-#         def stats(self):
-#             print(f"{self.mlbam} stats")
-
-#     class team:
-#         pass
-
-#     class teams:
-#         pass
-
-#     class standings:
-#         pass
-
+from .transactions import draft
+from .transactions import prospects
+from .transactions import free_agents
+from .transactions import transactions
 

@@ -9,26 +9,26 @@ from . import team
 from . import franchise
 from . import league
 
-from .async_mlb import get_leaders
+# from .async_mlb import get_leaders
 from .async_mlb import get_team_responses
 
-from .mlbdata import get_bios_df
+# from .mlbdata import get_bios_df
 from .mlbdata import get_people_df
-from .mlbdata import get_season_info
-from .mlbdata import get_teams_df
-from .mlbdata import get_seasons_df
+# from .mlbdata import get_season_info
+# from .mlbdata import get_teams_df
+# from .mlbdata import get_seasons_df
 from .mlbdata import get_yby_records
 
 from .constants import BASE
-from .constants import BBREF_ENDPOINTS
-from .constants import BBREF_BASE
-from .constants import TEAMS
-from .constants import BAT_FIELDS
-from .constants import BAT_FIELDS_ADV
-from .constants import PITCH_FIELDS
-from .constants import PITCH_FIELDS_ADV
-from .constants import FIELD_FIELDS
-from .constants import STATDICT
+# from .constants import BBREF_ENDPOINTS
+# from .constants import BBREF_BASE
+# from .constants import TEAMS
+# from .constants import BAT_FIELDS
+# from .constants import BAT_FIELDS_ADV
+# from .constants import PITCH_FIELDS
+# from .constants import PITCH_FIELDS_ADV
+# from .constants import FIELD_FIELDS
+# from .constants import STATDICT
 from .constants import POSITION_DICT
 
 from .utils import curr_year
@@ -41,7 +41,6 @@ from .utils import prettify_time
 from .utils import default_season
 from .utils import game_str_display
 
-__BASE = ""
  
 class Player:
     """

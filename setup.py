@@ -9,11 +9,10 @@ setuptools.setup(
     author='Joe Rechenmacher',
     author_email='joe.rechenmacher@gmail.com',
     long_description=long_description,
-    # url='https://github.com/joerex1418/cta',
-    # project_urls = {
-    #     "Issues": "https://github.com/joerex1418/simplestats/issues",
-    #     "Projects": "https://github.com/joerex1418/simplestats/projects"
-    # },
+    url='https://github.com/joerex1418/simplestats-mlb',
+    project_urls = {
+        "Issues": "https://github.com/joerex1418/simplestats/wiki/MLB",
+    },
     license='GPU',
     packages=setuptools.find_packages(where='/simplestats-mlb/',include=["mlb"]),
     install_requires=['requests','pandas','beautifulsoup4','async','aiohttp'],
