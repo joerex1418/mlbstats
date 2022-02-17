@@ -1,0 +1,148 @@
+season,seasonStart,seasonEnd,preSeasonStart,preSeasonEnd,regularSeasonStart,regularSeasonEnd,firstHalfEnd,secondHalfStart,allStarGame,postSeasonStart,postSeasonEnd,wildCard
+2022,February 26,October 31,February 26,February 25,March 31,October 2,July 17,July 21,July 19,October 4,October 31,True
+2021,February 28,November 3,February 28,March 30,April 1,October 3,July 11,July 15,July 13,October 4,November 3,True
+2020,July 23,October 28,February 21,July 22,July 23,September 27,August 25,August 26,,September 29,October 28,True
+2019,March 20,October 30,February 21,March 26,March 20,September 29,July 7,July 11,July 9,October 1,October 30,True
+2018,March 29,October 28,February 21,March 27,March 29,October 1,July 15,July 19,July 17,October 2,October 28,True
+2017,April 2,November 1,February 22,April 1,April 2,October 1,July 9,July 14,July 11,October 3,November 1,True
+2016,April 3,November 2,February 28,April 3,April 3,October 2,July 10,July 15,July 12,October 4,November 2,True
+2015,April 5,November 1,March 1,April 4,April 5,October 4,July 12,July 17,July 14,October 6,November 1,True
+2014,March 22,October 29,February 25,March 30,March 22,September 28,July 13,July 18,July 15,September 30,October 29,True
+2013,March 31,October 30,February 21,March 30,March 31,September 30,July 14,July 19,July 16,October 1,October 30,True
+2012,March 28,October 28,February 29,April 4,March 28,October 3,July 8,July 13,July 10,October 5,October 28,True
+2011,March 31,October 28,February 25,March 30,March 31,September 28,July 10,July 14,July 12,September 30,October 28,True
+2010,April 4,November 1,March 2,April 4,April 4,October 3,July 11,July 15,July 13,October 6,November 1,True
+2009,April 5,November 4,February 25,April 5,April 5,October 6,July 12,July 16,July 14,October 7,November 4,True
+2008,March 25,October 27,February 27,March 30,March 25,September 30,July 13,July 17,July 15,October 1,October 27,True
+2007,April 1,October 28,February 28,April 1,April 1,October 1,July 8,July 12,July 10,October 3,October 28,True
+2006,April 2,October 27,March 1,April 2,April 2,October 2,July 9,July 13,July 11,October 3,October 27,True
+2005,April 3,October 26,,,April 3,October 2,July 10,July 14,July 12,October 4,October 26,True
+2004,March 30,October 27,,,March 30,October 3,July 12,July 14,July 13,October 5,October 27,True
+2003,March 30,October 25,,,March 30,September 28,July 14,July 16,July 15,September 30,October 25,True
+2002,March 31,October 27,,,March 31,September 29,July 8,July 10,July 9,October 1,October 27,True
+2001,April 1,November 4,,,April 1,October 7,July 9,July 11,July 10,October 9,November 4,True
+2000,March 29,October 26,,,March 29,October 1,July 10,July 12,July 11,October 3,October 26,True
+1999,April 4,October 27,,,April 4,October 4,July 12,July 14,July 13,October 5,October 27,True
+1998,March 31,October 21,,,March 31,September 28,July 6,July 8,July 7,September 29,October 21,True
+1997,April 1,October 26,,,April 1,September 28,July 7,July 9,July 8,September 30,October 26,True
+1996,March 31,October 26,,,March 31,September 29,July 8,July 10,July 9,October 1,October 26,True
+1995,April 25,October 28,,,April 25,October 2,July 10,July 12,July 11,October 3,October 28,True
+1994,April 3,August 11,,,April 3,August 11,July 11,July 13,July 12,,,True
+1993,April 5,October 23,,,April 5,October 3,July 12,July 14,July 13,October 5,October 23,False
+1992,April 6,October 24,,,April 6,October 4,July 13,July 15,July 14,October 6,October 24,False
+1991,April 8,October 27,,,April 8,October 6,July 8,July 10,July 9,October 8,October 27,False
+1990,April 9,October 20,,,April 9,October 3,July 9,July 11,July 10,October 4,October 20,False
+1989,April 3,October 28,,,April 3,October 1,July 10,July 12,July 11,October 3,October 28,False
+1988,April 4,October 20,,,April 4,October 2,July 11,July 13,July 12,October 4,October 20,False
+1987,April 6,October 25,,,April 6,October 4,July 13,July 15,July 14,October 6,October 25,False
+1986,April 7,October 27,,,April 7,October 5,July 14,July 16,July 15,October 7,October 27,False
+1985,April 8,October 27,,,April 8,October 6,July 15,July 17,July 16,October 8,October 27,False
+1984,April 2,October 14,,,April 2,September 30,July 9,July 11,July 10,October 2,October 14,False
+1983,April 4,October 16,,,April 4,October 2,July 5,July 7,July 6,October 4,October 16,False
+1982,April 5,October 20,,,April 5,October 3,July 12,July 14,July 13,October 5,October 20,False
+1981,April 9,October 28,,,April 9,October 5,June 11,August 10,August 9,October 6,October 28,False
+1980,April 9,October 21,,,April 9,October 6,July 7,July 9,July 8,October 7,October 21,False
+1979,April 4,October 17,,,April 4,September 30,July 16,July 18,July 17,October 2,October 17,False
+1978,April 5,October 17,,,April 5,October 2,July 10,July 12,July 11,October 3,October 17,False
+1977,April 6,October 18,,,April 6,October 3,July 18,July 20,July 19,October 4,October 18,False
+1976,April 8,October 21,,,April 8,October 3,July 12,July 14,July 13,October 9,October 21,False
+1975,April 7,October 22,,,April 7,September 28,July 14,July 16,July 15,October 4,October 22,False
+1974,April 4,October 17,,,April 4,October 2,July 22,July 24,July 23,October 5,October 17,False
+1973,April 5,October 21,,,April 5,October 1,July 23,July 25,July 24,October 6,October 21,False
+1972,April 15,October 22,,,April 15,October 4,July 24,July 26,July 25,October 7,October 22,False
+1971,April 5,October 17,,,April 5,September 30,July 12,July 14,July 13,October 2,October 17,False
+1970,April 6,October 15,,,April 6,October 1,July 13,July 15,July 14,October 3,October 15,False
+1969,April 7,October 16,,,April 7,October 2,July 22,July 24,July 23,October 4,October 16,False
+1968,April 10,October 10,,,April 10,September 29,July 8,July 10,July 9,October 2,October 10,False
+1967,April 10,October 12,,,April 10,October 1,July 10,July 12,July 11,October 4,October 12,False
+1966,April 11,October 9,,,April 11,October 2,July 11,July 13,July 12,October 5,October 9,False
+1965,April 12,October 14,,,April 12,October 3,July 12,July 14,July 13,October 6,October 14,False
+1964,April 13,October 15,,,April 13,October 4,July 6,July 8,July 7,October 7,October 15,False
+1963,April 8,October 6,,,April 8,September 29,July 8,July 10,July 9,October 2,October 6,False
+1962,April 9,October 16,,,April 9,October 1,July 9,July 11,July 10,October 4,October 16,False
+1961,April 10,October 9,,,April 10,October 1,July 10,July 12,July 11,October 4,October 9,False
+1960,April 12,October 13,,,April 12,October 2,July 10,July 12,July 11,October 5,October 13,False
+1959,April 9,October 8,,,April 9,September 29,July 6,July 8,July 7,October 1,October 8,False
+1958,April 14,October 9,,,April 14,September 28,July 7,July 9,July 8,October 1,October 9,False
+1957,April 15,October 10,,,April 15,September 29,July 8,July 10,July 9,October 2,October 10,False
+1956,April 17,October 10,,,April 17,September 30,July 9,July 11,July 10,October 3,October 10,False
+1955,April 11,October 4,,,April 11,September 25,July 11,July 13,July 12,September 28,October 4,False
+1954,April 13,October 2,,,April 13,September 26,July 12,July 14,July 13,September 29,October 2,False
+1953,April 13,October 5,,,April 13,September 27,July 13,July 15,July 14,September 30,October 5,False
+1952,April 15,October 7,,,April 15,September 28,July 7,July 9,July 8,October 1,October 7,False
+1951,April 16,October 10,,,April 16,October 3,July 9,July 11,July 10,October 4,October 10,False
+1950,April 18,October 7,,,April 18,October 1,July 10,July 12,July 11,October 4,October 7,False
+1949,April 18,October 9,,,April 18,October 2,July 11,July 13,July 12,October 5,October 9,False
+1948,April 19,October 11,,,April 19,October 4,July 12,July 14,July 13,October 6,October 11,False
+1947,April 15,October 6,,,April 15,September 28,July 7,July 9,July 8,September 30,October 6,False
+1946,April 16,October 15,,,April 16,September 29,July 8,July 10,July 9,October 6,October 15,False
+1945,April 17,October 10,,,April 17,September 30,,,,October 3,October 10,False
+1944,April 18,October 9,,,April 18,October 1,July 10,July 12,July 11,October 4,October 9,False
+1943,April 20,October 11,,,April 20,October 3,July 12,July 14,July 13,October 5,October 11,False
+1942,April 14,October 5,,,April 14,September 27,July 5,July 7,July 6,September 30,October 5,False
+1941,April 14,October 6,,,April 14,September 28,July 7,July 9,July 8,October 1,October 6,False
+1940,April 16,October 8,,,April 16,September 29,July 8,July 10,July 9,October 2,October 8,False
+1939,April 17,October 8,,,April 17,October 1,July 10,July 12,July 11,October 4,October 8,False
+1938,April 18,October 9,,,April 18,October 2,July 5,July 7,July 6,October 5,October 9,False
+1937,April 19,October 10,,,April 19,October 3,July 6,July 8,July 7,October 6,October 10,False
+1936,April 14,October 6,,,April 14,September 27,July 6,July 8,July 7,September 30,October 6,False
+1935,April 16,October 7,,,April 16,September 29,July 7,July 9,July 8,October 2,October 7,False
+1934,April 17,October 9,,,April 17,September 30,July 9,July 11,July 10,October 3,October 9,False
+1933,April 12,October 7,,,April 12,October 1,July 5,July 7,July 6,October 3,October 7,False
+1932,April 11,October 2,,,April 11,September 25,,,,September 28,October 2,False
+1931,April 14,October 10,,,April 14,September 27,,,,October 1,October 10,False
+1930,April 14,October 8,,,April 14,September 28,,,,October 1,October 8,False
+1929,April 16,October 14,,,April 16,October 6,,,,October 8,October 14,False
+1928,April 10,October 9,,,April 10,September 30,,,,October 4,October 9,False
+1927,April 12,October 8,,,April 12,October 2,,,,October 5,October 8,False
+1926,April 13,October 10,,,April 13,September 27,,,,October 2,October 10,False
+1925,April 14,October 15,,,April 14,October 4,,,,October 7,October 15,False
+1924,April 15,October 10,,,April 15,September 30,,,,October 4,October 10,False
+1923,April 17,October 15,,,April 17,October 7,,,,October 10,October 15,False
+1922,April 12,October 8,,,April 12,October 1,,,,October 4,October 8,False
+1921,April 13,October 13,,,April 13,October 2,,,,October 5,October 13,False
+1920,April 14,October 12,,,April 14,October 3,,,,October 5,October 12,False
+1919,April 19,October 9,,,April 19,September 29,,,,October 1,October 9,False
+1918,April 15,September 11,,,April 15,September 2,,,,September 5,September 11,False
+1917,April 11,October 15,,,April 11,October 4,,,,October 6,October 15,False
+1916,April 12,October 12,,,April 12,October 5,,,,October 7,October 12,False
+1915,April 14,October 13,,,April 14,October 7,,,,October 8,October 13,False
+1914,April 14,October 13,,,April 14,October 7,,,,October 9,October 13,False
+1913,April 9,October 11,,,April 9,October 5,,,,October 7,October 11,False
+1912,April 11,October 16,,,April 11,October 6,,,,October 8,October 16,False
+1911,April 12,October 26,,,April 12,October 12,,,,October 14,October 26,False
+1910,April 14,October 23,,,April 14,October 15,,,,October 17,October 23,False
+1909,April 12,October 16,,,April 12,October 7,,,,October 8,October 16,False
+1908,April 14,October 14,,,April 14,October 8,,,,October 10,October 14,False
+1907,April 11,October 12,,,April 11,October 6,,,,October 8,October 12,False
+1906,April 12,October 14,,,April 12,October 7,,,,October 9,October 14,False
+1905,April 14,October 14,,,April 14,October 8,,,,October 9,October 14,False
+1904,April 14,October 10,,,April 14,October 10,,,,,,False
+1903,April 16,October 13,,,April 16,September 29,,,,October 1,October 13,False
+1902,April 17,October 5,,,April 17,October 5,,,,,,False
+1901,April 18,October 6,,,April 18,October 6,,,,,,False
+1900,April 19,October 14,,,April 19,October 14,,,,,,False
+1899,April 14,October 15,,,April 14,October 15,,,,,,False
+1898,April 15,October 15,,,April 15,October 15,,,,,,False
+1897,April 19,October 3,,,April 19,October 3,,,,,,False
+1896,April 16,September 26,,,April 16,September 26,,,,,,False
+1895,April 18,September 30,,,April 18,September 30,,,,,,False
+1894,April 19,September 30,,,April 19,September 30,,,,,,False
+1893,April 27,September 30,,,April 27,September 30,,,,,,False
+1892,April 12,October 15,,,April 12,October 15,,,,,,False
+1891,April 22,October 3,,,April 22,October 3,,,,,,False
+1890,April 19,October 4,,,April 19,October 4,,,,,,False
+1889,April 24,October 5,,,April 24,October 5,,,,,,False
+1888,April 20,October 13,,,April 20,October 13,,,,,,False
+1887,April 28,October 8,,,April 28,October 8,,,,,,False
+1886,April 29,October 11,,,April 29,October 11,,,,,,False
+1885,April 30,October 10,,,April 30,October 10,,,,,,False
+1884,May 1,October 15,,,May 1,October 15,,,,,,False
+1883,May 1,September 29,,,May 1,September 29,,,,,,False
+1882,May 1,October 2,,,May 1,October 2,,,,,,False
+1881,April 30,September 30,,,April 30,September 30,,,,,,False
+1880,May 1,October 1,,,May 1,October 1,,,,,,False
+1879,May 1,September 30,,,May 1,September 30,,,,,,False
+1878,May 1,September 30,,,May 1,September 30,,,,,,False
+1877,April 30,October 6,,,April 30,October 6,,,,,,False
+1876,April 22,October 9,,,April 22,October 9,,,,,,False

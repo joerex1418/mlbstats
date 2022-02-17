@@ -1,0 +1,228 @@
+class Player:
+    """
+    # Player
+
+    ADD:
+    - pitchArsenal
+    - opponentsFaced lists all pitchers faced for `group=hitting`, and batters faced for `group=pitching`
+    - lastXGames (uses limit parameter)
+    - byDateRange --> maybe create a web tool for this instead?
+    - hotColdZones
+    - vsTeam
+    - vsPlayer
+    - vsOpponents
+    - opponentsFaced
+    """
+    def __init__(self,playerID):
+        _player = player.player(playerID)
+        self.mlbam              = _player["mlbam"]
+        self.bbrefID            = _player["bbrefID"]
+        self.retroID            = _player["retroID"]
+        self.bbrefIDminors      = _player["bbrefIDminors"]
+        self.primaryPosition    = _player["primaryPosition"]
+        self.fullName           = _player["fullName"]
+        self.firstName          = _player["firstName"]
+        self.lastName           = _player["lastName"]
+        self.nickName           = _player["nickName"]
+        self.primaryNumber      = _player["primaryNumber"]
+        self.currentAge         = _player["currentAge"]
+        self.birthDate          = _player["birthDate"]
+        self.birthCity          = _player["birthCity"]
+        self.birthState         = _player["birthState"]
+        self.birthCountry       = _player["birthCountry"]
+        self.deathDate          = _player["deathDate"]
+        self.deathCity          = _player["deathCity"]
+        self.deathState         = _player["deathState"]
+        self.deathCountry       = _player["deathCountry"]
+        self.weight             = _player["weight"]
+        self.height             = _player["height"]
+        self.bats               = _player["bats"]
+        self.throws             = _player["throws"]
+        self.education          = _player["education"]
+        self.firstYear          = _player["firstYear"]
+        self.lastYear           = _player["lastYear"]
+        self.zoneBot            = _player["zoneBot"]
+        self.zoneTop            = _player["zoneTop"]
+        self.isActive           = _player["isActive"]
+        
+        self.__roster_entries   = _player["rosterEntries"]
+        self.__transactions     = _player["transactions"]
+        self.__drafts           = _player["drafts"]
+        self.__awards           = _player["awards"]
+
+
+        try:
+            self.birth_dt = dt.datetime.strptime(_player['birthDate'],r"%Y-%m-%d")
+        except:
+            self.birth_dt = None
+
+        try:
+            self.death_dt = dt.datetime.strptime(_player['deathDate'],r"%Y-%m-%d")
+        except:
+            self.death_dt = None
+        
+
+        # Stats Data
+        hitting =  _player["hitting"]
+        pitching = _player["pitching"]
+        fielding = _player["fielding"]
+
+        self.__hitting_recent = hitting["recentSeason"]
+        self.__hitting_yby = hitting["yby"]
+        self.__hitting_yby_adv = hitting["ybyAdv"]
+        self.__hitting_career_reg = hitting["careerReg"]
+        self.__hitting_caree_reg_adv = hitting["careerAdvReg"]
+        self.__hitting_career_post = hitting["careerPost"]
+        self.__hitting_career_post_adv = hitting["careerAdvPost"]
+
+        self.__pitching_recent = pitching["recentSeason"]
+        self.__pitching_yby = pitching["yby"]
+        self.__pitching_yby_adv = pitching["ybyAdv"]
+        self.__pitching_career_reg = pitching["careerReg"]
+        self.__pitching_career_reg_adv = pitching["careerAdvReg"]
+        self.__pitching_career_post = pitching["careerPost"]
+        self.__pitching_career_post_adv = pitching["careerAdvPost"]
+
+        self.__fielding_recent = fielding["recentSeason"]
+        self.__fielding_career_reg = fielding["careerReg"]
+        self.__fielding_career_post = fielding["careerPost"]
+        self.__fielding_yby = fielding["yby"]
+
+
+    def __repr__(self) -> str:
+        if self.isActive:
+            status = "active"
+        else:
+            status = "inactive"
+        return f"""<SimpleStats Player - '{self.fullName}' | mlbam ID: '{self.mlbam}' | baseball-reference ID: '{self.bbrefID}' | status: '{status}'>"""
+
+    def __getitem__(self,item):
+        return getattr(self,item)
+    
+    def __setitem__(self,key,value):
+        setattr(self,key,value)
+
+    def career_stats(self,group,advanced=False):
+        """
+        # Career Stats
+        Returns `pandas.Dataframe` of player's CAREER stats:
+
+        - Valid values for `group` parameter are "hitting", "pitching", or "fielding"
+        - If `advanced` is `True`, class method will return a dataframe of player's advanced stats"""
+        if group == "hitting":
+            if advanced is True:
+                return self.__hitting_caree_reg_adv
+            return self.__hitting_career_reg
+        elif group == "pitching":
+            if advanced is True:
+                return self.__pitching_career_reg_adv
+            return self.__pitching_career_reg
+        elif group == "fielding":
+            return self.__fielding_career_reg
+
+    def yby_stats(self,group,advanced=False):
+        """
+        # Year-by-Year Stats
+        Returns `pandas.Dataframe` of player's YEAR-BY-YEAR stats:
+        - Valid values for `group` parameter are "hitting", "pitching", or "fielding"
+        - If `advanced` is `True`, class method will return a dataframe of player's advanced stats
+        """
+        if group == "hitting":
+            if advanced is True:
+                return self.__hitting_yby_adv.sort_values(by="Year",ascending=False)
+            return self.__hitting_yby.sort_values(by="Year",ascending=False)
+        elif group == "pitching":
+            if advanced is True:
+                return self.__pitching_yby_adv.sort_values(by="Year",ascending=False)
+            return self.__pitching_yby.sort_values(by="Year",ascending=False)
+        elif group == "fielding":
+            return self.__fielding_yby.sort_values(by="Year",ascending=False)
+
+    def summary_stats(self,group):
+        """
+        # Recent Season Stats
+        Returns `pandas.Dataframe` of player's most RECENT SEASON stats:
+        - Valid values for `group` parameter are "hitting", "pitching", or "fielding"
+        - If `advanced` is `True`, class method will return a dataframe of player's advanced stats
+        """
+
+        if group == "hitting":
+            try:
+                recentYear = self.__hitting_yby.sort_values(by="Year",ascending=False)
+                recentYear = recentYear.iloc[[0]]
+                year_value = recentYear["Year"].item()
+                combined = pd.concat([self.__hitting_career_reg,recentYear]).drop(columns=["Year","Team"])
+                combined.insert(0,"",["Career",year_value])
+                return combined
+            except:
+                return None
+        elif group == "pitching":
+            try:
+                recentYear = self.__pitching_yby.sort_values(by="Year",ascending=False)
+                recentYear = recentYear.iloc[[0]]
+                year_value = recentYear["Year"].item()
+                combined = pd.concat([self.__pitching_career_reg,recentYear]).drop(columns=["Year","Team"])
+                combined.insert(0,"",["Career",year_value])
+                return combined
+            except:
+                return None
+        elif group == "fielding":
+            try:
+                recentYear = self.__fielding_yby.sort_values(by="Year",ascending=False)
+                year_value = recentYear.iloc[0]["Year"]
+                recentYear = recentYear[(recentYear["Year"]==year_value) & (recentYear["Pos"]!="DH")]
+                recentYear.insert(0,"",year_value)
+                recentYear.sort_values(by="G",ascending=False,inplace=True)
+
+                career = self.__fielding_career_reg
+                career = career[career["Pos"]!="DH"]
+                career.insert(0,"","Career")
+
+                combined = pd.concat([career,recentYear]).drop(columns=["Year","Team"]).fillna("--")
+                return combined
+            except:
+                return None
+
+    def game_logs(self,group,year=None):
+        """
+        Returns `pandas.Dataframe` of player's stats for each game in a given season:
+        """
+        if year is None: year = curr_year
+        if group == "hitting":
+            log = player.hittingLog(self.bbrefID,year)
+        elif group == "pitching":
+            log = player.pitchingLog(self.bbrefID,year)
+        elif group == "fielding":
+            log = player.fieldingLog(self.bbrefID,year)
+        return log
+
+    def metricLog(self):
+        """NOT YET CONFIGURED"""
+        pass
+
+    def play_log(self):
+        """NOT YET CONFIGURED"""
+        pass
+
+    def hitting_splits(self,year=curr_year):
+        bat_splits = player.bbrefSplits(self.bbrefID,year,"b")
+        return bat_splits
+
+    def pitching_splits(self,year=curr_year):
+        _pitch_splits = player.bbrefSplits(self.bbrefID,year,"p")
+        return _pitch_splits
+
+    def roster_entries(self):
+        return self.__roster_entries
+
+    def arsenal(self):
+        pass
+
+    def draft(self):
+        return self.__drafts
+
+    def awards(self):
+        return self.__awards
+
+    def transactions(self):
+        return self.__transactions

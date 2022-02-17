@@ -1,0 +1,102 @@
+mlbam,name,retroID,address,city,state,postalCode,country,phone,lat,long,capacity,turfType,roofType,leftLine,left,leftCenter,center,rightCenter,rightLine
+4169,loanDepot park,MIA02,501 Marlins Way,Miami,FL,33125,USA,,25.77796236,-80.21951795,37446,Grass,Retractable,344,,386,407,392,335
+1,Angel Stadium,ANA01,2000 Gene Autry Way,Anaheim,CA,92806,USA,(714) 940-2000,33.80019044,-117.8823996,45517,Grass,Open,330,347,389,396,365,330
+2,Oriole Park at Camden Yards,BAL12,333 West Camden Street,Baltimore,MD,21201,USA,(410) 685-9800,39.283787,-76.621689,45971,Grass,Open,333,364,410,400,373,318
+3,Fenway Park,BOS07,4 Yawkey Way,Boston,MA,2215,USA,(617) 267-9440,42.346456,-71.097441,37755,Grass,Open,310,379,390,420,380,302
+4,Guaranteed Rate Field,CHI12,333 West 35th Street,Chicago,IL,60616,USA,(312) 674-1000,41.83,-87.634167,40241,Grass,Open,330,,377,400,372,335
+6,Tiger Stadium,DET04,,Detroit,MI,,USA,,,,46945,Grass,Open,,,,,,
+7,Kauffman Stadium,KAN06,One Royal Way,Kansas City,MO,64129,USA,(816) 921-8000,39.051567,-94.480483,38427,Grass,Open,330,,385,410,385,330
+8,Hubert H. Humphrey Metrodome,MIN03,,Minneapolis,MN,,USA,,,,48678,Artificial Turf,Dome,343,,385,408,367,327
+9,Yankee Stadium,NYC16,,Bronx,NY,,USA,,,,57768,Grass,Open,318,,399,408,385,314
+10,Oakland Coliseum,OAK01,7000 Coliseum Way,Oakland,CA,94621,USA,(510) 638-4900,37.751511,-122.200698,46847,Grass,Open,330,367,388,400,388,330
+11,The Kingdome,SEA02,,Seattle,WA,,USA,,,,59166,Artificial Turf,Dome,,,,,,
+12,Tropicana Field,STP01,One Tropicana Drive,St. Petersburg,FL,33705,USA,(727) 825-3137,27.767778,-82.6525,25025,Artificial Turf,Dome,315,370,410,404,404,322
+15,Chase Field,PHO01,401 East Jefferson Street,Phoenix,AZ,85004,USA,(602) 462-6500,33.445302,-112.066687,48359,Artificial Turf,Retractable,328,376,412,407,414,335
+16,Turner Field,ATL02,755 Hank Aaron Drive,Atlanta,GA,30315,USA,(404) 522-7630,,,49393,Grass,Open,335,,380,401,390,330
+18,Cinergy Field,CIN08,,Cincinnati,OH,,USA,,,,52953,Grass,Open,,,,,,
+20,Hard Rock Stadium,MIA01,2269 Dan Marino Boulevard,Miami,FL,33056,USA,(305) 626-7400,,,37000,Grass,Retractable,340,,384,422,392,335
+21,Astrodome,HOU02,,Houston,TX,,USA,,,,54370,Artificial Turf,Dome,,,,,,
+22,Dodger Stadium,LOS03,1000 Vin Scully Avenue,Los Angeles,CA,90012-1199,USA,(323) 224-1500,34.07368,-118.24053,56000,Grass,Open,330,,385,395,385,330
+23,Milwaukee County Stadium,MIL05,,Milwaukee,WI,,USA,,,,53192,Grass,Open,,,,,,
+25,Shea Stadium,NYC17,,Flushing,NY,,USA,,,,57333,Grass,Open,338,,371,410,371,338
+27,Three Rivers Stadium,PIT07,,Pittsburgh,PA,,USA,,,,47687,Artificial Turf,Open,,,,,,
+28,Qualcomm Stadium,SAN01,,San Diego,CA,,USA,,,,66307,Grass,Open,327,,370,405,370,330
+29,3Com Park at Candlestick Point,SFO02,,San Francisco,CA,,USA,,,,63000,Grass,Open,,,,,,
+30,Busch Stadium,STL09,,St. Louis,MO,,USA,,,,50345,Grass,Open,330,,372,402,372,330
+680,T-Mobile Park,SEA03,P.O. Box 4100,Seattle,WA,98104,USA,(206) 346-4000,47.591333,-122.33251,47929,Grass,Retractable,331,,390,405,387,327
+2392,Minute Maid Park,HOU03,501 Crawford Street,Houston,TX,77002,USA,(713) 259-8000,29.756967,-95.355509,41000,Grass,Retractable,315,,362,409,373,326
+2394,Comerica Park,DET05,2100 Woodward Avenue,Detroit,MI,48201,USA,(313) 471-2000,42.3391151,-83.048695,41083,Grass,Open,345,,370,420,365,330
+2395,Oracle Park,SFO03,24 Willie Mays Plaza,San Francisco,CA,94107,USA,(415) 972-2000,37.778383,-122.389448,41915,Grass,Open,339,,399,391,415,309
+2503,Cashman Field,LAS01,850 Las Vegas Blvd. N.,Las Vegas,NV,89101,USA,,,,9334,Grass,Open,328,,364,433,364,328
+2504,Champion Stadium,LBV01,Champion Stadium,Lake Buena Vista,FL,34747,USA,(407) 939-2200,28.33725,-81.55613,9500,Grass,Open,340,,,400,,330
+31,PNC Park,PIT08,115 Federal Street,Pittsburgh,PA,15212,USA,(412) 323-5000,40.446904,-80.005753,38753,Grass,Open,325,389,410,399,375,320
+2680,Petco Park,SAN02,100 Park Boulevard,San Diego,CA,92101,USA,(619) 795-5000,32.707861,-117.157278,40222,Grass,Open,336,,386,396,391,322
+2681,Citizens Bank Park,PHI13,One Citizens Bank Way,Philadelphia,PA,19148,USA,(215) 463-6000,39.90539086,-75.16716957,42901,Grass,Open,329,369,381,401,398,330
+5,Progressive Field,CLE08,2401 Ontario Street,Cleveland,OH,44115,USA,(216) 420-4200,41.495861,-81.685255,34788,Grass,Open,325,370,410,405,375,325
+13,Globe Life Park in Arlington,ARL02,1000 Ballpark Way,Arlington,TX,76011,USA,(817) 273-5222,32.751321,-97.082682,48114,Grass,Open,332,,390,400,407,325
+32,American Family Field,MIL06,One Brewers Way,Milwaukee,WI,53214,USA,(414) 902-4400,43.02838,-87.97099,41700,Grass,Retractable,344,,371,400,374,345
+2602,Great American Ball Park,CIN09,100 Main Street,Cincinnati,OH,45202-4109,USA,(513) 765-7000,39.097389,-84.506611,43891,Grass,Open,328,,379,404,370,325
+26,Veterans Stadium,PHI12,,Philadelphia,PA,,USA,,,,62409,Artificial Turf,Open,330,,371,408,371,330
+17,Wrigley Field,CHI11,1060 West Addison,Chicago,IL,60613-4397,USA,(773) 404-2827,41.948171,-87.655503,41363,Grass,Open,355,,368,400,368,353
+19,Coors Field,DEN02,2001 Blake Street,Denver,CO,80205-2000,USA,(303) 292-0200,39.756042,-104.994136,50144,Grass,Open,347,390,420,415,424,350
+2721,Robert F. Kennedy Memorial Stadium,WAS10,,Washington,DC,,USA,,,,45016,Grass,Open,336,,385,410,385,336
+2889,Busch Stadium,STL10,700 Clark Street,St. Louis,MO,63102,USA,(314) 345-9600,38.62256667,-90.19286667,44494,Grass,Open,336,,375,400,375,335
+3109,League Park,WAS07,,Washington,DC,,USA,,,,,Grass,Open,,,,,,
+3110,League Park,WAS08,,Washington,DC,,USA,,,,,Grass,Open,,,,,,
+3111,Arlington Stadium,ARL01,,Arlington,TX,,USA,,,,43521,Grass,Open,,,,,,
+3112,Atlanta-Fulton County Stadium,ATL01,,Atlanta,GA,,USA,,,,52013,Grass,Open,,,,,,
+3113,Baker Bowl,PHI09,,Philadelphia,PA,,USA,,,,18800,Grass,Open,,,,,,
+3114,Bennett Park,DET02,,Detroit,MI,,USA,,,,14000,Grass,Open,,,,,,
+3115,Braves Field,BOS08,,Boston,MA,,USA,,,,40000,Grass,Open,,,,,,
+3116,Cleveland Municipal Stadium,CLE07,,Cleveland,OH,,USA,,,,74483,Grass,Open,,,,,,
+3117,Colt Stadium,HOU01,,Houston,TX,,USA,,,,3010,Grass,Open,,,,,,
+3118,Columbia Park,PHI10,,Philadelphia,PA,,USA,,,,13600,Grass,Open,,,,,,
+3119,Comiskey Park,CHI10,,Chicago,IL,,USA,,,,52000,Grass,Open,,,,,,
+3120,Crosley Field,CIN07,,Cincinnati,OH,,USA,,,,29488,Grass,Open,,,,,,
+3121,Ebbets Field,NYC15,,Brooklyn,NY,,USA,,,,32000,Grass,Open,,,,,,
+3123,Exhibition Stadium,TOR01,,Toronto,ON,,USA,,,,43737,Artificial Turf,Open,,,,,,
+3124,Exposition Park,PIT05,,Pittsburgh,PA,,USA,,,,16000,Grass,Open,,,,,,
+3125,Forbes Field,PIT06,,Pittsburgh,PA,,USA,,,,35000,Grass,Open,,,,,,
+3126,Griffith Stadium,WAS09,,Washington,DC,,USA,,,,27550,Grass,Open,,,,,,
+3127,Hilltop Park,NYC13,,New York,NY,,USA,,,,16000,Grass,Open,,,,,,
+3128,Huntington Avenue Grounds,BOS06,,Boston,MA,,USA,,,,11500,Grass,Open,,,,,,
+3129,Jarry Park,MON01,,Montreal,QB,,USA,,,,28456,Grass,Open,,,,,,
+3131,League Park,CLE06,,Cleveland,OH,,USA,,,,22500,Grass,Open,,,,,,
+3132,Lloyd Street Grounds,MIL04,,Milwaukee,WI,,USA,,,,,Grass,Open,,,,,,
+3133,Los Angeles Memorial Coliseum,LOS01,,Los Angeles,CA,,USA,,,,92488,Grass,Open,,,,,,
+3134,Memorial Stadium,BAL11,,Baltimore,MD,,USA,,,,53371,Grass,Open,,,,,,
+3135,Metropolitan Stadium,MIN02,,Bloomington ,MI,,USA,,,,45919,Grass,Open,,,,,,
+3136,Mile High Stadium,DEN01,,Denver,CO,,USA,,,,76123,Grass,Open,,,,,,
+3137,Municipal Stadium,KAN05,,Kansas City,MO,,USA,,,,35561,Grass,Open,,,,,,
+3138,Palace of the Fans,CIN06,,Cincinnati,OH,,USA,,,,,Grass,Open,,,,,,
+3139,Polo Grounds,NYC10,,New York,NY,,USA,,,,,Grass,Open,,,,,,
+3140,Polo Grounds,NYC14,,New York,NY,,USA,,,,55000,Grass,Open,,,,,,
+3141,Robison Field,STL05,,St. Louis,MO,,USA,,,,21000,Grass,Open,,,,,,
+3142,Seals Stadium,SFO01,,San Francisco  ,CA,,USA,,,,22900,Grass,Open,,,,,,
+3143,Shibe Park,PHI11,,Philadelphia,PA,,USA,,,,33000,Grass,Open,,,,,,
+3144,South End Grounds,SEA01,,Boston,MA,,USA,,,,,Grass,Open,,,,,,
+3147,South End Grounds,BOS05,,Boston,MA,,USA,,,,,Grass,Open,,,,,,
+3148,South Side Park ,CHI09,,Chicago,IL,,USA,,,,15000,Grass,Open,,,,,,
+3149,Sportsman's Park,STL06,,St. Louis,MO,,USA,,,,30500,Grass,Open,,,,,,
+3150,Washington Park ,NYC08,,Brooklyn,NY,,USA,,,,18800,Grass,Open,,,,,,
+3153,Wrigley Field,LOS02,,Los Angeles,CA,,USA,,,,20451,Grass,Open,,,,,,
+3154,Aloha Stadium,HON01,,Honolulu,HI,,USA,,,,,Grass,Open,,,,,,
+3155,Armory Park,TOL04,,Toledo,OH,,USA,,,,,Grass,Open,,,,,,
+3156,Burns Park,DET03,,Detroit,MI,,USA,,,,,Grass,Open,,,,,,
+3157,Fairview Park,DAY01,,Dayton,OH,,USA,,,,,Grass,Open,,,,,,
+3158,Jailhouse Flats,FOR03,,Fort Wayne,IN,,USA,,,,,Grass,Open,,,,,,
+3159,League Park,CLE05,,Cleveland,OH,,USA,,,,,Grass,Open,,,,,,
+3160,League Park,CIN05,,Cincinnati,OH,,USA,,,,,Grass,Open,,,,,,
+3162,Neil Park,COL03,,Columbus,OH,,USA,,,,,Grass,Open,,,,,,
+3163,Neil Park,COL04,,Columbus,OH,,USA,,,,,Grass,Open,,,,,,
+3164,Oriole Park,BAL09,,Baltimore,MD,,USA,,,,,Grass,Open,,,,,,
+3165,Ramona Park,GRA01,,Grand Rapids,MI,,USA,,,,,Grass,Open,,,,,,
+3166,Rocky Point Park,WAR01,,Warwick,RI,,USA,,,,,Grass,Open,,,,,,
+3167,Sportsman's Park,JER02,,St. Louis,MO,,USA,,,,,Grass,Open,,,,,,
+3168,Sportsman's Park,STL07,,St. Louis,MO,,USA,,,,,Grass,Open,,,,,,
+3169,West Side Park,CHI08,,Chicago,IL,,USA,,,,,Grass,Open,,,,,,
+3170,Wiedenmeyer's Park,NWK01,,Newark,NJ,,USA,,,,,Grass,Open,,,,,,
+3309,Nationals Park,WAS11,"1500 South Capitol Street, SE",Washington,DC,20003-1507,USA,(202) 349-0400,38.872861,-77.007501,41376,Grass,Open,336,,377,402,370,335
+3312,Target Field,MIN04,1 Twins Way,Minneapolis,MN,55403,USA,(612) 659-3400,44.981829,-93.277891,38544,Grass,Open,339,,377,404,367,328
+3313,Yankee Stadium,NYC21,One East 161st Street,Bronx,NY,10451,USA,(718) 293-4300,40.82919482,-73.9264977,47309,Grass,Open,318,,399,408,385,314
+3289,Citi Field,NYC20,Citi Field,Flushing,NY,11368,USA,(718) 507-6387,40.75753012,-73.84559155,42136,Grass,Open,335,358,370,408,380,330

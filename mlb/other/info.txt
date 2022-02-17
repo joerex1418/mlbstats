@@ -1,0 +1,18 @@
+NOTES:
+- broadcast data covers years 2000 - 2022
+
+BBREF Redirect URL:
+- https://www.baseball-reference.com/redirect.fcgi?player=1&mlb_ID={playerid}
+
+Event Types (formatted for "playLog"/"pitchLog"):
+    calledStrike - pitch
+    fieldOut
+    strikeout
+    doublePlay
+    groundedIntoDoublePlay
+
+    walk
+    single
+    double
+    triple
+    homeRun

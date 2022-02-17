@@ -1,0 +1,661 @@
+id,name,type,vid_res,language,home_away,call_sign
+102,Dodgers Radio AM570,AM,,en,home,570
+103,KMBC-9,TV,,en,home,KMBC-9
+104,KMBZ 980,AM,,en,home,KMBZ 980
+105,KMOX 1120 AM/98.7 FM,AM,,en,away,KMOX
+106,KMSP,TV,,en,away,KMSP
+108,KNBR 680,AM,,en,away,KNBR
+109,KNWS,TV,,en,home,KNWS
+110,KTTH 770,AM,,en,home,KTTH 770
+111,KOA 850 AM,AM,,en,away,KOA
+112,KOGO 600,AM,,en,away,KOGO 600
+113,KRLD 1080,AM,,en,away,KRLD
+115,KSUN La Mejor 1400 ,AM,,es,home,KSUN 1400
+116,ESPN Phoenix 620,AM,,en,home,ESPN 620
+117,KTLA,TV,,en,home,KTLA
+118,KTRH 740 AM/99.1 FM HD-2,AM,,en,home,KTRH 740
+119,KTVU,TV,,en,home,KTVU
+120,KURS,AM,,es,away,KURS
+121,KUSI Cable 9,TV,,en,away,KUSI 9
+124,MAS!,TV,,es,home,MAS!
+126,NESN,TV,,en,away,NESN
+127,RDS,TV,,en,home,RDS
+128,SCORE,TV,,en,away,SCORE
+129,TBS,TV,,en,away,TBS
+130,TS,TV,,en,home,TS
+131,TSN,TV,,en,home,TSN
+132,UPN,TV,,en,away,UPN
+133,UPN 57,TV,,en,away,UPN 57
+135,WAXY 790,AM,,en,home,WAXY 790
+136,104.3 FM/760 AM WLCC,AM,,es,home,760 AM
+137,CBC,TV,,en,home,CBC
+138,CKAC 730,AM,,fr,home,CKAC 730
+139,4SD/704-HD,TV,,en,home,4SD/704
+140,NBCSP,TV,,en,away,NBCSP
+142,ESPN,TV,,en,home,ESPN
+143,ESPN2,TV,,en,home,ESPN2
+144,FOX,TV,,en,away,FOX
+145,FOX OHIO,TV,,en,home,FSO
+148,FSN,TV,,en,home,FSAZ
+149,FSN+,TV,,en,home,FSAZ
+150,FSN2,TV,,en,away,FSW
+151,FSNC,TV,,en,away,FSNC
+152,FSNC+,TV,,en,away,FSNC
+153,FSND,TV,,en,home,FSD
+154,FSNP,TV,,en,home,FSNP
+155,FSN NY,TV,,en,home,FSN NY
+156,Bally Sports Southwest,TV,,en,home,BSSW
+157,FXSS,TV,,en,home,FXSS
+158,Bloomberg 960 AM,AM,HD,en,away,KNEW 960
+159,KBME 790 AM/94.5 FM HD-2,AM,,en,home,KBME
+160,KCAL,TV,,en,home,KCAL
+161,KCWE-29,TV,,en,away,KCWE-29
+162,kdfi,TV,,en,away,kdfi
+163,KDFW-4,TV,,en,home,KDFW-4
+164,100.1 FM/KDKA-AM 1020,AM,,en,away,100.1/1020
+165,KIRO 710,AM,,en,away,KIRO
+166,KIRO-7,TV,,en,home,KIRO-7
+167,WB-11,TV,,en,home,WB-11
+168,WCCO 830,AM,,en,home,WCCO
+169,WCGV-24,TV,,en,home,WCGV-24
+170,WCIU,TV,HD,en,home,WCIU
+171,WCWB-22,TV,,en,home,WCWB-22
+172,WDAE 620 AM/95.3 FM,AM,,en,home,WDAE
+173,WEEI 850,AM,,en,away,WEEI
+174,WFAN 660/101.9 FM,AM,,en,home,WFAN
+175,WFLA 970,AM,,en,home,WFLA 970
+176,WFXT-25,TV,,en,home,WFXT-25
+177,WGN,TV,,en,away,WGN
+178,WGN 720,AM,,en,away,WGN
+179,WISN-12,TV,,en,home,WISN-12
+180,WLW 700,AM,,en,home,WLW
+183,WMOR,TV,,en,home,WMOR
+185,1210 WPHT,AM,,en,home,1210WPHT
+186,WPIX,TV,,en,away,WPIX
+187,WQAM 560,AM,,en,home,WQAM 560
+188,WQBA 1140,AM,,es,away,WQBA1140
+189,WSB 750,AM,,en,home,WSB 750
+191,WTAM 1100,AM,,en,away,WTAM
+192,WTMJ 620,AM,,en,away,WTMJ
+193,WTSP,TV,,en,away,WTSP
+195,WXYT 1270,AM,,en,away,WXYT
+196,XPRS 1090,AM,,es,home,XPRS1090
+197,MSG,TV,,en,away,MSG
+199,WADO 1280,AM,,es,away,WADO
+200,FOX 5,TV,,en,away,FOX 5
+201,3TV,TV,,en,home,3TV
+202,KICU,TV,,en,home,KICU
+203,WB50 / WJZ,TV,,en,home,WB50/WJZ
+204,WB50 / WB54,TV,,en,away,WB50/54
+205,WJZ,TV,,en,home,WJZ
+206,NBCSP+,TV,,en,home,NBCSP
+208,SN,TV,,en,home,SNO
+210,FX,TV,,en,away,FX
+214,WB54,TV,,en,away,WB54
+215,WJW-TV8,TV,,en,home,WJW-TV8
+216,KCOP,TV,,en,away,KCOP
+217,KPLR-11,TV,,en,home,KPLR-11
+218,WPEN 950,AM,,en,away,WPEN 950
+219,RSN,TV,,en,home,RSN
+220,KZSF 1370,AM,,es,home,KZSF1370
+221,KWKW 1330,AM,,es,away,KWKW
+223,KESS,AM,,es,away,KESS
+224,WWWE,AM,,es,home,WWWE
+225,KMLY,AM,,es,home,KMLY
+226,WLYN,AM,,es,home,WLYN
+227,KRTX,AM,,es,home,KRTX
+228,Sabados,TV,,es,home,Sabados
+229,WMVP 1000 AM,AM,,en,away,WMVP
+230,SN590,AM,,en,away,SN590
+231,Fox Sports 1150,AM,,en,home,Fox-1150
+232,KFRC 106.9,FM,,en,home,KFRC106.9
+233,The Team 990,AM,,en,away,990 Team
+234,WB2,TV,,en,away,WB2
+235,98 Rock / WBAL 1090,AM,,en,home,98 Rock
+236,WCBS 880,AM,,en,away,WCBS 880
+237,KMVP 7,AM,,en,home,KMVP
+238,KSTC 45,TV,,en,home,KSTC 45
+240,RSN / CFMT,TV,,en,away,RSN/CFMT
+241,CBS,TV,,en,home,CBS
+242,Mojo 640,AM,,en,home,Mojo 640
+243,Rogers 10,TV,,en,home,Rogers10
+245,YES,TV,,en,away,YES
+246,CKTB 610,AM,,en,home,CKTB 610
+247,WPXM 35,TV,,en,away,WPXM 35
+248,CKAC / CKGM,AM,,en,home,CKAC-CKGM
+249,CKGM / MLB.com,AM,,en,home,CKGM
+250,WWJ 950,AM,,en,away,WWJ 950
+251,MLB.com,AM,,es,away,MLB.com
+252,Ch. 4 Padres,TV,,en,away,Ch. 4
+253,KPLS 830,AM,,en,away,KPLS 830
+254,XTRA 690,AM,,en,home,XTRA 690
+255,WCMS 1290,AM,,en,home,WCMS1290
+256,WJYI 1340,AM,,en,home,WJYI1340
+257,Fox 97.1,FM,,en,home,Fox 97.1
+258,ABC Family,TV,,en,home,ABC Fam
+259,KTTV,TV,,en,home,KTTV
+260,KSAZ,TV,,en,home,KSAZ
+261,KTVI,TV,,en,away,KTVI
+262,WAGA,TV,,en,home,WAGA
+263,ESPN Radio,AM,,en,away,ESPN
+264,KOMO 1000,AM,,en,away,KOMO1000
+265,KFWB,AM,,en,away,KFWB
+266,KSPN,AM,,en,home,KSPN
+267,KSTP / KSTC,TV,,en,home,KSTP-KSTC
+269,PAX,TV,,en,home,PAX
+270,UPN20,TV,,en,away,UPN20
+271,WBZ,TV,,en,away,WBZ
+272,WBZ / NESN,TV,,en,home,NESN
+273,WROL 950,AM,,en,away,WROL 950
+274,WSBK / NESN,TV,,en,away,NESN
+275,XEMO 860,AM,,es,away,XEMO
+276,KCCO,AM,,en,home,KCCO
+277,KMCI-38,TV,,en,away,KMCI-38
+278,KSTW,TV,,en,away,KSTW
+279,KYW,TV,,en,away,KYW
+280,RSTN,TV,,en,home,RSTN
+281,T-63,TV,,es,home,T-63
+283,WB54 / PAX 66,TV,,en,home,WB54
+284,KYW CBS3,TV,,en,home,KYW CBS3
+285,WFED 1050,AM,,en,away,WFED1050
+286,WJZ / PAX 66,TV,,en,home,WJZ-PAX66
+287,KTVK,TV,,en,home,KTVK
+288,CN8 / NC8,TV,,en,home,CN8/NC8
+289,WSBK,TV,,en,home,WSBK
+290,KWOD 1660,AM,,en,home,KWOD1660
+291,XKAM,AM,,es,home,XKAM
+292,KTMZ 1220,AM,,es,away,KTMZ
+293,WMCS 1290,AM,,en,away,WMCS1290
+294,KKMO 1360,AM,,es,away,KKMO1360
+295,104.1 JACK,FM,,en,home,104.1JACK
+296,KCCO / WXPT,AM,,en,home,KCCO-WXPT
+297,FOX 45,TV,,en,away,FOX 45
+298,710 ESPN,AM,,en,home,710
+299,Action 36 Cable 6,TV,,en,home,Action 36
+300,TUDN 93.3 / KLAT 1010,AM,,es,home,TUDN/KLAT
+301,WAZX 1550,AM,,es,home,WAZX1550
+302,WCBS-TV,TV,,en,home,WCBS-TV
+303,WBPX,TV,,en,away,WBPX
+304,WCVB,TV,,en,away,WCVB
+305,KSTP,TV,,en,away,KSTP
+306,WWOR,TV,,en,home,WWOR
+307,WPXA,TV,,en,home,WPXA
+308,WSVN,TV,,en,away,WSVN
+309,TBD,TV,,en,away,TBD
+310,FOX / FX,TV,,en,away,FOX / FX
+311,KASW (WB6),TV,,en,away,KASW-WB6
+312,CKOO,AM,,fr,away,CKOO
+314,WHB,AM,,en,home,WHB
+315,XPRS,AM,,en,away,XPRS
+316,KSNB,AM,,es,home,KSNB
+317,KTNQ 1020,AM,,es,away,KTNQ
+318,VS1,TV,,en,home,VS1
+319,KSTC/VS1,TV,,en,away,KSTC/VS1
+320,KSTC/KSTP/VS1,TV,,en,home,KSTC
+321,WB54 / WDCA,TV,,en,home,WB54-WDCA
+322,WJZ / WDCA,TV,,en,away,WJZ/WDCA
+323,KYW TV3,TV,,en,away,KYW TV3
+324,4 San Diego,TV,,en,away,4 SD
+325,Bally Sports Southeast,TV,,en,away,BSSE
+326,Bally Sports South,TV,,en,home,BSSO
+327,PAX30,TV,,en,away,PAX30
+328,KWHY 22,TV,,es,away,KWHY 22
+329,KDOC-56,TV,,en,away,KDOC-56
+330,WATB 1420,AM,,es,home,WATB1420
+331,NESN (Alt.),TV,,en,away,NESN
+332,KFLC 1270,AM,,es,away,KFLC
+333,SNET360,TV,,en,home,SNET
+334,Pay Per View ,TV,,en,away,PPV
+335,TBS Friday Night Xtra,TV,,en,home,TBS Fri
+336,WYTU,TV,HD,es,home,WYTU
+337,FSN-HD,TV,,en,home,FSNW
+338,WKAT 1360,AM,,en,away,WKAT1360
+339,NBCSCH,TV,,en,away,NBCSCH
+341,Bally Sports Ohio,TV,,en,home,BSOH
+342,CSN-C+,TV,,en,away,CSC
+343,WHNZ 1250,AM,,en,away,WHNZ1250
+344,UPN 29,TV,,en,home,UPN 29
+345,KMXA 1090,AM,,es,home,KMXA1090
+346,WPWA 1590,AM,,es,home,WPWA1590
+347,WAMA 1550,AM,,es,home,WAMA1550
+348,640 WGST,AM,,en,away,640 WGST
+349,94 WIP,FM,,en,away,WIP
+361,Telemundo,TV,,es,home,Telemundo
+381,WDCA,TV,,en,away,WDCA
+382,Cumbia 1170,AM,,es,home,1170
+401,Z104 FM,FM,,en,away,Z104 FM
+481,Rogers Ont.,TV,,en,away,Rogers
+501,KWBA,TV,,en,home,KWBA
+541,WRTO 1200,AM,,es,home,WRTO
+561,WKLS,FM,,en,away,WKLS
+581,MASN,TV,,en,home,MASN
+582,WTTG-5,TV,,en,away,WTTG-5
+602,KTVU-HD,TV,,en,home,KTVU-HD
+621,KBRO,AM,,es,home,KBRO
+661,WSAI-1360,AM,,en,away,WSAI
+681,Bally Sports Sun,TV,,en,home,BSSUN
+701,WTAM 30,TV,,es,home,WTAM 30
+721,WLNY-55,TV,,en,away,WLNY-55
+722,XETV,TV,,en,away,XETV
+741,SNY,TV,,en,home,SNY
+761,KTRS 550,AM,,en,away,KTRS 550
+762,KYCY 1550,AM,,en,away,KYCY1550
+763,WTWP 1500,AM,,en,home,WTWP1500
+764,670 The Score,AM,,en,away,WSCR
+781,Bally Sports Great Lakes,TV,,en,away,BSGL
+782,WKYC 3,TV,,en,home,WKYC 3
+801,(FS-N outstate),TV,,en,home,FSNO
+802,WFTC29,TV,,en,home,WFTC29
+821,KLOK 1170,AM,,es,home,KLOK1170
+841,Bally Sports SoCal,TV,,en,home,BSSC
+861,WMGG/WTMP,AM,,es,away,WMGG/WTMP
+881,VIVA 96.7,FM,,es,away,VIVA96.7
+901,TBS Xtra,TV,,en,home,TBS Xtra
+921,Project 9-6-1 ,FM,,en,away,Proj. 961
+941,Rogers Preview,TV,,en,home,Rogers
+961,TV 20,TV,,en,away,TV 20
+981,KNTS 1220,AM,,en,home,KNTS1220
+1001,KLAA 830,AM,,en,home,KLAA
+1021,105.7 FM,FM,,en,home,105.7 FM
+1041,KBGY 107.5,AM,,es,away,KBGY107.5
+1061,KTFH,AM,,es,home,KTFH
+1081,PRIME-HD,TV,,en,home,PRIME-HD
+1101,,TV,,en,away,i
+1121,KMVP 860,AM,,en,home,KMVP
+1141,CW11,TV,,en,home,CW11
+1161,Radio Net,AM,,en,home,RadioNet
+1162,TIBN,AM,,en,away,TIBN
+1163,MY9,TV,,en,home,MY9
+1164,KSDK 5,TV,,en,home,KSDK 5
+1201,my20,TV,,en,away,my20
+1202,WJBK 2,TV,,en,home,WJBK 2
+1221,SPSO,TV,,en,home,SPSO
+1241,KCAL-HD,TV,,en,home,KCAL-HD
+1261,ION,TV,,en,away,ION
+1281,107.7 FM,FM,,en,away,107.7 FM
+1282,CW 57,TV,,en,home,CW 57
+1283,WDAS 1480,AM,,es,home,WDAS1480
+1284,WPGB-FM 104.7,FM,,en,home,WPGB
+1301,WHFS 105.7,FM,,en,away,WHFS105.7
+1302,KFRC 1550,AM,,en,home,KFRC1550
+1321,WRKO 680,AM,,en,away,WRKO 680
+1341,WMLW 41,TV,,en,home,WMLW 41
+1361,94.9 FM WUBL,FM,,en,away,94.9 WUBL
+1362,MASN 2,TV,,en,away,MSN2
+1363,KPHE 44,TV,,es,home,KPHE 44
+1381,My27,TV,,en,away,My27
+1382,FOX 4,TV,,en,home,FSSW
+1401,Cablemas,TV,,es,away,Cablemas
+1402,Ch. 4/HD-704,TV,,en,away,Ch. 4
+1421,WGES 680,AM,,es,home,WGES
+1441,FSSW HD,TV,,en,home,FSSW
+1442,(SAP),TV,,en,away,(SAP)
+1461,92.7 WQBU,FM,,es,home,92.7WQBU
+1481,KDOW 1680,AM,,es,home,KDOW1680
+1501,KTAR 92.3 FM,FM,,en,home,KTAR
+1521,CSN+2,TV,,en,away,CSC
+1541,3TV-HD,TV,,en,home,3TV-HD
+1561,SS-HD,TV,,en,home,SS-HD
+1581,Extra Innings Preview,TV,,en,away,Extra
+1601,WUBA 1480,AM,,es,home,WUBA1480
+1621,940 AM WINZ,AM,,en,away,WINZ
+1641,WSSP 1250 AM,AM,,en,away,WSSP 1250
+1661,JACK 102.7,FM,,en,home,JACK102.7
+1681,WWWT 1500,AM,,en,home,WWWT1500
+1701,TNT,TV,,en,home,TNT
+1721,KCSP 610,AM,,en,away,KCSP
+1722,WNSW 1430,AM,,es,away,WNSW1430
+1723,KABC 790,AM,,en,home,KABC 790
+1724,KHJ 930,AM,,es,home,KHJ 930
+1725,NBC Bay Area,TV,,en,home,NBCSBA
+1726,PTV,TV,,en,home,PTV
+1741,CityTV,TV,,en,home,CityTV
+1742,Viva 105.7,FM,,es,away,Viva105.7
+1761,STO-HD,TV,,en,home,STO
+1781,MLB.TV,TV,,en,away,MLB.TV
+1801,WOOD 105.7,FM,,en,home,WOOD105.7
+1802,97.1 The Ticket,FM,,en,away,97.1
+1803,WVUM 90.5,FM,,en,home,WVUM90.5
+1821,WMMS 100.7,FM,,en,home,WMMS
+1841,ION-HD,TV,,en,home,ION-HD
+1861,La Raza,AM,,es,home,La Raza
+1881,Sun Sports HD,TV,,en,away,SUN
+1882,MASN HD,TV,,en,home,MASN
+1883,MASN 2 HD,TV,,en,home,MSN2
+1982,NBCS BA,TV,,en,away,NBCSBA
+1983,XEPE 1700,AM,,en,away,XEPE1700
+2011,kdfi-hd,TV,,en,home,kdfi-hd
+2012,KDFW-4 HD,TV,,en,home,KDFW-4HD
+2021,my20-HD,TV,,en,home,my20-HD
+2041,SBN 1150,AM,,es,home,SBN
+2061,NBCS BA+,TV,,en,home,NBCSBA
+2141,WXYT 97.1 FM,FM,,en,home,WXYT
+2161,KFRC 106.9 FM/KYCY 1550 AM,AM,,en,home,KFRC
+2181,Texas 21,TV,,en,home,TXA-21
+2182,1500 ESPN,AM,,en,away,1500ESPN
+2201,CSN-HD,TV,,en,away,CSP
+2202,CW 57-HD,TV,,en,away,CW 57-HD
+2281,XPRS 1090/105.7 FM ,AM,,en,home,XPRS 109
+2401,MAJIC 102.7,FM,,en,away,102.7
+2421,WZHF 1390 ,AM,,es,home,WZHF1390
+2481,SBP 1480,AM,,es,away,SBP
+2482,SBN 730,AM,,es,home,SBN
+2501,WMET 1160,AM,,es,home,WMET1160
+2521,ESPN Deportes 1510,AM,,es,home,ESPN-1510
+2582,(In progress),TV,,en,away,InProg
+2603,KTRB 860,AM,,es,away,KTRB 860
+2621,105.7 The Fan,FM,,en,home,105.7 Fan
+2641,KIRO 97.3,FM,,en,away,KIRO
+2661,MLBN,TV,,en,away,MLBN
+2681,Bally Sports Kansas City,TV,,en,home,BSKC
+2682,FS-H,TV,,en,away,FS-H
+2701,WFED 1500,AM,,en,home,WFED1500
+2702,PHL 17,TV,,en,home,PHL 17
+2721,FS-H HD,TV,,en,home,FS-H HD
+2722,Bally Sports West,TV,,en,home,BSW
+2723,Bally Sports Midwest,TV,,en,away,BSMW
+2724,CNP,TV,,en,away,CNP
+2725,WAQI 710,AM,,es,home,WAQI
+2726,Bally Sports Florida,TV,,en,home,BSFL
+2741,105.3 The Fan,FM,,en,away,105.3 Fan
+2742,NBCSCA,TV,,en,home,NBCSCA
+2743,NBCSCA+,TV,,en,away,NBCSCA+
+2761,Bally Sports Detroit,TV,,en,home,BSDET
+2762,Bally Sports Detroit+,TV,,en,away,BSDET+
+2763,ESPN Radio 1380,AM,,en,away,ESPN-1380
+2764,Bally Sports North,TV,,en,home,BSNO
+2781,CSCA-HD,TV,,en,away,CSCA
+2802,Bally Sports Arizona,TV,,en,away,BSAZ
+2821,ESPN Deportes,TV,,es,away,ESPN Dep.
+2841,WRRD 1510,AM,,es,home,WRRD1510
+2842,KDIA 1640,AM,,es,away,KDIA1640
+2843,KDYA 1190,AM,,es,home,KDYA1190
+3001,ESPN 730,AM,,es,away,ESPN 730
+3021,CSS,TV,,en,home,CSS
+3022,FSKC-HD,TV,,en,away,FSKC
+3041,FS-M HD,TV,,en,away,FSMW
+3061,DirecTV-652,TV,,en,home,DTV-652
+3062,Dishnet-446,TV,,en,home,Dish-446
+3065,FS-D HD,TV,,en,away,FSD
+3101,FS-F HD,TV,,en,away,FSFL
+3102,820 CHAM,AM,,en,home,820 CHAM
+3121,CKOC 1150,AM,,en,home,CKOC1150
+3141,WDCW DC-50,TV,,en,away,WDCW
+3181,FSNO HD,TV,,en,home,FSNO
+3182,KIQI 1010,AM,,es,home,KIQI
+3201,Dish453,TV,,en,home,Dish453
+3202,Dish445,TV,,en,away,Dish445
+3203,Dish447,TV,,en,home,Dish447
+3204,Dish444,TV,,en,home,Dish444
+3205,Dish448,TV,,en,home,Dish448
+3206,Dish446,TV,,en,away,Dish446
+3261,NESN+,TV,,en,home,NESN
+3262,Bally Sports FL+,TV,,en,away,BSFL+
+3263,FSN-SAP,AM,,es,home,FSN-SAP
+3282,CSBA HD,TV,,en,home,NBCSBA
+3301,TSN2,TV,,en,away,TSN2
+3321,KATD 990,AM,,es,home,KATD 990
+3322,FS-D+ HD,TV,,en,away,FSD
+3341,DodgersWIN,AM,,en,home,D...WIN
+3381,KGST 1600,AM,,es,home,KGST1600
+3402,100.7 The Wolf,FM,,en,home,100.7
+3461,BOB FM,FM,,es,away,BOB FM
+3481,DRN,AM,,en,away,DRN
+3484,WIFN 1340 AM/103.7FM,AM,,en,home,WIFN
+3485,WFOM 1230/106.3 FM,AM,,en,home,WFOM1230
+3486,WCNN 680/93.7,AM,,en,home,WCNN
+3487,Fox Sports 970,AM,,en,home,FS 970
+3504,MLB.com,TV,,en,home,MLB.com
+3505,FOX-2,TV,,en,home,FOX-2
+3524,STO (live),TV,,en,away,STO
+3544,MASN (live),TV,,en,home,MASN
+3545,MLBN (delay),TV,,en,away,MLBN
+3564,FSN (live),TV,,en,home,FSN(Live)
+3624,DirecTV-678,TV,,en,away,DTV-678
+3644,WQBU 92.7,FM,,es,home,WQBU92.7
+3664,WKRC-TV,TV,,en,home,WKRC-TV
+3684,FS-O HD,TV,,en,home,FSO
+3724,Texas 21 HD,TV,,en,home,TXA-21HD
+3744,Bay 9,TV,,es,home,Bay 9
+3745,News 13,TV,,es,home,News 13
+3784,Bally Sports Arizona+,TV,,en,away,BSAZ+
+3804,94.5 ESPN Milwaukee,FM,,en,home,WLWK94.5
+3824,WLKX-FM,FM,,es,,WLKX-FM
+3844,TWC 960,TV,,es,home,TWC 960
+3864,SNET,TV,,en,home,SNET
+3884,WIND 560,AM,,en,away,WIND 560
+3924,SN-1,TV,,en,home,SNO
+3964,WNNX 100.5,FM,,en,away,WNNX100.5
+3984,103.3 ESPN ,FM,,en,home,103.3ESPN
+3985,1540am ESPN Deportes,AM,,es,home,1540 AM
+3986,KSKY 660,AM,,en,home,KSKY 660
+4004,ROOT SPORTS,TV,,en,home,RSNW
+4024,680 AM/93.7 FM The Fan,AM,,en,away,680 AM
+4025,ESPN Deportes 710,AM,,es,away,ESPN 710
+4026,FSN/ROOT Sports,TV,,en,home,FSN/ROOT
+4044,106.7 The Fan,FM,,en,away,106.7
+4064,ESPN 970,AM,,en,home,ESPN 970
+4084,Bally Sports Southwest+,TV,,en,home,BSSW+
+4085,TWC 858,TV,,es,home,TWC 858
+4105,CHML 900,AM,,en,away,CHML 900
+4124,ESPN 1700,AM,,en,home,ESPN1700
+4164,95.7 FM The Game,FM,,en,home,95.7 FM 
+4165,47 Uniradio TV,TV,,es,away,47 Uni.
+4167,Dish449,TV,,en,away,Dish449
+4168,WUFC 1510,AM,,es,away,WUFC1510
+4185,DishHD-9514,TV,,en,away,Dish-9514
+4186,DishHD-9515,TV,,en,away,Dish-9515
+4187,DishHD-9516,TV,,en,away,Dish-9516
+4188,DishHD-9519,TV,,en,home,Dish-9519
+4189,WJFK 1580 AM,AM,,en,away,WJFK
+4204,WHIM 1080,AM,,en,away,WHIM1080
+4224,Dish450,TV,,en,away,Dish450
+4226,DishHD-9517,TV,,en,away,Dish-9517
+4227,DishHD-9518,TV,,en,away,Dish-9518
+4245,Dish455,TV,,en,home,FSWI
+4246,DishHD-9573,TV,,en,away,Dish-9573
+4264,MLB.TV -- blackout free,TV,,en,away,MLB.TV
+4284,TVA Sports,TV,,fr,away,TVA
+4304,WEEI 93.7 FM/850 AM,AM,,en,home,WEEI
+4324,KDKA-FM 93.7,FM,,en,away,KDKA
+4384,Bally Sports North+,TV,,en,home,BSNO+
+4444,WNEW 1580,AM,,en,away,WNEW1580
+4445,WLBA 1130,AM,,es,away,WLBA
+4464,97.5 ESPN Deportes,FM,,es,away,97.5 ESPN
+4484,FSW-ESP ,TV,,es,home,FSW
+4485,Jose 106.9 FM,FM,,es,home,106.9
+4504,Dish442,TV,,en,home,Dish442
+4505,Dish440,TV,,en,home,Dish440
+4506,Dish441,TV,,en,away,Dish441
+4507,Dish443,TV,,en,away,Dish443
+4508,DishHD-9580,TV,,en,home,Dish-9580
+4509,DishHD-9575,TV,,en,home,Dish-9575
+4510,DishHD-9581,TV,,en,away,Dish-9581
+4511,DishHD-9579,TV,,en,away,Dish-9579
+4512,Bally Sports San Diego,TV,,en,home,BSSD
+4524,Bally Sports Midwest+,TV,,en,away,BSMW+
+4544,Sun Sports (Alt.),TV,,en,away,SUN
+4545,Bally Sports Wisconsin,TV,,en,home,BSWI
+4604,ESPN Deportes 1050,AM,,es,away,ESPN-1050
+4624,Go 96.3,FM,,en,home,Go 96.3
+4664,A's Radio Network,AM,,en,away,A's Radio
+4665,103.3 ESPN (delay),FM,,en,home,103.3
+4666,WAXY 790AM/104.3FM,FM,,en,home,WAXY 790
+4668,WEEI 93.7,FM,,en,away,WEEI
+4669,99X,FM,,en,home,99X
+4671,710 ESPN (delay),AM,,en,away,710
+4673,WUSA 9,TV,,en,home,WUSA 9
+4674,WEPN 1050,AM,,en,home,WEPN
+4684,FX Canada,TV,,en,away,FXCanada
+4685,KOFY 20,TV,,en,home,KOFY 20
+4686,Telemundo 48,TV,,es,away,Tele. 48
+4704,WTTM 1680,AM,,es,home,WTTM1680
+4724,FS-D (live),TV,,en,home,FSD
+4725,FS1,TV,,en,away,FS1
+4726,SNET-1,TV,,en,home,SNET-1
+4727,Brewers Radio Network,AM,,en,home,MIL Radio
+4745,Cubs Radio Network,AM,,en,home,CHC Radio
+4764,Radio Korea 1540,AM,,ko,home,1540
+4765,PRIME ALTERNATE,TV,,en,away,PRIME
+4768,ESPN Deportes 1490,AM,,es,home,ESPN-1490
+4784,KNRV 1150,AM,,es,home,KNRV
+4804,WXTB 98 Rock/97.9,FM,,en,away,WXTB 98 
+4824,WDCH 99.1,FM,,en,away,WDCH99.1
+4844,KMCQ 104.5,FM,,en,away,KMCQ104.5
+4864,98.1 WOGL,FM,,en,away,98.1WOGL
+4884,KHOW 630,AM,,en,home,KHOW 630
+4955,TuneIn Audio,INET,,en,away,TuneIn
+4965,SportsNet LA,TV,,en,away,SNLA
+4966,NBC 10,TV,,en,home,NBC 10
+4970,710 WOR,AM,,en,away,WOR
+4975,98.7 FM Arizona's Sports Station,FM,,en,home,98.7 FM 
+4980,ROOT SPORTS (delay),TV,,en,away,ROOT SP
+4981,610 AM WIOD,AM,,en,away,610 WIOD
+4982,SNLA Deportes,TV,,es,home,SNLA (Sp)
+4985,Braves Radio Network,AM,,en,home,ATL Radio
+4986,WCNN 680/WYAY 106.7,AM,,en,away,WCNN
+4987,Bally Deportes San Diego,TV,,en,home,BDSD (Sp)
+4988,Reds Radio Network,AM,,en,home,CIN Radio
+4989,Orioles Radio Network,AM,,en,home,O's Radio
+4991,Rangers Radio Network,FM,,en,home,TEX Radio
+4995,WCCM 1490 AM/103.7 FM,AM,,es,away,WCCM 1490
+4996,WCCM 1110 AM,AM,,es,away,WCCM 1110
+4998,KLIF 570,AM,,en,away,KLIF 570
+4999,ROOTNW (Sp.),TV,,es,home,RSNW
+5000,RSNW-ESP,AM,,es,home,ROOT
+5015,KVI 570,AM,,en,home,KVI 570
+5020,ESPN Deportes,AM,,es,home,ESPN Dep.
+5025,93.5,FM,,en,home,93.5
+5030,97.9 FM/1250 AM,AM,,en,away,97.9
+5035,FOX / FS1,TV,HD,en,away,FOX/FS1
+5045,FOX Deportes,TV,,es,home,FOX Dep.
+5050,ROOTSW,TV,,en,home,RSSW
+5055,ABC 7,TV,,en,home,ABC 7
+5060,Indians Radio Network,FM,,en,away,CLE Radio
+5061,WatchESPN,TV,,en,away,WatchESPN
+5065,KYKY 98.1,FM,,en,away,KYKY98.1
+5070,WBBM 780,AM,,en,away,WBBM 780
+5075,WPWR,TV,,en,away,WPWR
+5080,KBME 790 (delay),AM,,en,home,KBME
+5085,KPRC 950 (delay),AM,,en,away,KPRC 950
+5090,KPRC 950,AM,,en,home,KPRC 950
+5095,KMPC 1540,AM,,ko,home,KMPC1540
+5100,KTRH 740 (delay),AM,,en,home,KTRH 740
+5105,Rockies Radio Network,AM,,en,away,COL Radio
+5115,TVA Sports 2,TV,,fr,away,TVA Sp 2
+5120,KFCD 990 AM,AM,,en,away,KFCD 990
+5140,KDTD 1340 AM,AM,,es,home,KDTD 1340
+5145,WMTX-HD2 94.5/105.9,FM,,en,away,WMTX 94.5
+5150,WBBM 105.9 FM,FM,,en,away,105.9
+5155,FOX / SNET,TV,,en,away,FOX/SNET
+5159,FS1 / SNET,TV,,en,away,FS1/SNET
+5161,MLBN / SNET,TV,,en,home,MLBN-SNET
+5165,WLS 890,AM,,en,away,WLS
+5170,KDSP 760,AM,,en,home,KDSP 760
+5175,KYYS-1250 AM,AM,,es,home,KYYS
+5180,La Nueva 94.1 FM,FM,,es,home,La Nueva
+5185,CW 31,TV,,en,away,CW 31
+5190,ESPN (out-of-market only),TV,,en,home,ESPN
+5195,Las Cruces CW,TV,,en,home,Cruces CW
+5200,WYAY 106.7,FM,,en,home,WYAY106.7
+5205,ESPN2 (out-of-market-only),TV,,en,home,ESPN2
+5210,ROOTSW (Alt.),TV,,en,away,RSSW
+5215,MLBN (out-of-market only),TV,,en,away,MLBN
+5220,ROOT SPORTS+,TV,,en,away,RSSW
+5225,Bally Sports Arizona+ (Sp),TV,,es,home,BSAZ+ (Sp)
+5235,TBS (out-of-market only),TV,,en,away,TBS
+5240,ROOTRM,TV,,en,away,RSRM
+5241,ROOTPIT,TV,,en,home,RSP
+5242,ROOTNW,TV,,en,away,RSNW
+5250,KKSF,AM,,es,home,KKSF
+5255,1250 AM/Thunder FM,AM,,en,home,1250 AM
+5260,Ke Buena,AM,,en,home,Ke Buena
+5265,KFZO 99.1,FM,,es,away,KFZO99.1
+5270,TBS / SNET,TV,,en,away,TBS/SNET
+5285,WZTU 94.9 HD-2,FM,,en,away,WZTU94.9
+5290,KHOV Univision 105.1,FM,,es,home,KHOV
+5295,FM 94.9,FM,,en,home,FM 94.9
+5296,KWFN 97.3,FM,,en,away,KWFN
+5298,Bally Sports San Diego+,TV,,en,away,BSSD+
+5300,FS-O (delay),TV,,en,away,FS-O
+5305,Bally Sports Wisconsin+,TV,,en,away,BSWI+
+5310,KOA 850 AM/94.1 FM ,AM,,en,away,KOA
+5315,CBS Radio 1300 AM,AM,,en,away,1300 AM
+5320,102.9 FM KBLX,FM,,en,away,102.9
+5330,KXZM 93.7,FM,,es,home,KXZM
+5335,STO (delay),TV,,en,home,STO
+5336,98.5 FM KFOX,FM,,en,away,98.5 KFOX
+5340,La Mejor 1600/1460/1130 AM,AM,,es,away,1600 AM
+5350,KEJY 790 AM,AM,,es,home,KEJY 790
+5360,94.5 FM ESPN Milwaukee,FM,,en,away,WKTI 94.5
+5365,ROOTSW+,TV,,en,home,RSSW
+5370,Spanish Stream MLB.com,AM,,es,home,Spanish 
+5380,KMIH 94.5 FM,FM,,en,home,KMIH 94.5
+5385,ATT SportsNet-PIT,TV,,en,home,ATTP
+5386,ATT SportsNet-RM,TV,,en,away,ATTR
+5387,ATT SportsNet-SW,TV,,en,home,ATTH
+5390,KFNS AM 590 ,AM,,es,home,KFNS 590
+5395,NBC Sports Chicago,TV,,en,home,CSNC
+5415,NBC Sports Chicago+,TV,,en,away,CSNC
+5420,WIJR AM 880 (En Espanol),AM,,es,home,WIJR
+5421,Rays Radio Network,AM,,en,away,Rays
+5425,NBCSCH+,TV,,en,away,NBCSCH+
+5430,FB-WATCH,TV,,en,away,FB-WATCH
+5441,La Ranchera 101.7 FM/850 AM,FM,,es,home,
+5445,La Ranchera 850 AM,AM,,es,away,
+5446,KNTE 101.7,FM,,es,away,
+5447,Q102,FM,,en,home,
+5448,WSAN AM 1470,AM,,es,home,WSAN
+5450,ATT SportsNet-SW+,TV,,en,home,ATTH
+5456,ATT SportsNet-PIT2,TV,HD,en,away,ATTP
+5460,Bally Sports Sun+,TV,,en,home,BSSUN+
+5461,SN360,TV,,en,away,SNET
+5465,KGMZ 1550,AM,,en,away,
+5470,NHK Radio,AM,,en,home,
+5475,FOX-INT,TV,,en,away,FOX-INT
+5480,OMNI,TV,,en,home,
+5485,Twitter,TV,,en,home,
+5490,FB-WATCH (out-of-market only),TV,HD,en,home,FB-WATCH
+5495,TBS-INT,TV,,en,away,TBS-INT
+5496,MLBN-INT,TV,,en,away,MLBN-INT
+5500,AM 1160,AM,,en,away,
+5505,FS1-INT,TV,,en,away,FS1-INT
+5510,ALT 99.1,FM,,en,away,99.1
+5515,Boston 25,TV,,en,home,
+5516,twinsbeisbol.com,AM,,es,home,Twins(Sp)
+5520,Bally Sports West+,TV,,en,home,BSW+
+5521,ESPN+,TV,,en,away,ESPN+
+5525,SAP WGN,TV,,es,home,
+5526,105.3 The Fan (delay),FM,,en,home,
+5530,KKDA 730 AM,AM,,ko,home,KKDA
+5535,WLCC 760,AM,,es,home,
+5540,Rock 100.5,FM,,en,away,
+5545,Dish Network,TV,HD,en,away,
+5546,Fox Sports GO,TV,HD,en,away,
+5550,SNET-1 (in progress),TV,HD,en,away,
+5560,YouTube,TV,HD,en,home,YouTube
+5565,KNBR 104.5 FM/680 AM,AM,HD,en,away,KNBR
+5575,1510 AM - KSFN,AM,HD,es,away,KSFN
+5580,Marquee Sports Network,TV,,en,home,MARQ
+5585,A's Cast,AM,HD,en,away,A's Cast
+5590,The Wolf 102.9 FM,FM,HD,en,away,The Wolf
+5625,Mariners Radio Network,AM,,en,away,
+5626,Tigers Radio Network,AM,,en,away,
+5627,Cardinals Radio Network,AM,,en,away,CRN
+5630,Pirates Radio Network,AM,HD,en,home,
+5635,Royals Radio Network,AM,,en,away,RRN
+5645,Cozi-TV,TV,HD,en,home,
+5655,ABC,TV,HD,en,home,ABC
+5670,The Team 980,AM,,en,home,
+5680,REAL 106.1,FM,HD,en,home,REAL106.1
+5690,NBCSCH++,TV,HD,en,home,NBCSCH++
+5695,Audacy,AM,HD,en,away,Audacy
+5700,Bally Sports Arizona Extra,TV,HD,en,away,BSAZX
+5705,TeleXitos,TV,HD,es,home,TeleXitos
+5710,WAMG 94.9/890 AM,AM,,es,home,WAMG
+5720,KNTV,TV,HD,en,home,KNTV
+5725,Peacock,TV,HD,en,home,Peacock
+5730,Bally Sports Arizona (Sp),TV,HD,es,home,BSAZ (Sp.)
+5815,KAMA HD2 104.9 FM,FM,HD,es,away,KAMA HD2
+5820,AM 880 KIXI,AM,HD,en,home,880 KIXI
+5825,TICO-ES,AM,HD,es,home,TICO

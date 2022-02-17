@@ -1,0 +1,38 @@
+code,description
+SC,Status Change
+TR,Trade
+PUR,Purchase
+LON,Loan
+ASG,Assigned
+AWD,Awarded
+TRN,Transferred
+DES,Designated for Assignment
+SE,Selected
+SU,Suspension
+CU,Recalled
+RE,Reinstated
+RET,Retired
+REL,Released
+RTN,Returned
+WA,Waived
+CLW,Claimed Off Waivers
+OUT,Outrighted
+RES,Reserved
+OPT,Optioned
+OBT,Obtained
+URL,Unconditional Release
+DEI,Declared Ineligible
+DR,Drafted
+SGN,Signed
+SFA,Signed as Free Agent
+DFA,Declared Free Agency
+ARB,Offered arbitration
+REF,Refused Arbitration
+NOA,Not offered Arbitration
+NTC,Not Tendered Contract
+NC,New Contract
+CP,Contract Purchased
+CV,Contract Void
+JUM,Jumped
+NUM,Number Change
+DEC,Deceased

@@ -1,0 +1,198 @@
+abstractGameState,codedGameState,detailedState,statusCode,reason,abstractGameCode
+Final,F,"Final: Tie, decision by tiebreaker",FW,Tied (won in tiebreaker),F
+Final,O,"Game Over: Tie, decision by tiebreaker",OW,Tied (won in tiebreaker),F
+Live,M,Manager challenge: Tag-up play,MU,Tag-up play,L
+Live,M,Manager challenge: Rules check,MQ,Rules check,L
+Live,N,Umpire review: Tag-up play,NU,Tag-up play,L
+Live,N,Umpire review: Rules check,NQ,Rules check,L
+Final,O,Completed Early: Mercy Rule,OM,Mercy,F
+Final,F,Completed Early: Mercy Rule,FM,Mercy,F
+Live,M,Manager challenge: Home-plate collision,MP,Home-plate collision,L
+Live,N,Umpire review: Home-plate collision,NP,Home-plate collision,L
+Live,M,Manager challenge: Close play at 1st,MF,Close play at 1st,L
+Live,M,Manager challenge: Catch/drop in outfield,MD,Catch/drop in outfield,L
+Live,N,Umpire review: Close play at 1st,NF,Close play at 1st,L
+Live,N,Umpire review: Catch/drop in outfield,ND,Catch/drop in outfield,L
+Live,I,Instant Replay,IH,Review,L
+Preview,S,Scheduled,S,,P
+Preview,P,Pre-Game,P,,P
+Live,P,Warmup,PW,,L
+Preview,P,Delayed Start: Rain,PR,Rain,P
+Preview,P,Delayed Start: Snow,PS,Snow,P
+Preview,P,Delayed Start: Wet Grounds,PG,Wet Grounds,P
+Preview,P,Delayed Start: Venue,PV,Venue,P
+Preview,P,Delayed Start: Fog,PF,Fog,P
+Preview,P,Delayed Start: Cold,PC,Cold,P
+Preview,P,Delayed Start: Wind,PB,Wind,P
+Preview,P,Delayed Start: Power,PP,Power,P
+Preview,P,Delayed Start: Ceremony,PY,Ceremony,P
+Preview,P,Delayed Start: Lightning,PL,Lightning,P
+Preview,P,Delayed Start: Air Quality,PD,Air Quality,P
+Preview,P,Delayed Start: Tragedy,PA,Tragedy,P
+Preview,P,Delayed Start,PO,,P
+Live,I,In Progress,I,,L
+Live,I,Delayed: Rain,IR,Rain,L
+Live,I,Delayed: Snow,IS,Snow,L
+Live,I,Delayed: Wet Grounds,IG,Wet Grounds,L
+Live,I,Delayed: Venue,IV,Venue,L
+Live,I,Delayed: Fog,IF,Fog,L
+Live,I,Delayed: Cold,IC,Cold,L
+Live,I,Delayed: Wind,IB,Wind,L
+Live,I,Delayed: Power,IP,Power,L
+Live,I,Delayed: Ceremony,IY,Ceremony,L
+Live,I,Delayed: Lightning,IL,Lightning,L
+Live,I,Delayed: Air Quality,ID,Air Quality,L
+Live,I,Delayed: Tragedy,IA,Tragedy,L
+Live,I,Delayed,IO,,L
+Live,I,Delayed: About to Resume,IZ,About to Resume,L
+Final,D,Postponed: Rain,DR,Rain,F
+Final,D,Postponed: Snow,DS,Snow,F
+Final,D,Postponed: Wet Grounds,DG,Wet Grounds,F
+Final,D,Postponed: Venue,DV,Venue,F
+Final,D,Postponed: Fog,DF,Fog,F
+Final,D,Postponed: Cold,DC,Cold,F
+Final,D,Postponed: Wind,DB,Wind,F
+Final,D,Postponed: Power,DP,Power,F
+Final,D,Postponed: Lightning,DL,Lightning,F
+Final,D,Postponed: Air Quality,DD,Air Quality,F
+Final,D,Postponed: Tragedy,DA,Tragedy,F
+Final,D,Postponed,DO,,F
+Final,C,Cancelled: Rain,CR,Rain,F
+Final,C,Cancelled: Snow,CS,Snow,F
+Final,C,Cancelled: Wet Grounds,CG,Wet Grounds,F
+Final,C,Cancelled: Venue,CV,Venue,F
+Final,C,Cancelled: Fog,CF,Fog,F
+Final,C,Cancelled: Cold,CC,Cold,F
+Final,C,Cancelled: Wind,CB,Wind,F
+Final,C,Cancelled: Power,CP,Power,F
+Final,C,Cancelled: Lightning,CL,Lightning,F
+Final,C,Cancelled: Air Quality,CD,Air Quality,F
+Final,C,Cancelled: Tragedy,CA,Tragedy,F
+Final,C,Cancelled,CO,,F
+Final,O,Game Over,O,,F
+Final,O,Completed Early: Rain,OR,Rain,F
+Final,O,Completed Early: Snow,OS,Snow,F
+Final,O,Completed Early: Wet Grounds,OG,Wet Grounds,F
+Final,O,Completed Early: Venue,OV,Venue,F
+Final,O,Completed Early: Fog,OF,Fog,F
+Final,O,Completed Early: Cold,OC,Cold,F
+Final,O,Completed Early: Wind,OB,Wind,F
+Final,O,Completed Early: Power,OP,Power,F
+Final,O,Completed Early: Lightning,OL,Lightning,F
+Final,O,Completed Early: Air Quality,OD,Air Quality,F
+Final,O,Completed Early: Tragedy,OA,Tragedy,F
+Final,O,Completed Early,OO,,F
+Final,F,Final,F,,F
+Final,F,Completed Early: Rain,FR,Rain,F
+Final,F,Completed Early: Snow,FS,Snow,F
+Final,F,Completed Early: Wet Grounds,FG,Wet Grounds,F
+Final,F,Completed Early: Venue,FV,Venue,F
+Final,F,Completed Early: Fog,FF,Fog,F
+Final,F,Completed Early: Cold,FC,Cold,F
+Final,F,Completed Early: Wind,FB,Wind,F
+Final,F,Completed Early: Power,FP,Power,F
+Final,F,Completed Early: Lightning,FL,Lightning,F
+Final,F,Completed Early: Air Quality,FD,Air Quality,F
+Final,F,Completed Early: Tragedy,FA,Tragedy,F
+Final,F,Completed Early,FO,,F
+Live,U,Suspended: Rain,UR,Rain,L
+Live,U,Suspended: Snow,US,Snow,L
+Live,U,Suspended: Wet Grounds,UG,Wet Grounds,L
+Live,U,Suspended: Venue,UV,Venue,L
+Live,U,Suspended: Fog,UF,Fog,L
+Live,U,Suspended: Cold,UC,Cold,L
+Live,U,Suspended: Wind,UB,Wind,L
+Live,U,Suspended: Power,UP,Power,L
+Live,U,Suspended: Lightning,UL,Lightning,L
+Live,U,Suspended: Tragedy,UA,Tragedy,L
+Live,U,Suspended,UO,,L
+Final,R,Forfeit: Final,R,,F
+Other,W,Writing,W,,O
+Other,X,Unknown,X,,O
+Live,U,Suspended,U,,L
+Final,R,Forfeit: Willful rule violation,RR,Rule,F
+Live,T,Suspended,T,,L
+Live,T,Suspended: Rain,TR,Rain,L
+Live,T,Suspended: Snow,TS,Snow,L
+Live,T,Suspended: Wet Grounds,TG,Wet Grounds,L
+Live,T,Suspended: Venue,TV,Venue,L
+Live,T,Suspended: Fog,TF,Fog,L
+Live,T,Suspended: Cold,TC,Cold,L
+Live,T,Suspended: Wind,TB,Wind,L
+Live,T,Suspended: Power,TP,Power,L
+Live,T,Suspended: Lightning,TL,Lightning,L
+Live,T,Suspended: Tragedy,TA,Tragedy,L
+Live,T,Suspended,TO,,L
+Final,Q,Forfeit: Game Over,Q,,F
+Final,Q,Forfeit: Delay of game ,QK,Delay,F
+Final,Q,Forfeit: Failure to appear ,QX,Appear,F
+Final,Q,Forfeit: Failure to field lineup ,QQ,Lineup,F
+Final,Q,Forfeit: Ignoring ejection ,QJ,Ejection,F
+Final,Q,Forfeit: Ineligible player ,QI,Ineligible,F
+Final,Q,Forfeit: Refuses to play ,QN,Refusal,F
+Final,Q,Forfeit: Unplayable field ,QV,Unplayable,F
+Final,Q,Forfeit: Willful rule violation,QR,Rule,F
+Final,Q,Forfeit,QO,,F
+Final,R,Forfeit: Delay of game ,RK,Delay,F
+Final,R,Forfeit: Failure to appear ,RX,Appear,F
+Final,R,Forfeit: Failure to field lineup ,RQ,Lineup,F
+Final,R,Forfeit: Ignoring ejection ,RJ,Ejection,F
+Final,R,Forfeit: Ineligible player ,RI,Ineligible,F
+Final,R,Forfeit: Refuses to play ,RN,Refusal,F
+Final,R,Forfeit: Unplayable field ,RV,Unplayable,F
+Final,R,Forfeit,RO,,F
+Live,M,Manager challenge: Slide interference,ME,Slide interference,L
+Live,N,Umpire review: Slide interference,NE,Slide interference,L
+Final,O,Game Over: Tied,OT,Tied,F
+Live,U,Suspended: About to Resume,UZ,About to Resume,L
+Final,F,Final: Tied,FT,Tied,F
+Preview,P,Delayed Start: Inclement Weather,PI,Inclement Weather,P
+Live,I,Delayed: Inclement Weather,II,Inclement Weather,L
+Final,D,Postponed: Inclement Weather,DI,Inclement Weather,F
+Final,C,Cancelled: Inclement Weather,CI,Inclement Weather,F
+Final,O,Completed Early: Inclement Weather,OI,Inclement Weather,F
+Final,F,Completed Early: Inclement Weather,FI,Inclement Weather,F
+Live,T,Suspended: Inclement Weather,TI,Inclement Weather,L
+Live,U,Suspended: Inclement Weather,UI,Inclement Weather,L
+Live,T,Suspended: Appeal Upheld,TU,Appeal Upheld,L
+Live,U,Suspended: Appeal Upheld,UU,Appeal Upheld,L
+Live,M,Manager challenge: Home run,MH,Home run,L
+Live,M,Manager challenge: Grounds rule,MG,Grounds rule,L
+Live,M,Manager challenge: Fan interference,MN,Fan interference,L
+Live,M,Manager challenge: Stadium boundary call,MS,Stadium boundary call,L
+Live,M,Manager challenge: Force play,MC,Force play,L
+Live,M,Manager challenge: Tag play,MA,Tag play,L
+Live,M,Manager challenge: Fair/foul in outfield,MO,Fair/foul in outfield,L
+Live,M,Manager challenge: Trap play in outfield,MT,Trap play in outfield,L
+Live,M,Manager challenge: Hit by pitch,MI,Hit by pitch,L
+Live,M,Manager challenge: Timing play,MM,Timing play,L
+Live,M,Manager challenge: Touching a base,MB,Touching a base,L
+Live,M,Manager challenge: Passing runners,MR,Passing runners,L
+Live,M,Manager challenge: Record keeping,MK,Record keeping,L
+Live,M,Manager challenge: Multiple issues,ML,Multiple issues,L
+Live,M,Manager challenge,MX,,L
+Live,N,Umpire review: Home run,NH,Home run,L
+Live,N,Umpire review: Grounds rule,NG,Grounds rule,L
+Live,N,Umpire review: Fan interference,NN,Fan interference,L
+Live,N,Umpire review: Stadium boundary call,NS,Stadium boundary call,L
+Live,N,Umpire review: Force play,NC,Force play,L
+Live,N,Umpire review: Tag play,NA,Tag play,L
+Live,N,Umpire review: Fair/foul in outfield,NO,Fair/foul in outfield,L
+Live,N,Umpire review: Trap play in outfield,NT,Trap play in outfield,L
+Live,N,Umpire review: Hit by pitch,NI,Hit by pitch,L
+Live,N,Umpire review: Timing play,NM,Timing play,L
+Live,N,Umpire review: Touching a base,NB,Touching a base,L
+Live,N,Umpire review: Passing runners,NR,Passing runners,L
+Live,N,Umpire review: Record keeping,NK,Record keeping,L
+Live,N,Umpire review: Multiple issues,NL,Multiple issues,L
+Live,N,Umpire review,NX,,L
+Preview,P,Delayed Start: COVID-19,PE,COVID-19,P
+Live,I,Delayed: COVID-19,IE,COVID-19,L
+Final,D,Postponed: COVID-19,DE,COVID-19,F
+Final,C,Cancelled: COVID-19,CE,COVID-19,F
+Final,O,Completed Early: COVID-19,OE,COVID-19,F
+Final,F,Completed Early: COVID-19,FE,COVID-19,F
+Live,U,Suspended: COVID-19,UE,COVID-19,L
+Live,T,Suspended: COVID-19,TE,COVID-19,L
+Live,U,Suspended: Air Quality,UD,Air Quality,L
+Live,T,Suspended: Air Quality,TD,Air Quality,L
