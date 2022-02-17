@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='simplestats',
+    name='SimpleStatsMLB',
     version='1.0.0',
     author='Joe Rechenmacher',
     author_email='joe.rechenmacher@gmail.com',
@@ -15,6 +15,6 @@ setuptools.setup(
     #     "Projects": "https://github.com/joerex1418/simplestats/projects"
     # },
     license='GPU',
-    packages=setuptools.find_packages(where='/simplestats/simplestats/',include=["mlb"]),
-    install_requires=['requests','pandas','beautifulsoup4','async','aiohttp','SQLAlchemy'],
+    packages=setuptools.find_packages(where='/simplestats-mlb/',include=["mlb"]),
+    install_requires=['requests','pandas','beautifulsoup4','async','aiohttp'],
 )
