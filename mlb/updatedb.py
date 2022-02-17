@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 
-from .paths import BIOS_CSV, HALL_OF_FAME_CSV, PEOPLE_CSV, YBY_RECORDS_CSV, VENUES_CSV
+from .paths import BIOS_CSV, HALL_OF_FAME_CSV, PEOPLE_CSV, YBY_RECORDS_CSV, VENUES_CSV, BBREF_BATTING_DATA_CSV, BBREF_PITCHING_DATA_CSV
 
 from .async_mlb import get_updated_records
 from .async_mlb import get_bios
@@ -308,5 +308,19 @@ def update_venues(return_df=False,replace_existing=True):
     if return_df is True:
         return df
 
+def update_bbref_hitting_war(return_df=False,replace_existing=True):
+    url = "https://www.baseball-reference.com/data/war_daily_bat.txt"
+    df = pd.read_csv(url)
+    if replace_existing is True:
+        df.to_csv(BBREF_BATTING_DATA_CSV,index=False)
+    if return_df is True:
+        return df
 
+def update_bbref_pitching_war(return_df=False,replace_existing=True):
+    url = "https://www.baseball-reference.com/data/war_daily_pitch.txt"
+    df = pd.read_csv(url)
+    if replace_existing is True:
+        df.to_csv(BBREF_PITCHING_DATA_CSV,index=False)
+    if return_df is True:
+        return df
 

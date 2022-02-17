@@ -3,13 +3,68 @@
 
 Author: Joe Rechenmacher
 
+
+Classes
+-------
+- Player
+- Team
+- Franchise
+- League
+- Game
+
+Functions
+---------
+- play_search
+- pitch_search
+- game_search
+- schedule_search
+- get_matchup_stats
+- leaderboards
+- last_game
+- next_game
+- find_team
+- find_player
+- find_venue
+- schedule
+- player_hitting
+- player_pitching
+- player_fielding
+- player_hitting_advanced
+- player_pitching_advanced
+- team_hitting
+- team_pitching
+- team_fielding
+- team_hitting_advanced
+- team_pitching_advanced
+- team_roster
+- league_hitting
+- league_pitching
+- league_fielding
+- league_hitting_advanced
+- league_pitching_advanced
+
+Data
+----
+- bios
+- teams
+- people
+- venues
+- seasons
+- franchise
+- standings
+- yby_records
+- hall_of_fame
+- broadcasts
+
 """
+
+
+
 from .mlb import Player
 from .mlb import Team
 from .mlb import Franchise
 from .mlb import League
 from .mlb import Game
-# from .mlb import StatsAPI
 
 from .functions import play_search
 from .functions import pitch_search
@@ -48,6 +103,9 @@ from .functions import league_fielding
 from .functions import league_hitting_advanced
 from .functions import league_pitching_advanced
 from .functions import league_leaders
+
+player_batting = player_hitting
+team_batting = team_hitting
 
 from .functions import game_highlights
 
@@ -90,20 +148,65 @@ from .mlbdata import get_standings_df as standings
 from .mlbdata import get_yby_records as yby_records
 from .mlbdata import get_hall_of_fame as hall_of_fame
 from .mlbdata import get_broadcasts_df as broadcasts
+from .mlbdata import get_bbref_hitting_war_df as bbref_war_hit
+from .mlbdata import get_bbref_pitching_war_df as bbref_war_pitch
 
 from .updatedb import update_hof
 from .updatedb import update_bios
 from .updatedb import update_people
 from .updatedb import update_venues
 from .updatedb import update_yby_records
+from .updatedb import update_bbref_hitting_war
+from .updatedb import update_bbref_pitching_war
 
-# from .transactions import draft as get_draft
-# from .transactions import prospects as get_prospects
-# from .transactions import free_agents as get_free_agents
-# from .transactions import transactions as get_transactions
+update_bbref_batting_war = update_bbref_hitting_war
 
-from .transactions import draft
-from .transactions import prospects
-from .transactions import free_agents
-from .transactions import transactions
+# from .player import player as player_info
+# from .player import getPlayerStats as player_stats
+# from .player import pitchArsenal as get_pitch_arsenal
+# from .player import metricSearch as player_metric_search
+# from .player import hittingLog as player_hitting_log
+# from .player import pitchingLog as player_pitching_log
+# from .player import fieldingLog as player_fielding_log
+
+from .transactions import draft as get_draft
+from .transactions import prospects as get_prospects
+from .transactions import free_agents as get_free_agents
+from .transactions import transactions as get_transactions
+
+from .team import team_leaders
+
+from .league import leaders_players
+from .league import stats_and_standings
+from .league import team_stats as lg_team_stats
+from .league import player_stats as lg_player_stats
+from .league import standings as lg_standings
+# from .league import bbrefSplits as lg_bbref_splits
+
+# from .async_mlb import get_leaders
+# from .async_mlb import get_team_responses
+# from .async_mlb import get_season_managers
+# from .async_mlb import get_league_responses
+
+
+class stats:
+    class player:
+        hitting = player_hitting
+        hitting_adv = player_hitting_advanced
+        pitching = player_pitching
+        pitching_adv = player_pitching_advanced
+        fielding = player_fielding
+        def date_range(mlbam,season,statGroup):
+            print("hello")
+    class team:
+        hitting = team_hitting
+        hitting_adv = team_hitting_advanced
+        pitching = team_pitching
+        pitching_adv = team_pitching_advanced
+        fielding = team_fielding
+        class by_date_range:
+            def hitting():
+                print("team hitting by date range")
+
+
 

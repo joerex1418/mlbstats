@@ -361,6 +361,14 @@ def get_hall_of_fame() -> pd.DataFrame:
 def get_broadcasts_df() -> pd.DataFrame:
     return pd.read_csv(BROADCASTS_CSV,index_col=False)
 
+def get_bbref_hitting_war_df() -> pd.DataFrame:
+    df = pd.read_csv(BBREF_BATTING_DATA_CSV)
+    return df
+
+def get_bbref_pitching_war_df() -> pd.DataFrame:
+    df = pd.read_csv(BBREF_PITCHING_DATA_CSV)
+    return df
+
 def save_teams():
     try:
         df = get_teams_df()
