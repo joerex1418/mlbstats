@@ -41,6 +41,7 @@ from .utils import prettify_time
 from .utils import default_season
 from .utils import game_str_display
 
+__BASE = ""
  
 class Player:
     """
@@ -3317,4 +3318,39 @@ class Game:
         pass
     
 
+class StatsAPI:
+    class stats:
+        pass
 
+    class people:
+        def __new__(cls,mlbam):
+            self = object.__new__(cls)
+            self.mlbam = mlbam
+            return self
+
+        def info(self):
+            url = BASE + f"/people/{self.mlbam}"
+            resp = requests.get(url)
+            return resp.json()
+
+        def stats(self,statType,statGroup,season=None,**kwargs):
+            
+            if season is not None:
+                season = default_season()
+            params = {
+                "stats":statType,
+                "group":statGroup,
+                "season":season
+            }
+            url = BASE + f"/people/{self.mlbam}/stats"
+            resp = requests.get(url,params)
+            return resp.json()
+
+    class team:
+        pass
+
+    class teams:
+        pass
+
+    class standings:
+        pass
