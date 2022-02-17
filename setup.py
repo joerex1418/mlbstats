@@ -11,7 +11,7 @@ setuptools.setup(
     long_description=long_description,
     url='https://github.com/joerex1418/simplestats-mlb',
     project_urls = {
-        "Issues": "https://github.com/joerex1418/simplestats/wiki/MLB",
+        "Issues": "https://github.com/joerex1418/simplestats/wiki",
     },
     license='GPU',
     packages=setuptools.find_packages(where='/simplestats-mlb/',include=["mlb"]),
