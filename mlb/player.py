@@ -197,7 +197,7 @@ def player(playerID) -> dict:
         rost_entries_df = pd.DataFrame(data=all_rost_entries,columns=rostEntry_cols)
 
     except Exception as e:
-        print("ERROR: ",e)
+        # print("ERROR: ",e)
         rost_entries_df = None
 
 
@@ -442,9 +442,10 @@ def player(playerID) -> dict:
                         for field in BAT_FIELDS:
                             try:player_stats.append(split["stat"][field])
                             except:player_stats.append("--")
+                        player_stats.append(teamId)
                         years.append(player_stats)
                     
-            df = pd.DataFrame(data=years,columns=["Year","Team"]+bat_headers)
+            df = pd.DataFrame(data=years,columns=["Year","Team"] + bat_headers + ["tm_mlbam"])
             hitting[addingTo] = df
             
         elif stat_item["group"]["displayName"] == "hitting" and stat_item["type"]["displayName"] == "yearByYearAdvanced":
@@ -464,10 +465,11 @@ def player(playerID) -> dict:
                         for field in BAT_FIELDS_ADV:
                             try:player_stats.append(split["stat"][field])
                             except:player_stats.append("--")
+                        player_stats.append(teamId)
                         years.append(player_stats)
                     
 
-            df = pd.DataFrame(data=years,columns=["Year","Team"]+bat_advheaders)
+            df = pd.DataFrame(data=years,columns=["Year","Team"] + bat_advheaders + ["tm_mlbam"])
             hitting[addingTo] = df
         # ====================================================================================== YEAR-BY-YEAR HITTING ===
 
@@ -489,9 +491,10 @@ def player(playerID) -> dict:
                         for field in PITCH_FIELDS:
                             try:player_stats.append(split["stat"][field])
                             except:player_stats.append("--")
+                        player_stats.append(teamId)
                         years.append(player_stats)
 
-            df = pd.DataFrame(data=years,columns=["Year","Team"]+pitch_headers)
+            df = pd.DataFrame(data=years,columns=["Year","Team"]+pitch_headers+["tm_mlbam"])
             pitching[addingTo] = df
 
         elif stat_item["group"]["displayName"] == "pitching" and stat_item["type"]["displayName"] == "yearByYearAdvanced":
@@ -511,9 +514,10 @@ def player(playerID) -> dict:
                         for field in PITCH_FIELDS_ADV:
                             try:player_stats.append(split["stat"][field])
                             except:player_stats.append("--")
+                        player_stats.append(teamId)
                         years.append(player_stats)
 
-            df = pd.DataFrame(data=years,columns=["Year","Team"]+pitch_advheaders)
+            df = pd.DataFrame(data=years,columns=["Year","Team"]+pitch_advheaders+["tm_mlbam"])
             pitching[addingTo] = df
         # ===================================================================================== YEAR-BY-YEAR PITCHING ===
 
@@ -536,9 +540,10 @@ def player(playerID) -> dict:
                         for field in FIELD_FIELDS:
                             try:player_stats.append(split["stat"][field])
                             except:player_stats.append("--")
+                        player_stats.append(teamId)
                         years.append(player_stats)
 
-            df = pd.DataFrame(data=years,columns=["Year","Team","Pos"]+field_headers)
+            df = pd.DataFrame(data=years,columns=["Year","Team","Pos"]+field_headers+["tm_mlbam"])
             fielding[addingTo] = df
         # ===================================================================================== YEAR-BY-YEAR FIELDING ===
         else:pass
@@ -584,7 +589,6 @@ def player(playerID) -> dict:
         "drafts":           drafts_df,
         "awards":           awards_df,
         "rosterEntries":    rost_entries_df}
-
 
 # get player's hitting log by game from 'baseball-reference.com' (statsapi.mlb.com does not have games in early 20th century)
 def hittingLog(bbrefID,year):
