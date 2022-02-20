@@ -58,8 +58,6 @@ Data
 
 """
 
-
-
 from .mlb import Player
 from .mlb import Team
 from .mlb import Franchise
@@ -108,8 +106,8 @@ player_batting = player_hitting
 team_batting = team_hitting
 
 from .functions import game_highlights
-
 from .functions import get_video_link
+
 
 # from .constants import STATDICT
 
@@ -119,14 +117,15 @@ from .functions import get_video_link
 # from .utils import iso_format
 # from .utils import maketable
 # from .utils import showtable
-from .utils import compile_codes
-from .utils import draw_pitches
-from .utils import draw_strikezone
-from .utils import simplify_time
-from .utils import prettify_time
-from .utils import default_season
-from .utils import prepare_game_data
-from .utils import curr_year as current_year
+
+# from .utils import compile_codes
+# from .utils import draw_pitches
+# from .utils import draw_strikezone
+# from .utils import simplify_time
+# from .utils import prettify_time
+# from .utils import default_season
+# from .utils import prepare_game_data
+# from .utils import curr_year as current_year
 
 from .mlbdata import get
 from .mlbdata import save_all
@@ -158,16 +157,8 @@ from .updatedb import update_venues
 from .updatedb import update_yby_records
 from .updatedb import update_bbref_hitting_war
 from .updatedb import update_bbref_pitching_war
-
 update_bbref_batting_war = update_bbref_hitting_war
 
-# from .player import player as player_info
-# from .player import getPlayerStats as player_stats
-# from .player import pitchArsenal as get_pitch_arsenal
-# from .player import metricSearch as player_metric_search
-# from .player import hittingLog as player_hitting_log
-# from .player import pitchingLog as player_pitching_log
-# from .player import fieldingLog as player_fielding_log
 
 from .transactions import draft as get_draft
 from .transactions import prospects as get_prospects
@@ -176,12 +167,11 @@ from .transactions import transactions as get_transactions
 
 from .team import team_leaders
 
-from .league import leaders_players
-from .league import stats_and_standings
-from .league import team_stats as lg_team_stats
-from .league import player_stats as lg_player_stats
-from .league import standings as lg_standings
-# from .league import bbrefSplits as lg_bbref_splits
+# from .league import leaders_players
+# from .league import stats_and_standings
+# from .league import team_stats as lg_team_stats
+# from .league import player_stats as lg_player_stats
+# from .league import standings as lg_standings
 
 # from .async_mlb import get_leaders
 # from .async_mlb import get_team_responses

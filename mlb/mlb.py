@@ -12,14 +12,15 @@ from . import league
 # from .async_mlb import get_leaders
 from .async_mlb import get_team_responses
 
-# from .mlbdata import get_bios_df
 from .mlbdata import get_people_df
+from .mlbdata import get_yby_records
+# from .mlbdata import get_bios_df
 # from .mlbdata import get_season_info
 # from .mlbdata import get_teams_df
 # from .mlbdata import get_seasons_df
-from .mlbdata import get_yby_records
 
 from .constants import BASE
+from .constants import POSITION_DICT
 # from .constants import BBREF_ENDPOINTS
 # from .constants import BBREF_BASE
 # from .constants import TEAMS
@@ -29,7 +30,6 @@ from .constants import BASE
 # from .constants import PITCH_FIELDS_ADV
 # from .constants import FIELD_FIELDS
 # from .constants import STATDICT
-from .constants import POSITION_DICT
 
 from .utils import curr_year
 from .utils import curr_date
