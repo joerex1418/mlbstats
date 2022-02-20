@@ -4,14 +4,14 @@ import aiohttp
 # import time
 
 from ..constants import BASE
-from ..constants import BAT_FIELDS
-from ..constants import BAT_FIELDS_ADV
-from ..constants import PITCH_FIELDS
-from ..constants import PITCH_FIELDS_ADV
-from ..constants import FIELD_FIELDS
-from ..constants import STATDICT
+# from ..constants import BAT_FIELDS
+# from ..constants import BAT_FIELDS_ADV
+# from ..constants import PITCH_FIELDS
+# from ..constants import PITCH_FIELDS_ADV
+# from ..constants import FIELD_FIELDS
+# from ..constants import STATDICT
 
-from ..constants import POSITION_DICT
+# from ..constants import POSITION_DICT
 
 
 def get_tasks(session,mlbam,season):

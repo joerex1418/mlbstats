@@ -179,24 +179,4 @@ from .team import team_leaders
 # from .async_mlb import get_league_responses
 
 
-class stats:
-    class player:
-        hitting = player_hitting
-        hitting_adv = player_hitting_advanced
-        pitching = player_pitching
-        pitching_adv = player_pitching_advanced
-        fielding = player_fielding
-        def date_range(mlbam,season,statGroup):
-            print("hello")
-    class team:
-        hitting = team_hitting
-        hitting_adv = team_hitting_advanced
-        pitching = team_pitching
-        pitching_adv = team_pitching_advanced
-        fielding = team_fielding
-        class by_date_range:
-            def hitting():
-                print("team hitting by date range")
-
-
 

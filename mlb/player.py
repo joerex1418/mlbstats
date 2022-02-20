@@ -25,7 +25,10 @@ from .utils import curr_year
 
 # get player info and stats
 def player(playerID) -> dict:
-    '''Returns a dictionary of player's basic bio and a number of statistic dataframes in dictionary'''
+    """Returns a dictionary of player's basic bio and a number of statistic dataframes in dictionary
+    
+    """
+
     people = get_people_df()
     try:
         mlbam = int(playerID)
@@ -49,36 +52,36 @@ def player(playerID) -> dict:
     player = playerPage["people"][0]
     
     primaryPosition = player["primaryPosition"]["abbreviation"]
-    fullName = player["fullFMLName"]
-    firstName = player["firstName"]
-    lastName = player["lastName"]
-    nickName = player.get("nickName","--")
-    primaryNumber = player["primaryNumber"]
-    birthDate = player["birthDate"]
-    currentAge = player["currentAge"]
-    birthCity = player.get("birthCity","")
-    birthState = player.get("birthStateProvince","")
-    birthCountry = player.get("birthCountry","")
-    deathDate = player.get("deathDate","")
-    deathCity = player.get("deathCity","")
-    deathState = player.get("deathStateProvince","")
-    deathCountry = player.get("deathCountry","")
-    weight = player["weight"]
-    height = player["height"]
-    bats = player["batSide"]["code"]
-    throws = player["pitchHand"]["code"]
-    education = player.get("education","")
-    mlbDebutDate = player["mlbDebutDate"]
-    firstYear = player_df[["yearDebut"]].item()
-    lastYear = player_df[["yearRecent"]].item()
-    zoneTop = player["strikeZoneTop"]
-    zoneBot = player["strikeZoneBottom"]
-    isActive = player["active"]
-    awards = player.get("awards",None)
-    drafts = player.get("drafts",None)
-    transactions = player.get("transactions",None)
-    stats_list = player["stats"]
-    rosterEntries = player["rosterEntries"]
+    fullName        = player["fullFMLName"]
+    firstName       = player["firstName"]
+    lastName        = player["lastName"]
+    nickName        = player.get("nickName","--")
+    primaryNumber   = player["primaryNumber"]
+    birthDate       = player["birthDate"]
+    currentAge      = player["currentAge"]
+    birthCity       = player.get("birthCity","")
+    birthState      = player.get("birthStateProvince","")
+    birthCountry    = player.get("birthCountry","")
+    deathDate       = player.get("deathDate","")
+    deathCity       = player.get("deathCity","")
+    deathState      = player.get("deathStateProvince","")
+    deathCountry    = player.get("deathCountry","")
+    weight          = player["weight"]
+    height          = player["height"]
+    bats            = player["batSide"]["code"]
+    throws          = player["pitchHand"]["code"]
+    education       = player.get("education","")
+    mlbDebutDate    = player["mlbDebutDate"]
+    firstYear       = player_df[["yearDebut"]].item()
+    lastYear        = player_df[["yearRecent"]].item()
+    zoneTop         = player["strikeZoneTop"]
+    zoneBot         = player["strikeZoneBottom"]
+    isActive        = player["active"]
+    awards          = player.get("awards",None)
+    drafts          = player.get("drafts",None)
+    transactions    = player.get("transactions",None)
+    stats_list      = player["stats"]
+    rosterEntries   = player["rosterEntries"]
 
     active_range = list(range(int(mlbDebutDate[:4]),curr_year+1))
     team_df = get_teams_df()
@@ -90,37 +93,42 @@ def player(playerID) -> dict:
     try:
         all_rows = []
         for a in awards:
-            award_id = a.get("id","-")
-            award_name = a.get("name","-")
-            award_date = a.get("date","-")
-            award_season = a.get("season","-")
-            award_team = a.get("team",{}).get("teamName")
+            award_id        = a.get("id","-")
+            award_name      = a.get("name","-")
+            award_date      = a.get("date","-")
+            award_season    = a.get("season","-")
+            award_team      = a.get("team",{}).get("teamName")
+            
             row = [award_id,award_name,award_date,award_season,award_team]
+            
             all_rows.append(row)
+
         awards_df = pd.DataFrame(data=all_rows,columns=("award_id","award","date","season","team"))
+
     except:
         awards_df = None
 
     try:
-        draft_columns = ('year','draft_code','draft_type','draft_round','pick_number','round_pickNumber','team','team_mlbam','pos','school')
+        draft_columns = ['year','draft_code','draft_type','draft_round','pick_number','round_pickNumber','team','team_mlbam','pos','school']
         draft_rows = []
         for d in drafts:
-            pickRound = d.get("pickRound","-")
-            pickNumber = d.get("pickNumber","-")
-            roundPickNum = d.get("roundPickNumber","-")
-            team = d.get("team",{}).get("name","-")
-            team_mlbam = d.get("team",{}).get("id","")
-            player = d.get("person")
-            p_name = player.get("fullName")
-            p_mlbam = player.get("id")
-            bats = player.get("batSide",{}).get("code","-")
-            throws = player.get("pitchHand",{}).get("code","-")
-            school = d.get("school",{}).get("name","-")
-            draftYear = d.get("year","-")
-            pos = player.get("primaryPosition",{}).get("abbreviation","-")
-            if pos == "RHP" or pos == "LHP": pos = "P"
-            draftTypeCode = d.get("draftType",{}).get("code","-")
-            draftType = d.get("draftType",{}).get("description","-")
+            pickRound       = d.get("pickRound","-")
+            pickNumber      = d.get("pickNumber","-")
+            roundPickNum    = d.get("roundPickNumber","-")
+            team            = d.get("team",{}).get("name","-")
+            team_mlbam      = d.get("team",{}).get("id","")
+            player          = d.get("person")
+            p_name          = player.get("fullName")
+            p_mlbam         = player.get("id")
+            bats            = player.get("batSide",{}).get("code","-")
+            throws          = player.get("pitchHand",{}).get("code","-")
+            school          = d.get("school",{}).get("name","-")
+            draftYear       = d.get("year","-")
+            pos             = player.get("primaryPosition",{}).get("abbreviation","-")
+            if pos == "RHP" or pos == "LHP":
+                pos = "P"
+            draftTypeCode   = d.get("draftType",{}).get("code","-")
+            draftType       = d.get("draftType",{}).get("description","-")
 
             row = [draftYear,draftTypeCode,draftType,pickRound,pickNumber,roundPickNum,team,team_mlbam,pos,school]
 
@@ -128,7 +136,6 @@ def player(playerID) -> dict:
 
         drafts_df = pd.DataFrame(data=draft_rows,columns=draft_columns)
     except:
-        # print("no draft info found")
         drafts_df = None
     
     try:
@@ -539,48 +546,45 @@ def player(playerID) -> dict:
     # *** need to incorporate a way to include current_season stats from the StatsAPI
     
     return {
-        "mlbam":mlbam,
-        "bbrefID":bbrefID,
-        "retroID":retroID,
-        "bbrefIDminors":bbrefIDminors,
-        "fullName":fullName,
-        "firstName":firstName,
-        "lastName":lastName,
-        "nickName":nickName,
-        "birthDate":birthDate,
-        "birthCity":birthCity,
-        "birthState":birthState,
-        "birthCountry":birthCountry,
-        "deathDate":deathDate,
-        "deathCity":deathCity,
-        "deathState":deathState,
-        "deathCountry":deathCountry,
-        "currentAge":int(currentAge),
-        "weight":weight,
-        "height":height,
-        "primaryPosition":primaryPosition,
-        "primaryNumber":primaryNumber,
-        "bats":bats,
-        "throws":throws,
-        "education":education,
-        "mlbDebutDate":mlbDebutDate,
-        "firstYear":int(firstYear),
-        "lastYear":int(lastYear),
-        "zoneTop":zoneTop,
-        "zoneBot":zoneBot,
-        "isActive":isActive,
-        "activeRange":active_range,
-        "hitting":hitting,
-        "pitching":pitching,
-        "fielding":fielding,
-        "transactions":trx_df,
-        "drafts":drafts_df,
-        "awards":awards_df,
-        "rosterEntries":rost_entries_df}
+        "mlbam":            mlbam,
+        "bbrefID":          bbrefID,
+        "retroID":          retroID,
+        "bbrefIDminors":    bbrefIDminors,
+        "fullName":         fullName,
+        "firstName":        firstName,
+        "lastName":         lastName,
+        "nickName":         nickName,
+        "birthDate":        birthDate,
+        "birthCity":        birthCity,
+        "birthState":       birthState,
+        "birthCountry":     birthCountry,
+        "deathDate":        deathDate,
+        "deathCity":        deathCity,
+        "deathState":       deathState,
+        "deathCountry":     deathCountry,
+        "currentAge":       int(currentAge),
+        "weight":           weight,
+        "height":           height,
+        "primaryPosition":  primaryPosition,
+        "primaryNumber":    primaryNumber,
+        "bats":             bats,
+        "throws":           throws,
+        "education":        education,
+        "mlbDebutDate":     mlbDebutDate,
+        "firstYear":        int(firstYear),
+        "lastYear":         int(lastYear),
+        "zoneTop":          zoneTop,
+        "zoneBot":          zoneBot,
+        "isActive":         isActive,
+        "activeRange":      active_range,
+        "hitting":          hitting,
+        "pitching":         pitching,
+        "fielding":         fielding,
+        "transactions":     trx_df,
+        "drafts":           drafts_df,
+        "awards":           awards_df,
+        "rosterEntries":    rost_entries_df}
 
-# get
-def career_splits(playerID) -> dict:
-    pass
 
 # get player's hitting log by game from 'baseball-reference.com' (statsapi.mlb.com does not have games in early 20th century)
 def hittingLog(bbrefID,year):

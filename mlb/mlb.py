@@ -46,6 +46,9 @@ class Player:
     """
     # Player
 
+    Parameters
+    ----------
+
     playerID : str | int
         player's official MLB ID
     """
@@ -85,7 +88,6 @@ class Player:
         self.__transactions     = _player["transactions"]
         self.__drafts           = _player["drafts"]
         self.__awards           = _player["awards"]
-
 
         try:
             self.birth_dt = dt.datetime.strptime(_player['birthDate'],r"%Y-%m-%d")
