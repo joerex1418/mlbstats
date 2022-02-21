@@ -201,7 +201,6 @@ def player(playerID) -> dict:
         rost_entries_df = None
 
 
-
     hitting = {
         "careerReg":False,
         "careerPost":False,
@@ -445,7 +444,7 @@ def player(playerID) -> dict:
                         player_stats.append(teamId)
                         years.append(player_stats)
                     
-            df = pd.DataFrame(data=years,columns=["season","Team"] + bat_headers + ["tm_mlbam"])
+            df = pd.DataFrame(data=years,columns=["season","team"] + bat_headers + ["tm_mlbam"])
             hitting[addingTo] = df
             
         elif stat_item["group"]["displayName"] == "hitting" and stat_item["type"]["displayName"] == "yearByYearAdvanced":
@@ -469,7 +468,7 @@ def player(playerID) -> dict:
                         years.append(player_stats)
                     
 
-            df = pd.DataFrame(data=years,columns=["season","Team"] + bat_advheaders + ["tm_mlbam"])
+            df = pd.DataFrame(data=years,columns=["season","team"] + bat_advheaders + ["tm_mlbam"])
             hitting[addingTo] = df
         # ====================================================================================== YEAR-BY-YEAR HITTING ===
 
@@ -494,7 +493,7 @@ def player(playerID) -> dict:
                         player_stats.append(teamId)
                         years.append(player_stats)
 
-            df = pd.DataFrame(data=years,columns=["season","Team"]+pitch_headers+["tm_mlbam"])
+            df = pd.DataFrame(data=years,columns=["season","team"]+pitch_headers+["tm_mlbam"])
             pitching[addingTo] = df
 
         elif stat_item["group"]["displayName"] == "pitching" and stat_item["type"]["displayName"] == "yearByYearAdvanced":
@@ -517,7 +516,7 @@ def player(playerID) -> dict:
                         player_stats.append(teamId)
                         years.append(player_stats)
 
-            df = pd.DataFrame(data=years,columns=["season","Team"]+pitch_advheaders+["tm_mlbam"])
+            df = pd.DataFrame(data=years,columns=["season","team"]+pitch_advheaders+["tm_mlbam"])
             pitching[addingTo] = df
         # ===================================================================================== YEAR-BY-YEAR PITCHING ===
 
@@ -543,7 +542,7 @@ def player(playerID) -> dict:
                         player_stats.append(teamId)
                         years.append(player_stats)
 
-            df = pd.DataFrame(data=years,columns=["season","Team","Pos"]+field_headers+["tm_mlbam"])
+            df = pd.DataFrame(data=years,columns=["season","team","Pos"]+field_headers+["tm_mlbam"])
             fielding[addingTo] = df
         # ===================================================================================== YEAR-BY-YEAR FIELDING ===
         else:pass
@@ -1143,7 +1142,7 @@ def getPlayerStats(playerID) -> dict:
                             except:player_stats.append("--")
                         years.append(player_stats)
                     
-            df = pd.DataFrame(data=years,columns=["season","Team"]+bat_headers)
+            df = pd.DataFrame(data=years,columns=["season","team"]+bat_headers)
             hitting[addingTo] = df
             
         elif stat_item["group"]["displayName"] == "hitting" and stat_item["type"]["displayName"] == "yearByYearAdvanced":
@@ -1166,7 +1165,7 @@ def getPlayerStats(playerID) -> dict:
                         years.append(player_stats)
                     
 
-            df = pd.DataFrame(data=years,columns=["season","Team"]+bat_advheaders)
+            df = pd.DataFrame(data=years,columns=["season","team"]+bat_advheaders)
             hitting[addingTo] = df
         # ====================================================================================== YEAR-BY-YEAR HITTING ===
 
@@ -1190,7 +1189,7 @@ def getPlayerStats(playerID) -> dict:
                             except:player_stats.append("--")
                         years.append(player_stats)
 
-            df = pd.DataFrame(data=years,columns=["season","Team"]+pitch_headers)
+            df = pd.DataFrame(data=years,columns=["season","team"]+pitch_headers)
             pitching[addingTo] = df
 
         elif stat_item["group"]["displayName"] == "pitching" and stat_item["type"]["displayName"] == "yearByYearAdvanced":
@@ -1212,7 +1211,7 @@ def getPlayerStats(playerID) -> dict:
                             except:player_stats.append("--")
                         years.append(player_stats)
 
-            df = pd.DataFrame(data=years,columns=["season","Team"]+pitch_advheaders)
+            df = pd.DataFrame(data=years,columns=["season","team"]+pitch_advheaders)
             pitching[addingTo] = df
         # ===================================================================================== YEAR-BY-YEAR PITCHING ===
 
@@ -1237,7 +1236,7 @@ def getPlayerStats(playerID) -> dict:
                             except:player_stats.append("--")
                         years.append(player_stats)
 
-            df = pd.DataFrame(data=years,columns=["season","Team","Pos"]+field_headers)
+            df = pd.DataFrame(data=years,columns=["season","team","pos"]+field_headers)
             fielding[addingTo] = df
         # ===================================================================================== YEAR-BY-YEAR FIELDING ===
         else:pass
