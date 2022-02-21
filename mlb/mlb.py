@@ -109,7 +109,7 @@ class Player:
         self.__hitting_yby = hitting["yby"]
         self.__hitting_yby_adv = hitting["ybyAdv"]
         self.__hitting_career_reg = hitting["careerReg"]
-        self.__hitting_caree_reg_adv = hitting["careerAdvReg"]
+        self.__hitting_career_reg_adv = hitting["careerAdvReg"]
         self.__hitting_career_post = hitting["careerPost"]
         self.__hitting_career_post_adv = hitting["careerAdvPost"]
 
@@ -148,7 +148,7 @@ class Player:
         - If `advanced` is `True`, class method will return a dataframe of player's advanced stats"""
         if group == "hitting":
             if advanced is True:
-                return self.__hitting_caree_reg_adv
+                return self.__hitting_career_reg_adv
             return self.__hitting_career_reg
         elif group == "pitching":
             if advanced is True:
@@ -166,14 +166,28 @@ class Player:
         """
         if group == "hitting":
             if advanced is True:
-                return self.__hitting_yby_adv.sort_values(by="Year",ascending=False)
-            return self.__hitting_yby.sort_values(by="Year",ascending=False)
+                df = self.__hitting_yby_adv
+            else: 
+                df = self.__hitting_yby
+            if df is not False:
+                return df.sort_values(by="season",ascending=False)
+            else:
+                return None
         elif group == "pitching":
             if advanced is True:
-                return self.__pitching_yby_adv.sort_values(by="Year",ascending=False)
-            return self.__pitching_yby.sort_values(by="Year",ascending=False)
+                df = self.__pitching_yby_adv
+            else: 
+                df = self.__pitching_yby
+            if df is not False:
+                return df.sort_values(by="season",ascending=False)
+            else:
+                return None
         elif group == "fielding":
-            return self.__fielding_yby.sort_values(by="Year",ascending=False)
+            df = self.__fielding_yby
+            if df is not False:
+                return df.sort_values(by="season",ascending=False)
+            else:
+                return None
 
     def summary_stats(self,group):
         """
