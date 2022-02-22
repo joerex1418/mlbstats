@@ -77,6 +77,7 @@ from .functions import find_player
 from .functions import find_venue
 from .functions import players_by_year
 from .functions import schedule
+from .functions import player_bio
 from .functions import player_stats
 from .functions import player_hitting
 from .functions import player_pitching
