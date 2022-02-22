@@ -1,3 +1,4 @@
+import lxml
 import pytz
 # import numpy as np
 import requests
@@ -7,7 +8,7 @@ from bs4 import BeautifulSoup as bs
 
 from .async_mlb import get_leaders
 
-from .mlbdata import get_people_df
+# from .mlbdata import get_people_df
 from .mlbdata import get_season_info
 from .mlbdata import get_venues_df
 from .mlbdata import get_bios_df
@@ -17,14 +18,13 @@ from .utils import curr_year
 from .utils import curr_date
 from .utils import default_season
 
-from .utils import utc_zone
+# from .utils import utc_zone
 from .utils import et_zone
 from .utils import ct_zone
 from .utils import mt_zone
 from .utils import pt_zone
 
 from .constants import BASE
-from .constants import CLIP_BASE_TEMP
 from .constants import BAT_FIELDS
 from .constants import BAT_FIELDS_ADV
 from .constants import PITCH_FIELDS
@@ -32,7 +32,6 @@ from .constants import PITCH_FIELDS_ADV
 from .constants import FIELD_FIELDS
 from .constants import STATDICT
 from .constants import LEAGUE_IDS
-from .constants import POSITION_DICT
 
 # ===============================================================
 # PLAYER Functions
@@ -1821,11 +1820,15 @@ def team_roster(mlbam,season=None,rosterType=None,**kwargs) -> pd.DataFrame:
     params = {}
     if season is not None:
         params["season"] = season
+    elif season is None:
+        params["season"] = default_season()
     if rosterType is not None:
         params["rosterType"] = rosterType
     if len(kwargs) != 0:
         for k,v in kwargs.items():
             params["k"] = v
+    if kwargs.get("hydrate") is not None:
+        params["hydrate"] = kwargs["hydrate"]
 
     # hydrate=person(rosterEntries)
     url = BASE + f"/teams/{mlbam}/roster"
@@ -1836,6 +1839,9 @@ def team_roster(mlbam,season=None,rosterType=None,**kwargs) -> pd.DataFrame:
     columns = [
         'mlbam',
         'name',
+        'name_first',
+        'name_last',
+        'name_lastfirst',
         'jersey_number',
         'pos',
         'status',
@@ -1844,18 +1850,24 @@ def team_roster(mlbam,season=None,rosterType=None,**kwargs) -> pd.DataFrame:
     data = []
 
     for p in roster:
-        person = p.get("person")
-        mlbam = person.get("id")
-        name = person.get("fullName")
-        jersey_number = p.get("jerseyNumber")
-        position = p.get("position")
-        pos = position.get("abbreviation")
-        status = p.get("status",{}).get("description")
-        status_code = p.get("status",{}).get("code")
+        person          = p.get("person")
+        mlbam           = person.get("id")
+        name            = person.get("fullName")
+        name_first      = person.get("firstName")
+        name_last       = person.get("lastName")
+        name_lastfirst  = person.get("lastFirstName")
+        jersey_number   = p.get("jerseyNumber")
+        position        = p.get("position")
+        pos             = position.get("abbreviation")
+        status          = p.get("status",{}).get("description")
+        status_code     = p.get("status",{}).get("code")
         
         data.append([
             mlbam,
             name,
+            name_first,
+            name_last,
+            name_lastfirst,
             jersey_number,
             pos,
             status,
@@ -2262,6 +2274,7 @@ def league_pitching_advanced(league='all',**kwargs):
 
 def league_leaders():
     pass
+
 # ===============================================================
 # MISC Functions
 # ===============================================================
@@ -4793,3 +4806,32 @@ def players_by_year(season):
     url = BASE + f"/sports/1/players?season={season}&hydrate=person"
     resp = requests.get(url).json()
     return resp
+
+def player_bio(mlbam):
+    """Get short biography of player from Baseball-Reference.com's Player Bullpen pages.
+
+    Parameters
+    ----------
+
+    mlbam : str or int
+        player's official MLB ID
+    
+    """
+    # URL to Player's Baseball-Reference page
+    with requests.session() as sesh:
+        url = f"https://www.baseball-reference.com/redirect.fcgi?player=1&mlb_ID={mlbam}"
+
+        resp = sesh.get(url)
+
+        soup = bs(resp.text,'lxml')
+
+        # URL to Player's "Bullpen" page
+        url = soup.find('a',text='View Player Info')['href']
+
+        resp = sesh.get(url)
+
+        soup = bs(resp.text,'lxml')
+
+        bio_p_tags = soup.find("span",id="Biographical_Information").findParent('h2').find_next_siblings('p')
+
+        return bio_p_tags
