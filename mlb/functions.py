@@ -13,6 +13,8 @@ from .mlbdata import get_season_info
 from .mlbdata import get_venues_df
 from .mlbdata import get_bios_df
 from .mlbdata import get_teams_df
+from .mlbdata import get_yby_records
+from .mlbdata import get_standings_df
 
 from .utils import curr_year
 from .utils import curr_date
@@ -864,7 +866,6 @@ def player_splits_advanced(mlbam,statGroup,sitCodes,season=None,gameType=None) -
     # df = pd.DataFrame(data).rename(columns=STATDICT)
     return df
 
-
 def player_tracking(mlbam,statGroup):
     url = BASE + f"/people/547989/stats?stats=tracking&season=2021"
 
@@ -1318,6 +1319,120 @@ def player_stats(mlbam,statGroup,statType,season=None,**kwargs) -> pd.DataFrame:
 
     return df
 
+def player_search(name,sportId=1,**kwargs):
+    """Search for a person using the API by name
+    
+    Paramaters
+    ----------
+    
+    name : str
+        person's name
+
+        names
+        required
+            
+        string
+
+        Insert name to search for players. Users can search by first name, middle name, last name, and nick name
+
+            Insert name: https://statsapi.mlb.com/api/v1/people/search?names=juansoto
+            Insert first name: https://statsapi.mlb.com/api/v1/people/search?names=babe
+            Insert last name: https://statsapi.mlb.com/api/v1/people/search?names=salmon
+            Insert nickname: https://statsapi.mlb.com/api/v1/people/search?names=bighurt
+            Insert letter: https://statsapi.mlb.com/api/v1/people/search?names=j
+
+        personIds
+        required
+            
+        string
+
+        Insert personId(s) to search and return biographical information for a specific player(s). Format '605151,592450'
+
+            One personId: https://statsapi.mlb.com/api/v1/people/search?personIds=605151
+            Multiple personIds: https://statsapi.mlb.com/api/v1/people/search?personIds=605151,592450
+
+        List of players by sport can be found in the Sports endpoint under the “view information on a players for a given sportId” subsection.
+        sportIds	
+        string
+
+        Insert sportId(s) to search and return biographical information for players in a specific sport(s).
+
+            One sportId: https://statsapi.mlb.com/api/v1/people/search?names=juan&sportIds=23
+            Multiple sportIds: https://statsapi.mlb.com/api/v1/people/search?names=juan&sportIds=23,1
+
+        List of players by sport can be found in the Sports endpoint under the “view information on a players for a given sportId” subsection.
+        leagueIds	
+        string
+
+        Insert leagueId(s) to search and return biographical information for players in a specific league(s).
+
+            One leagueId: https://statsapi.mlb.com/api/v1/people/search?names=juan&leagueIds=104
+            Multiple leagueIds: https://statsapi.mlb.com/api/v1/people/search?names=juan&leagueIds=104,103
+
+        teamIds	
+        string
+
+        Insert teamId(s) to search and return biographical information for players on a specific team(s).
+
+            One sportId: https://statsapi.mlb.com/api/v1/people/search?names=juan&teamIds=133
+            Multiple sportIds: https://statsapi.mlb.com/api/v1/people/search?names=juan&teamIds=133,147
+
+        active	
+        string
+
+        Insert active to search and return biographical information for players if they are active.
+
+            active: https://statsapi.mlb.com/api/v1/people/search?names=bigUnit&sportId=1&active=true
+
+        rookie	
+        string
+
+        Insert rookie to search and return biographical information for players if they are rookies.
+
+            rookie: https://statsapi.mlb.com/api/v1/people/search?names=a&sportId=1&rookie=true
+
+        limit	
+        string
+
+        Insert a limit to limit return {Limit 50}.
+
+            One Limit: https://statsapi.mlb.com/api/v1/people/search?names=juan&leagueIds=103&limit=25
+
+        limit	
+        string
+
+        Insert a limit to limit return {Limit 50}.
+
+            One Limit: https://statsapi.mlb.com/api/v1/people/search?names=juan&leagueIds=103&limit=25
+
+        hydrate	
+        string
+
+        Insert hydration(s) to return statistical or biographical data for a specific player(s).
+
+            One Hydration: https://statsapi.mlb.com/api/v1/people/search?names=trout&hydrate=currentTeam
+            Check For Available Hydrations: https://statsapi.mlb.com/api/v1/people/search?names=trout&hydrate=hydrations
+
+            
+        any
+
+        Comma delimited list of specific fields to be returned. Format: topLevelNode, childNode, attribute
+        fields	
+        Array of strings unique
+
+        Comma delimited list of specific fields to be returned. Format: topLevelNode, childNode, attribute
+
+        Example: http://statsapi.mlb.com/api/v1/people/592178/stats/game/current?fields=stats,splits,stat,type,group
+
+
+
+
+    """
+    url = f"https://statsapi.mlb.com/api/v1/people/search?names={name}"
+
+    resp = requests.get(url)
+
+    return resp.json()
 
 # ===============================================================
 # TEAM Functions
@@ -1877,6 +1992,46 @@ def team_roster(mlbam,season=None,rosterType=None,**kwargs) -> pd.DataFrame:
 
     return df
 
+def fetch_team_data(mlbam,season=None,rosterType=None,**kwargs) -> dict:
+    """Fetch various team season data & information for a team in one API call
+
+    Parameters
+    ----------
+    mlbam : str or int
+        Official team MLB ID
+
+    season : int or str
+        season/year ID (Defaults to season with most recently available data)
+
+    rosterType : str
+        specify the type of roster to retrieve (Default is "40Man")
+
+    
+    """
+    
+
+    records = get_standings_df()
+    records = records[records['tm_mlbam']==int(mlbam)]
+
+    if season is None:
+        season = default_season()
+    if rosterType is None:
+        rosterType = '40Man'
+
+    with requests.session() as sesh:
+        url = BASE + f"/teams/{mlbam}/roster?hydrate=person(stats(type=season,season={season},group=[hitting,pitching,fielding]),currentTeam)&rosterType={rosterType}"
+        resp = sesh.get(url)
+        roster_data_json = resp.json()
+
+        url = BASE + f"/teams/{mlbam}/stats?stats=yearByYear&group=hitting,pitching,fielding"
+        resp = sesh.get(url)
+        team_data_json = resp.json()
+
+    fetched_data = {
+        "records":records
+    }
+
+    return fetched_data
 
 # For consideration:
     # https://statsapi.mlb.com/api/v1/rosterTypes
@@ -1901,7 +2056,9 @@ def league_hitting(league="all",**kwargs):
         Official League MLB ID or abbreviation - AL, NL (not case-sensitive)
 
     Default 'season' is the current (or most recently completed if in off-season)
+
     """
+
     stats = "season"
     statGroup = "hitting"
 
@@ -2272,8 +2429,106 @@ def league_pitching_advanced(league='all',**kwargs):
 
     return df
 
-def league_leaders():
-    pass
+def league_leaders(season=None,statGroup=None,playerPool="Qualified"):
+    """Get league leaders for hitting & pitching
+
+    season : int or str
+        season/year ID to get stats
+
+    statGroup : str
+        stat group(s) to retrieve stats for (hitting, pitching, fielding, etc.)
+
+    playerPool : str
+        filter results by pool
+            - "All"
+            - "Qualified"
+            - "Rookies"
+            - "Qualified_rookies"
+    
+    """
+    if season is None:
+        season = default_season()
+
+    if statGroup is None:
+        statGroup = 'hitting,pitching'
+
+    url = BASE + f"/stats?stats=season&season={season}&group={statGroup}&playerPool={playerPool}"
+
+    resp = requests.get(url)
+
+    resp_json = resp.json()
+
+    hit_cols = ['rank', 'season', 'position', 'player_mlbam', 'player_name', 'team_mlbam', 'team_name', 'league_mlbam', 'league_name','G', 'GO', 'AO', 'R', '2B', '3B', 'HR', 'SO', 'BB', 'IBB', 'H', 'HBP', 'AVG', 'AB', 'OBP', 'SLG', 'OPS', 'CS', 'SB', 'SB%', 'GIDP', 'P', 'PA', 'TB', 'RBI', 'LOB', 'sB', 'sF', 'BABIP', 'GO/AO', 'CI', 'AB/HR']
+    pit_cols = ['rank', 'season', 'position', 'player_mlbam', 'player_name', 'team_mlbam', 'team_name', 'league_mlbam', 'league_name','G', 'GS', 'GO', 'AO', 'R', '2B', '3B', 'HR', 'SO', 'BB', 'IBB', 'H', 'HBP', 'AVG', 'AB', 'OBP', 'SLG', 'OPS', 'CS', 'SB', 'SB%', 'GIDP', 'P', 'ERA', 'IP', 'W', 'L', 'SV', 'SVO', 'HLD', 'BS', 'ER', 'WHIP', 'BF', 'O', 'GP', 'CG', 'ShO', 'K', 'K%', 'HB', 'BK', 'WP', 'PK', 'TB', 'GO/AO', 'W%', 'P/Inn', 'GF', 'SO:BB', 'SO/9', 'BB/9', 'H/9', 'R/9', 'HR/9', 'IR', 'IRS', 'CI', 'sB', 'sF']
+
+    top_hitters = []
+    top_pitchers = []
+
+    for g in resp_json['stats']:
+        sg = g.get("group",{}).get("displayName")
+        # st = g.get("type",{}).get("displayName")
+        if sg == "hitting":
+            for s in g.get("splits",[{}]):
+                stats = s.get("stat")
+
+                rank = s.get('rank')
+                season = s.get("season",'-')
+                player = s.get("player",{})
+                player_mlbam = player.get("id","")
+                player_name = player.get("fullName","")
+                team = s.get("team",{})
+                team_mlbam = team.get("id","")
+                team_name = team.get("name","")
+                league = s.get("league",{})
+                league_mlbam = league.get("id","")
+                league_name = league.get("name","")
+                position = s.get("position",{}).get("abbreviation",'-')
+
+                stats["rank"] = rank
+                stats["season"] = season
+                stats["position"] = position
+                stats["player_mlbam"] = player_mlbam
+                stats["player_name"] = player_name
+                stats["team_mlbam"] = team_mlbam
+                stats["team_name"] = team_name
+                stats["league_mlbam"] = league_mlbam
+                stats["league_name"] = league_name
+                
+                top_hitters.append(pd.Series(stats))
+
+        elif sg == "pitching":
+            for s in g.get("splits",[{}]):
+                stats = s.get("stat")
+
+                rank = s.get('rank')
+                season = s.get("season",'-')
+                player = s.get("player",{})
+                player_mlbam = player.get("id","")
+                player_name = player.get("fullName","")
+                team = s.get("team",{})
+                team_mlbam = team.get("id","")
+                team_name = team.get("name","")
+                league = s.get("league",{})
+                league_mlbam = league.get("id","")
+                league_name = league.get("name","")
+                position = s.get("position",{}).get("abbreviation",'-')
+
+                stats["rank"] = rank
+                stats["season"] = season
+                stats["position"] = position
+                stats["player_mlbam"] = player_mlbam
+                stats["player_name"] = player_name
+                stats["team_mlbam"] = team_mlbam
+                stats["team_name"] = team_name
+                stats["league_mlbam"] = league_mlbam
+                stats["league_name"] = league_name
+                
+                top_pitchers.append(pd.Series(stats))
+
+    hit_df = pd.DataFrame(data=top_hitters).rename(columns=STATDICT)[hit_cols]
+    pitch_df = pd.DataFrame(data=top_pitchers).rename(columns=STATDICT)[pit_cols]
+
+    return {"hitting":hit_df,"pitching":pitch_df}
 
 # ===============================================================
 # MISC Functions

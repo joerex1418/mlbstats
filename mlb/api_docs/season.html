@@ -1,0 +1,760 @@
+<html data-darkreader-mode="dynamic" data-darkreader-scheme="dark">
+
+<head>
+    <title>SEASON</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+
+    <style>
+        .ps {
+            overflow: hidden !important;
+            overflow-anchor: none;
+            -ms-overflow-style: none;
+            touch-action: auto;
+            -ms-touch-action: auto
+        }
+
+        .ps__rail-x {
+            display: none;
+            opacity: 0;
+            transition: background-color .2s linear, opacity .2s linear;
+            -webkit-transition: background-color .2s linear, opacity .2s linear;
+            height: 15px;
+            bottom: 0;
+            position: absolute
+        }
+
+        .ps__rail-y {
+            display: none;
+            opacity: 0;
+            transition: background-color .2s linear, opacity .2s linear;
+            -webkit-transition: background-color .2s linear, opacity .2s linear;
+            width: 15px;
+            right: 0;
+            position: absolute
+        }
+
+        .ps--active-x>.ps__rail-x,
+        .ps--active-y>.ps__rail-y {
+            display: block;
+            background-color: transparent
+        }
+
+        .ps:hover>.ps__rail-x,
+        .ps:hover>.ps__rail-y,
+        .ps--focus>.ps__rail-x,
+        .ps--focus>.ps__rail-y,
+        .ps--scrolling-x>.ps__rail-x,
+        .ps--scrolling-y>.ps__rail-y {
+            opacity: .6
+        }
+
+        .ps .ps__rail-x:hover,
+        .ps .ps__rail-y:hover,
+        .ps .ps__rail-x:focus,
+        .ps .ps__rail-y:focus,
+        .ps .ps__rail-x.ps--clicking,
+        .ps .ps__rail-y.ps--clicking {
+            background-color: #eee;
+            opacity: .9
+        }
+
+        .ps__thumb-x {
+            background-color: #aaa;
+            border-radius: 6px;
+            transition: background-color .2s linear, height .2s ease-in-out;
+            -webkit-transition: background-color .2s linear, height .2s ease-in-out;
+            height: 6px;
+            bottom: 2px;
+            position: absolute
+        }
+
+        .ps__thumb-y {
+            background-color: #aaa;
+            border-radius: 6px;
+            transition: background-color .2s linear, width .2s ease-in-out;
+            -webkit-transition: background-color .2s linear, width .2s ease-in-out;
+            width: 6px;
+            right: 2px;
+            position: absolute
+        }
+
+        .ps__rail-x:hover>.ps__thumb-x,
+        .ps__rail-x:focus>.ps__thumb-x,
+        .ps__rail-x.ps--clicking .ps__thumb-x {
+            background-color: #999;
+            height: 11px
+        }
+
+        .ps__rail-y:hover>.ps__thumb-y,
+        .ps__rail-y:focus>.ps__thumb-y,
+        .ps__rail-y.ps--clicking .ps__thumb-y {
+            background-color: #999;
+            width: 11px
+        }
+
+        @supports (-ms-overflow-style: none) {
+            .ps {
+                overflow: auto !important
+            }
+        }
+
+        @media screen and (-ms-high-contrast: active),
+        (-ms-high-contrast: none) {
+            .ps {
+                overflow: auto !important
+            }
+        }
+
+        /*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIndlYnBhY2s6Ly8uL25vZGVfbW9kdWxlcy9wZXJmZWN0LXNjcm9sbGJhci9jc3MvcGVyZmVjdC1zY3JvbGxiYXIuY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUdBLElBQ0UseUJBQUEsQ0FDQSxvQkFBQSxDQUNBLHVCQUFBLENBQ0EsaUJBQUEsQ0FDQSxxQkFBQSxDQU1GLFlBQ0UsWUFBQSxDQUNBLFNBQUEsQ0FDQSx5REFBQSxDQUNBLGlFQUFBLENBQ0EsV0FBQSxDQUVBLFFBQUEsQ0FFQSxpQkFBQSxDQUdGLFlBQ0UsWUFBQSxDQUNBLFNBQUEsQ0FDQSx5REFBQSxDQUNBLGlFQUFBLENBQ0EsVUFBQSxDQUVBLE9BQUEsQ0FFQSxpQkFBQSxDQUdGLG9EQUVFLGFBQUEsQ0FDQSw0QkFBQSxDQUdGLG9KQU1FLFVBQUEsQ0FHRixrSkFNRSxxQkFBQSxDQUNBLFVBQUEsQ0FNRixhQUNFLHFCQUFBLENBbkVGLGlCQUFBLENBcUVFLDZEQUFBLENBQ0EscUVBQUEsQ0FDQSxVQUFBLENBRUEsVUFBQSxDQUVBLGlCQUFBLENBR0YsYUFDRSxxQkFBQSxDQS9FRixpQkFBQSxDQWlGRSw0REFBQSxDQUNBLG9FQUFBLENBQ0EsU0FBQSxDQUVBLFNBQUEsQ0FFQSxpQkFBQSxDQUdGLG9HQUdFLHFCQUFBLENBQ0EsV0FBQSxDQUdGLG9HQUdFLHFCQUFBLENBQ0EsVUFBQSxDQUlGLHFDQUNFLElBQ0UsdUJBQUEsQ0FBQSxDQUlKLHdFQUNFLElBQ0UsdUJBQUEsQ0FBQSIsInNvdXJjZXNDb250ZW50IjpbIi8qXHJcbiAqIENvbnRhaW5lciBzdHlsZVxyXG4gKi9cclxuLnBzIHtcclxuICBvdmVyZmxvdzogaGlkZGVuICFpbXBvcnRhbnQ7XHJcbiAgb3ZlcmZsb3ctYW5jaG9yOiBub25lO1xyXG4gIC1tcy1vdmVyZmxvdy1zdHlsZTogbm9uZTtcclxuICB0b3VjaC1hY3Rpb246IGF1dG87XHJcbiAgLW1zLXRvdWNoLWFjdGlvbjogYXV0bztcclxufVxyXG5cclxuLypcclxuICogU2Nyb2xsYmFyIHJhaWwgc3R5bGVzXHJcbiAqL1xyXG4ucHNfX3JhaWwteCB7XHJcbiAgZGlzcGxheTogbm9uZTtcclxuICBvcGFjaXR5OiAwO1xyXG4gIHRyYW5zaXRpb246IGJhY2tncm91bmQtY29sb3IgLjJzIGxpbmVhciwgb3BhY2l0eSAuMnMgbGluZWFyO1xyXG4gIC13ZWJraXQtdHJhbnNpdGlvbjogYmFja2dyb3VuZC1jb2xvciAuMnMgbGluZWFyLCBvcGFjaXR5IC4ycyBsaW5lYXI7XHJcbiAgaGVpZ2h0OiAxNXB4O1xyXG4gIC8qIHRoZXJlIG11c3QgYmUgJ2JvdHRvbScgb3IgJ3RvcCcgZm9yIHBzX19yYWlsLXggKi9cclxuICBib3R0b206IDBweDtcclxuICAvKiBwbGVhc2UgZG9uJ3QgY2hhbmdlICdwb3NpdGlvbicgKi9cclxuICBwb3NpdGlvbjogYWJzb2x1dGU7XHJcbn1cclxuXHJcbi5wc19fcmFpbC15IHtcclxuICBkaXNwbGF5OiBub25lO1xyXG4gIG9wYWNpdHk6IDA7XHJcbiAgdHJhbnNpdGlvbjogYmFja2dyb3VuZC1jb2xvciAuMnMgbGluZWFyLCBvcGFjaXR5IC4ycyBsaW5lYXI7XHJcbiAgLXdlYmtpdC10cmFuc2l0aW9uOiBiYWNrZ3JvdW5kLWNvbG9yIC4ycyBsaW5lYXIsIG9wYWNpdHkgLjJzIGxpbmVhcjtcclxuICB3aWR0aDogMTVweDtcclxuICAvKiB0aGVyZSBtdXN0IGJlICdyaWdodCcgb3IgJ2xlZnQnIGZvciBwc19fcmFpbC15ICovXHJcbiAgcmlnaHQ6IDA7XHJcbiAgLyogcGxlYXNlIGRvbid0IGNoYW5nZSAncG9zaXRpb24nICovXHJcbiAgcG9zaXRpb246IGFic29sdXRlO1xyXG59XHJcblxyXG4ucHMtLWFjdGl2ZS14ID4gLnBzX19yYWlsLXgsXHJcbi5wcy0tYWN0aXZlLXkgPiAucHNfX3JhaWwteSB7XHJcbiAgZGlzcGxheTogYmxvY2s7XHJcbiAgYmFja2dyb3VuZC1jb2xvcjogdHJhbnNwYXJlbnQ7XHJcbn1cclxuXHJcbi5wczpob3ZlciA+IC5wc19fcmFpbC14LFxyXG4ucHM6aG92ZXIgPiAucHNfX3JhaWwteSxcclxuLnBzLS1mb2N1cyA+IC5wc19fcmFpbC14LFxyXG4ucHMtLWZvY3VzID4gLnBzX19yYWlsLXksXHJcbi5wcy0tc2Nyb2xsaW5nLXggPiAucHNfX3JhaWwteCxcclxuLnBzLS1zY3JvbGxpbmcteSA+IC5wc19fcmFpbC15IHtcclxuICBvcGFjaXR5OiAwLjY7XHJcbn1cclxuXHJcbi5wcyAucHNfX3JhaWwteDpob3ZlcixcclxuLnBzIC5wc19fcmFpbC15OmhvdmVyLFxyXG4ucHMgLnBzX19yYWlsLXg6Zm9jdXMsXHJcbi5wcyAucHNfX3JhaWwteTpmb2N1cyxcclxuLnBzIC5wc19fcmFpbC14LnBzLS1jbGlja2luZyxcclxuLnBzIC5wc19fcmFpbC15LnBzLS1jbGlja2luZyB7XHJcbiAgYmFja2dyb3VuZC1jb2xvcjogI2VlZTtcclxuICBvcGFjaXR5OiAwLjk7XHJcbn1cclxuXHJcbi8qXHJcbiAqIFNjcm9sbGJhciB0aHVtYiBzdHlsZXNcclxuICovXHJcbi5wc19fdGh1bWIteCB7XHJcbiAgYmFja2dyb3VuZC1jb2xvcjogI2FhYTtcclxuICBib3JkZXItcmFkaXVzOiA2cHg7XHJcbiAgdHJhbnNpdGlvbjogYmFja2dyb3VuZC1jb2xvciAuMnMgbGluZWFyLCBoZWlnaHQgLjJzIGVhc2UtaW4tb3V0O1xyXG4gIC13ZWJraXQtdHJhbnNpdGlvbjogYmFja2dyb3VuZC1jb2xvciAuMnMgbGluZWFyLCBoZWlnaHQgLjJzIGVhc2UtaW4tb3V0O1xyXG4gIGhlaWdodDogNnB4O1xyXG4gIC8qIHRoZXJlIG11c3QgYmUgJ2JvdHRvbScgZm9yIHBzX190aHVtYi14ICovXHJcbiAgYm90dG9tOiAycHg7XHJcbiAgLyogcGxlYXNlIGRvbid0IGNoYW5nZSAncG9zaXRpb24nICovXHJcbiAgcG9zaXRpb246IGFic29sdXRlO1xyXG59XHJcblxyXG4ucHNfX3RodW1iLXkge1xyXG4gIGJhY2tncm91bmQtY29sb3I6ICNhYWE7XHJcbiAgYm9yZGVyLXJhZGl1czogNnB4O1xyXG4gIHRyYW5zaXRpb246IGJhY2tncm91bmQtY29sb3IgLjJzIGxpbmVhciwgd2lkdGggLjJzIGVhc2UtaW4tb3V0O1xyXG4gIC13ZWJraXQtdHJhbnNpdGlvbjogYmFja2dyb3VuZC1jb2xvciAuMnMgbGluZWFyLCB3aWR0aCAuMnMgZWFzZS1pbi1vdXQ7XHJcbiAgd2lkdGg6IDZweDtcclxuICAvKiB0aGVyZSBtdXN0IGJlICdyaWdodCcgZm9yIHBzX190aHVtYi15ICovXHJcbiAgcmlnaHQ6IDJweDtcclxuICAvKiBwbGVhc2UgZG9uJ3QgY2hhbmdlICdwb3NpdGlvbicgKi9cclxuICBwb3NpdGlvbjogYWJzb2x1dGU7XHJcbn1cclxuXHJcbi5wc19fcmFpbC14OmhvdmVyID4gLnBzX190aHVtYi14LFxyXG4ucHNfX3JhaWwteDpmb2N1cyA+IC5wc19fdGh1bWIteCxcclxuLnBzX19yYWlsLXgucHMtLWNsaWNraW5nIC5wc19fdGh1bWIteCB7XHJcbiAgYmFja2dyb3VuZC1jb2xvcjogIzk5OTtcclxuICBoZWlnaHQ6IDExcHg7XHJcbn1cclxuXHJcbi5wc19fcmFpbC15OmhvdmVyID4gLnBzX190aHVtYi15LFxyXG4ucHNfX3JhaWwteTpmb2N1cyA+IC5wc19fdGh1bWIteSxcclxuLnBzX19yYWlsLXkucHMtLWNsaWNraW5nIC5wc19fdGh1bWIteSB7XHJcbiAgYmFja2dyb3VuZC1jb2xvcjogIzk5OTtcclxuICB3aWR0aDogMTFweDtcclxufVxyXG5cclxuLyogTVMgc3VwcG9ydHMgKi9cclxuQHN1cHBvcnRzICgtbXMtb3ZlcmZsb3ctc3R5bGU6IG5vbmUpIHtcclxuICAucHMge1xyXG4gICAgb3ZlcmZsb3c6IGF1dG8gIWltcG9ydGFudDtcclxuICB9XHJcbn1cclxuXHJcbkBtZWRpYSBzY3JlZW4gYW5kICgtbXMtaGlnaC1jb250cmFzdDogYWN0aXZlKSwgKC1tcy1oaWdoLWNvbnRyYXN0OiBub25lKSB7XHJcbiAgLnBzIHtcclxuICAgIG92ZXJmbG93OiBhdXRvICFpbXBvcnRhbnQ7XHJcbiAgfVxyXG59XHJcbiJdLCJzb3VyY2VSb290IjoiIn0= */
+    </style>
+    <style data-styled="active" data-styled-version="5.3.0"></style>
+</head>
+
+<body>
+    <redoc spec-url="/docs/season/swagger.json">
+        <div class="sc-ellfGf cFYLqk redoc-wrap">
+            <div class="sc-dvUynV lbhIE menu-content" style="top: 0px; height: calc(0px + 100vh);">
+                <div role="search" class="sc-iIgjPs krBuaG"><svg class="sc-amkrK ghHTBh search-icon" version="1.1"
+                        viewBox="0 0 1000 1000" x="0px" xmlns="http://www.w3.org/2000/svg" y="0px">
+                        <path
+                            d="M968.2,849.4L667.3,549c83.9-136.5,66.7-317.4-51.7-435.6C477.1-25,252.5-25,113.9,113.4c-138.5,138.3-138.5,362.6,0,501C219.2,730.1,413.2,743,547.6,666.5l301.9,301.4c43.6,43.6,76.9,14.9,104.2-12.4C981,928.3,1011.8,893,968.2,849.4z M524.5,522c-88.9,88.7-233,88.7-321.8,0c-88.9-88.7-88.9-232.6,0-321.3c88.9-88.7,233-88.7,321.8,0C613.4,289.4,613.4,433.3,524.5,522z">
+                        </path>
+                    </svg><input placeholder="Search..." aria-label="Search" type="text"
+                        class="sc-gstuGz jbhGLE search-input" value=""></div>
+                <div class="sc-bBjRSN cdTyhF scrollbar-container undefined ps">
+                    <ul class="sc-fHCHyC jhKFuG" role="navigation">
+                        <li data-item-id="tag/season" class="sc-dtLLSn gUTFiI"><label type="tag" role="menuitem"
+                                class="sc-dkQUaI cAgrCZ -depth1"><span title="season"
+                                    class="sc-WZYut cePYMT">season</span><svg class="sc-dIsUp fyYtoM" version="1.1"
+                                    viewBox="0 0 24 24" x="0" xmlns="http://www.w3.org/2000/svg" y="0"
+                                    aria-hidden="true">
+                                    <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 "></polygon>
+                                </svg></label>
+                            <ul class="sc-fHCHyC eoKdtf">
+                                <li data-item-id="operation/seasons" class="sc-dtLLSn gUTFiI"><label role="menuitem"
+                                        class="sc-dkQUaI dgtLHO -depth2"><span type="get"
+                                            class="sc-euEtCV jMHIOm operation-type get">get</span><span
+                                            width="calc(100% - 38px)" class="sc-WZYut kHZffi">View current season
+                                            info.</span></label></li>
+                                <li data-item-id="operation/allSeasons" class="sc-dtLLSn gUTFiI"><label role="menuitem"
+                                        class="sc-dkQUaI dgtLHO -depth2"><span type="get"
+                                            class="sc-euEtCV jMHIOm operation-type get">get</span><span
+                                            width="calc(100% - 38px)" class="sc-WZYut kHZffi">View information for all
+                                            seasons based on id.</span></label></li>
+                                <li data-item-id="operation/seasonId" class="sc-dtLLSn gUTFiI"><label role="menuitem"
+                                        class="sc-dkQUaI dgtLHO -depth2"><span type="get"
+                                            class="sc-euEtCV jMHIOm operation-type get">get</span><span
+                                            width="calc(100% - 38px)" class="sc-WZYut kHZffi">View information on an
+                                            individual season.</span></label></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <div class="sc-ikXwFM fmzkAx"><a target="_blank" rel="noopener noreferrer"
+                            href="https://github.com/Redocly/redoc">Documentation Powered by ReDoc</a></div>
+                    <div class="ps__rail-x" style="left: 0px; bottom: 0px;">
+                        <div class="ps__thumb-x" tabindex="0" style="left: 0px; width: 0px;"></div>
+                    </div>
+                    <div class="ps__rail-y" style="top: 0px; right: 0px;">
+                        <div class="ps__thumb-y" tabindex="0" style="top: 0px; height: 0px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="sc-jtiXyc cSSWmS">
+                <div class="sc-kTCsyW rJmkA"><svg class=""
+                        style="transform: translate(2px, -4px) rotate(180deg); transition: transform 0.2s ease 0s;"
+                        viewBox="0 0 926.23699 573.74994" version="1.1" x="0px" y="0px" width="15" height="15">
+                        <g transform="translate(904.92214,-879.1482)">
+                            <path d="
+          m -673.67664,1221.6502 -231.2455,-231.24803 55.6165,
+          -55.627 c 30.5891,-30.59485 56.1806,-55.627 56.8701,-55.627 0.6894,
+          0 79.8637,78.60862 175.9427,174.68583 l 174.6892,174.6858 174.6892,
+          -174.6858 c 96.079,-96.07721 175.253196,-174.68583 175.942696,
+          -174.68583 0.6895,0 26.281,25.03215 56.8701,
+          55.627 l 55.6165,55.627 -231.245496,231.24803 c -127.185,127.1864
+          -231.5279,231.248 -231.873,231.248 -0.3451,0 -104.688,
+          -104.0616 -231.873,-231.248 z
+        " fill="currentColor" style="--darkreader-inline-fill: currentColor;" data-darkreader-inline-fill=""></path>
+                        </g>
+                    </svg><svg class="" style="transform: translate(2px, 4px); transition: transform 0.2s ease 0s;"
+                        viewBox="0 0 926.23699 573.74994" version="1.1" x="0px" y="0px" width="15" height="15">
+                        <g transform="translate(904.92214,-879.1482)">
+                            <path d="
+          m -673.67664,1221.6502 -231.2455,-231.24803 55.6165,
+          -55.627 c 30.5891,-30.59485 56.1806,-55.627 56.8701,-55.627 0.6894,
+          0 79.8637,78.60862 175.9427,174.68583 l 174.6892,174.6858 174.6892,
+          -174.6858 c 96.079,-96.07721 175.253196,-174.68583 175.942696,
+          -174.68583 0.6895,0 26.281,25.03215 56.8701,
+          55.627 l 55.6165,55.627 -231.245496,231.24803 c -127.185,127.1864
+          -231.5279,231.248 -231.873,231.248 -0.3451,0 -104.688,
+          -104.0616 -231.873,-231.248 z
+        " fill="currentColor" style="--darkreader-inline-fill: currentColor;" data-darkreader-inline-fill=""></path>
+                        </g>
+                    </svg></div>
+            </div>
+            <div class="sc-kizEQm lkySpF api-content">
+                <div class="sc-eCApnc chOOHy">
+                    <div class="sc-iCoGMd dolNKP">
+                        <div class="sc-hKFxyN hutltu api-info">
+                            <h1 class="sc-fujyAs sc-GvhzO kreCXJ hWoQvV">statsapi.mlb.com <span>(1.0)</span></h1>
+                            <p>Download OpenAPI specification:<a download="" target="_blank"
+                                    href="https://statsapi.mlb.com/docs/season/swagger.json"
+                                    class="sc-gsWcmt hzcviW">Download</a></p>
+                            <div class="sc-iBzEeX sc-cOifOu coaOfs emjsJn"></div>
+                            <div class="sc-iBzEeX sc-cOifOu coaOfs emjsJn" data-role="redoc-summary"></div>
+                            <div class="sc-iBzEeX sc-cOifOu coaOfs emjsJn" data-role="redoc-description"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="tag/season" data-section-id="tag/season" class="sc-eCApnc chOOHy">
+                    <div class="sc-iCoGMd dolNKP">
+                        <div class="sc-hKFxyN hutltu">
+                            <h1 class="sc-fujyAs kreCXJ"><a class="sc-crzoAE DykGo" href="#tag/season"
+                                    aria-label="tag/season"></a>season</h1>
+                        </div>
+                    </div>
+                </div>
+                <div id="operation/seasons" data-section-id="operation/seasons" class="sc-eCApnc kzhJjR">
+                    <div class="sc-iCoGMd dolNKP">
+                        <div class="sc-hKFxyN hutltu">
+                            <h2 class="sc-pNWdM loDKCl"><a class="sc-crzoAE DykGo" href="#operation/seasons"
+                                    aria-label="operation/seasons"></a>View current season info. </h2>
+                            <div class="sc-eWnToP jGgSbx">
+                                <div class="sc-iBzEeX sc-cOifOu coaOfs emjsJn">
+                                    <p><strong>Description:</strong>
+                                        This endpoint returns season information for the current year.</p>
+                                    <p> <strong>Return Includes:</strong> Spring Training, Regular Season, Postseason
+                                        start dates and end dates</p>
+                                    <p> <strong>Required Parameters:</strong> sportId is required to run this call.</p>
+                                    <hr>
+                                    <p> <strong>Example of call with required parameters</strong></p>
+                                    <p> <a
+                                            href="https://statsapi.mlb.com/api/v1/seasons?sportId=1">https://statsapi.mlb.com/api/v1/seasons?sportId=1</a>
+                                    </p>
+                                </div>
+                            </div>
+                            <div>
+                                <h5 class="sc-iqAclL iupIzr">query Parameters</h5>
+                                <table class="sc-hHEiqL iZJLLY">
+                                    <tbody>
+                                        <tr>
+                                            <td class="sc-hBMUJo sc-fFSPTT eJvdeH ktTSbS" kind="field" title="sportId">
+                                                <span class="sc-iemWCZ kMjgQu"></span><span>sportId</span>
+                                                <div class="sc-TtZnY sc-jHNicF ehnWxS imjMKL"> required </div>
+                                            </td>
+                                            <td class="sc-bkbkJK gaTxIt">
+                                                <div>
+                                                    <div><span class="sc-fbIWvP sc-FRrlG JIFSj gDAJjz"></span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo">integer</span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo"> &lt;int32&gt;
+                                                        </span></div>
+                                                    <div>
+                                                        <div class="sc-iBzEeX sc-cOifOu coaOfs ekuuTt">
+                                                            <p>Insert a sportId to return season information for the
+                                                                current year for a particular sport.</p>
+                                                            <ol>
+                                                                <li>Insert sportId: <a
+                                                                        href="https://statsapi.mlb.com/api/v1/seasons?sportId=1">https://statsapi.mlb.com/api/v1/seasons?sportId=1</a>
+                                                                </li>
+                                                            </ol>
+                                                            <p> For a list of all sportIds: <a
+                                                                    href="http://statsapi.mlb.com/api/v1/sports">http://statsapi.mlb.com/api/v1/sports</a>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="sc-hBMUJo sc-fFSPTT eJvdeH ktTSbS" kind="field"
+                                                title="withGameTypeDates"><span
+                                                    class="sc-iemWCZ kMjgQu"></span><span>withGameTypeDates</span>
+                                                <div class="sc-TtZnY sc-jHNicF ehnWxS imjMKL"> required </div>
+                                            </td>
+                                            <td class="sc-bkbkJK gaTxIt">
+                                                <div>
+                                                    <div><span class="sc-fbIWvP sc-FRrlG JIFSj gDAJjz"></span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo">integer</span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo"> &lt;int32&gt;
+                                                        </span></div>
+                                                    <div>
+                                                        <div class="sc-iBzEeX sc-cOifOu coaOfs ekuuTt">
+                                                            <p>Insert a withGameTypeDates to return season information
+                                                                for all gameTypes.</p>
+                                                            <ol>
+                                                                <li>Insert withGameTypeDates: <a
+                                                                        href="http://statsapi.mlb.com/api/v1/seasons?season=2019&amp;sportId=1&amp;withGameTypeDates=true">http://statsapi.mlb.com/api/v1/seasons?season=2019&amp;sportId=1&amp;withGameTypeDates=true</a>
+                                                                </li>
+                                                            </ol>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="last undefined">
+                                            <td class="sc-hBMUJo sc-fFSPTT eJvdeH ktTSbS" kind="field" title="fields">
+                                                <span class="sc-iemWCZ kMjgQu"></span><span>fields</span></td>
+                                            <td class="sc-bkbkJK gaTxIt">
+                                                <div>
+                                                    <div><span class="sc-fbIWvP sc-FRrlG JIFSj gDAJjz">Array of
+                                                        </span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo">strings</span><span>
+                                                            <span class="sc-fbIWvP sc-bTDOke JIFSj elpFbm"> unique
+                                                            </span></span></div>
+                                                    <div>
+                                                        <div class="sc-iBzEeX sc-cOifOu coaOfs ekuuTt">
+                                                            <p>Comma delimited list of specific fields to be returned.
+                                                                Format:
+                                                                topLevelNode, childNode, attribute</p>
+                                                            <p>Example: <a
+                                                                    href="https://statsapi.mlb.com/api/v1/seasons?sportId=1&amp;fields=seasons,seasonStartDate,seasonEndDate">https://statsapi.mlb.com/api/v1/seasons?sportId=1&amp;fields=seasons,seasonStartDate,seasonEndDate</a>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div>
+                                <h3 class="sc-htmcrh hJDFuu">Responses</h3>
+                                <div><button class="sc-eEVmNe gwEYzt"><svg class="sc-dIsUp gDqeGV" version="1.1"
+                                            viewBox="0 0 24 24" x="0" xmlns="http://www.w3.org/2000/svg" y="0"
+                                            aria-hidden="true">
+                                            <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 ">
+                                            </polygon>
+                                        </svg><strong class="sc-dTSzeu krkYvd">200 </strong><span
+                                            class="sc-Arkif gGzosX">
+                                            <p>OK</p>
+                                        </span></button></div>
+                                <div><button class="sc-eEVmNe cFREEZ" disabled=""><strong class="sc-dTSzeu krkYvd">401
+                                        </strong><span class="sc-Arkif gGzosX">
+                                            <p>Unauthorized</p>
+                                        </span></button></div>
+                                <div><button class="sc-eEVmNe cFREEZ" disabled=""><strong class="sc-dTSzeu krkYvd">403
+                                        </strong><span class="sc-Arkif gGzosX">
+                                            <p>Forbidden</p>
+                                        </span></button></div>
+                                <div><button class="sc-eEVmNe cFREEZ" disabled=""><strong class="sc-dTSzeu krkYvd">404
+                                        </strong><span class="sc-Arkif gGzosX">
+                                            <p>Not Found</p>
+                                        </span></button></div>
+                            </div>
+                        </div>
+                        <div class="sc-jSFjdj sc-gKAaRy dYGhuI fTsuzH">
+                            <div class="sc-xGAEC cBoHoo"><button class="sc-jHcXXw edhkaR"><span type="get"
+                                        class="sc-bQCEYZ eXfACm http-verb get">get</span><span
+                                        class="sc-dWBRfb cBCORQ">/v1/seasons</span><svg class="sc-dIsUp bvUgLx"
+                                        style="margin-right: -25px;" version="1.1" viewBox="0 0 24 24" x="0"
+                                        xmlns="http://www.w3.org/2000/svg" y="0" aria-hidden="true">
+                                        <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 "></polygon>
+                                    </svg></button>
+                                <div aria-hidden="true" class="sc-fXgAZx YzYlp">
+                                    <div class="sc-EZqKI iONckA">
+                                        <div class="sc-iBzEeX sc-cOifOu coaOfs ekuuTt"></div>
+                                        <div tabindex="0" role="button">
+                                            <div class="sc-jXcxbT dsQZCS">
+                                                <span>http://statsapi.mlb.com</span>/v1/seasons</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="operation/allSeasons" data-section-id="operation/allSeasons" class="sc-eCApnc kzhJjR">
+                    <div class="sc-iCoGMd dolNKP">
+                        <div class="sc-hKFxyN hutltu">
+                            <h2 class="sc-pNWdM loDKCl"><a class="sc-crzoAE DykGo" href="#operation/allSeasons"
+                                    aria-label="operation/allSeasons"></a>View information for all seasons based on id.
+                            </h2>
+                            <div class="sc-eWnToP jGgSbx">
+                                <div class="sc-iBzEeX sc-cOifOu coaOfs emjsJn">
+                                    <p><strong>Description:</strong>
+                                        This endpoint returns season information for all seasons based on id.</p>
+                                    <p> <strong>Return Includes:</strong> Regular Season, Postseason start dates and end
+                                        dates</p>
+                                    <p> <strong>Required Parameters:</strong> sportId is required to run this call.</p>
+                                    <hr>
+                                    <p> <strong>Example of call with required parameters</strong></p>
+                                    <p> <a
+                                            href="https://statsapi.mlb.com/api/v1/seasons/all?sportId=1">https://statsapi.mlb.com/api/v1/seasons/all?sportId=1</a>
+                                    </p>
+                                </div>
+                            </div>
+                            <div>
+                                <h5 class="sc-iqAclL iupIzr">query Parameters</h5>
+                                <table class="sc-hHEiqL iZJLLY">
+                                    <tbody>
+                                        <tr>
+                                            <td class="sc-hBMUJo sc-fFSPTT eJvdeH ktTSbS" kind="field"
+                                                title="divisionId"><span
+                                                    class="sc-iemWCZ kMjgQu"></span><span>divisionId</span></td>
+                                            <td class="sc-bkbkJK gaTxIt">
+                                                <div>
+                                                    <div><span class="sc-fbIWvP sc-FRrlG JIFSj gDAJjz"></span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo">string</span></div>
+                                                    <div>
+                                                        <div class="sc-iBzEeX sc-cOifOu coaOfs ekuuTt">
+                                                            <p>Insert divisionId to return a directory of seasons for a
+                                                                specific division.</p>
+                                                            <ol>
+                                                                <li>One divisionId: <a
+                                                                        href="https://statsapi.mlb.com/api/v1/seasons/all?divisionId=200">https://statsapi.mlb.com/api/v1/seasons/all?divisionId=200</a>
+                                                                    For a list of all divisionIds: <a
+                                                                        href="https://statsapi.mlb.com/api/v1/divisions">https://statsapi.mlb.com/api/v1/divisions</a>
+                                                                </li>
+                                                            </ol>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="sc-hBMUJo sc-fFSPTT eJvdeH ktTSbS" kind="field" title="leagueId">
+                                                <span class="sc-iemWCZ kMjgQu"></span><span>leagueId</span></td>
+                                            <td class="sc-bkbkJK gaTxIt">
+                                                <div>
+                                                    <div><span class="sc-fbIWvP sc-FRrlG JIFSj gDAJjz"></span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo">integer</span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo"> &lt;int32&gt;
+                                                        </span></div>
+                                                    <div>
+                                                        <div class="sc-iBzEeX sc-cOifOu coaOfs ekuuTt">
+                                                            <p>Insert leagueId to return a directory of seasons in a
+                                                                specific league.</p>
+                                                            <ol>
+                                                                <li>One leagueId: <a
+                                                                        href="https://statsapi.mlb.com/api/v1/seasons/all?leagueId=103">https://statsapi.mlb.com/api/v1/seasons/all?leagueId=103</a>
+                                                                </li>
+                                                            </ol>
+                                                            <p>For a list of all leagueIds: <a
+                                                                    href="http://statsapi.mlb.com/api/v1/sports">http://statsapi.mlb.com/api/v1/sports</a>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="sc-hBMUJo sc-fFSPTT eJvdeH ktTSbS" kind="field"
+                                                title="withGameTypeDates"><span
+                                                    class="sc-iemWCZ kMjgQu"></span><span>withGameTypeDates</span>
+                                                <div class="sc-TtZnY sc-jHNicF ehnWxS imjMKL"> required </div>
+                                            </td>
+                                            <td class="sc-bkbkJK gaTxIt">
+                                                <div>
+                                                    <div><span class="sc-fbIWvP sc-FRrlG JIFSj gDAJjz"></span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo">integer</span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo"> &lt;int32&gt;
+                                                        </span></div>
+                                                    <div>
+                                                        <div class="sc-iBzEeX sc-cOifOu coaOfs ekuuTt">
+                                                            <p>Insert a withGameTypeDates to return season information
+                                                                for all gameTypes.</p>
+                                                            <ol>
+                                                                <li>Insert withGameTypeDates: <a
+                                                                        href="https://statsapi.mlb.com/api/v1/seasons/all?sportId=1&amp;withGameTypeDates=true">https://statsapi.mlb.com/api/v1/seasons/all?sportId=1&amp;withGameTypeDates=true</a>
+                                                                </li>
+                                                            </ol>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="sc-hBMUJo sc-fFSPTT eJvdeH ktTSbS" kind="field" title="sportId">
+                                                <span class="sc-iemWCZ kMjgQu"></span><span>sportId</span></td>
+                                            <td class="sc-bkbkJK gaTxIt">
+                                                <div>
+                                                    <div><span class="sc-fbIWvP sc-FRrlG JIFSj gDAJjz"></span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo">integer</span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo"> &lt;int32&gt;
+                                                        </span></div>
+                                                    <div>
+                                                        <div class="sc-iBzEeX sc-cOifOu coaOfs ekuuTt">
+                                                            <p>Insert a sportId to return a directory of seasons for a
+                                                                specific sport.</p>
+                                                            <ol>
+                                                                <li>One sportId: <a
+                                                                        href="https://statsapi.mlb.com/api/v1/seasons/all?sportId=1">https://statsapi.mlb.com/api/v1/seasons/all?sportId=1</a>
+                                                                </li>
+                                                            </ol>
+                                                            <p>For a list of all sportIds: <a
+                                                                    href="http://statsapi.mlb.com/api/v1/sports">http://statsapi.mlb.com/api/v1/sports</a>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="last undefined">
+                                            <td class="sc-hBMUJo sc-fFSPTT eJvdeH ktTSbS" kind="field" title="fields">
+                                                <span class="sc-iemWCZ kMjgQu"></span><span>fields</span></td>
+                                            <td class="sc-bkbkJK gaTxIt">
+                                                <div>
+                                                    <div><span class="sc-fbIWvP sc-FRrlG JIFSj gDAJjz">Array of
+                                                        </span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo">strings</span><span>
+                                                            <span class="sc-fbIWvP sc-bTDOke JIFSj elpFbm"> unique
+                                                            </span></span></div>
+                                                    <div>
+                                                        <div class="sc-iBzEeX sc-cOifOu coaOfs ekuuTt">
+                                                            <p>Comma delimited list of specific fields to be returned.
+                                                                Format:
+                                                                topLevelNode, childNode, attribute</p>
+                                                            <p>Example: <a
+                                                                    href="https://statsapi.mlb.com/api/v1/seasons/all?sportId=1&amp;fields=seasons,seasonStartDate,seasonEndDate">https://statsapi.mlb.com/api/v1/seasons/all?sportId=1&amp;fields=seasons,seasonStartDate,seasonEndDate</a>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div>
+                                <h3 class="sc-htmcrh hJDFuu">Responses</h3>
+                                <div><button class="sc-eEVmNe gwEYzt"><svg class="sc-dIsUp gDqeGV" version="1.1"
+                                            viewBox="0 0 24 24" x="0" xmlns="http://www.w3.org/2000/svg" y="0"
+                                            aria-hidden="true">
+                                            <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 ">
+                                            </polygon>
+                                        </svg><strong class="sc-dTSzeu krkYvd">200 </strong><span
+                                            class="sc-Arkif gGzosX">
+                                            <p>OK</p>
+                                        </span></button></div>
+                                <div><button class="sc-eEVmNe cFREEZ" disabled=""><strong class="sc-dTSzeu krkYvd">401
+                                        </strong><span class="sc-Arkif gGzosX">
+                                            <p>Unauthorized</p>
+                                        </span></button></div>
+                                <div><button class="sc-eEVmNe cFREEZ" disabled=""><strong class="sc-dTSzeu krkYvd">403
+                                        </strong><span class="sc-Arkif gGzosX">
+                                            <p>Forbidden</p>
+                                        </span></button></div>
+                                <div><button class="sc-eEVmNe cFREEZ" disabled=""><strong class="sc-dTSzeu krkYvd">404
+                                        </strong><span class="sc-Arkif gGzosX">
+                                            <p>Not Found</p>
+                                        </span></button></div>
+                            </div>
+                        </div>
+                        <div class="sc-jSFjdj sc-gKAaRy dYGhuI fTsuzH">
+                            <div class="sc-xGAEC cBoHoo"><button class="sc-jHcXXw edhkaR"><span type="get"
+                                        class="sc-bQCEYZ eXfACm http-verb get">get</span><span
+                                        class="sc-dWBRfb cBCORQ">/v1/seasons/all</span><svg class="sc-dIsUp bvUgLx"
+                                        style="margin-right: -25px;" version="1.1" viewBox="0 0 24 24" x="0"
+                                        xmlns="http://www.w3.org/2000/svg" y="0" aria-hidden="true">
+                                        <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 "></polygon>
+                                    </svg></button>
+                                <div aria-hidden="true" class="sc-fXgAZx YzYlp">
+                                    <div class="sc-EZqKI iONckA">
+                                        <div class="sc-iBzEeX sc-cOifOu coaOfs ekuuTt"></div>
+                                        <div tabindex="0" role="button">
+                                            <div class="sc-jXcxbT dsQZCS">
+                                                <span>http://statsapi.mlb.com</span>/v1/seasons/all</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="operation/seasonId" data-section-id="operation/seasonId" class="sc-eCApnc kzhJjR">
+                    <div class="sc-iCoGMd dolNKP">
+                        <div class="sc-hKFxyN hutltu">
+                            <h2 class="sc-pNWdM loDKCl"><a class="sc-crzoAE DykGo" href="#operation/seasonId"
+                                    aria-label="operation/seasonId"></a>View information on an individual season. </h2>
+                            <div class="sc-eWnToP jGgSbx">
+                                <div class="sc-iBzEeX sc-cOifOu coaOfs emjsJn">
+                                    <p><strong>Description:</strong>
+                                        This endpoint returns season information for the current year.</p>
+                                    <p><strong>Return Includes:</strong> Spring Training,Regular Season, Postseason
+                                        start dates and end dates</p>
+                                    <p><strong>Required Parameters:</strong> sportId and seasonId are required to run
+                                        this call.</p>
+                                    <hr>
+                                    <p><strong>Example of call with required parameters</strong></p>
+                                    <p> <a
+                                            href="https://statsapi.mlb.com/api/v1/seasons/2017?sportId=1">https://statsapi.mlb.com/api/v1/seasons/2017?sportId=1</a>
+                                    </p>
+                                </div>
+                            </div>
+                            <div>
+                                <h5 class="sc-iqAclL iupIzr">path Parameters</h5>
+                                <table class="sc-hHEiqL iZJLLY">
+                                    <tbody>
+                                        <tr class="last undefined">
+                                            <td class="sc-hBMUJo sc-fFSPTT eJvdeH ktTSbS" kind="field" title="seasonId">
+                                                <span class="sc-iemWCZ kMjgQu"></span><span>seasonId</span>
+                                                <div class="sc-TtZnY sc-jHNicF ehnWxS imjMKL"> required </div>
+                                            </td>
+                                            <td class="sc-bkbkJK gaTxIt">
+                                                <div>
+                                                    <div><span class="sc-fbIWvP sc-FRrlG JIFSj gDAJjz"></span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo">string</span></div>
+                                                    <div>
+                                                        <div class="sc-iBzEeX sc-cOifOu coaOfs ekuuTt">
+                                                            <p>Insert year to return season information for a particular
+                                                                season. </p>
+                                                            <ol>
+                                                                <li>Insert year: <a
+                                                                        href="https://statsapi.mlb.com/api/v1/seasons/2017?sportId=1">https://statsapi.mlb.com/api/v1/seasons/2017?sportId=1</a>
+                                                                </li>
+                                                            </ol>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div>
+                                <h5 class="sc-iqAclL iupIzr">query Parameters</h5>
+                                <table class="sc-hHEiqL iZJLLY">
+                                    <tbody>
+                                        <tr>
+                                            <td class="sc-hBMUJo sc-fFSPTT eJvdeH ktTSbS" kind="field" title="sportId">
+                                                <span class="sc-iemWCZ kMjgQu"></span><span>sportId</span>
+                                                <div class="sc-TtZnY sc-jHNicF ehnWxS imjMKL"> required </div>
+                                            </td>
+                                            <td class="sc-bkbkJK gaTxIt">
+                                                <div>
+                                                    <div><span class="sc-fbIWvP sc-FRrlG JIFSj gDAJjz"></span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo">integer</span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo"> &lt;int32&gt;
+                                                        </span></div>
+                                                    <div>
+                                                        <div class="sc-iBzEeX sc-cOifOu coaOfs ekuuTt">
+                                                            <p>Insert a sportId to return season information for the
+                                                                current year for a particular sport.</p>
+                                                            <ol>
+                                                                <li>Insert sportId: <a
+                                                                        href="https://statsapi.mlb.com/api/v1/seasons/2017?sportId=1">https://statsapi.mlb.com/api/v1/seasons/2017?sportId=1</a>
+                                                                </li>
+                                                            </ol>
+                                                            <p> For a list of all sportIds: <a
+                                                                    href="http://statsapi.mlb.com/api/v1/sports">http://statsapi.mlb.com/api/v1/sports</a>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="sc-hBMUJo sc-fFSPTT eJvdeH ktTSbS" kind="field"
+                                                title="withGameTypeDates"><span
+                                                    class="sc-iemWCZ kMjgQu"></span><span>withGameTypeDates</span>
+                                                <div class="sc-TtZnY sc-jHNicF ehnWxS imjMKL"> required </div>
+                                            </td>
+                                            <td class="sc-bkbkJK gaTxIt">
+                                                <div>
+                                                    <div><span class="sc-fbIWvP sc-FRrlG JIFSj gDAJjz"></span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo">integer</span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo"> &lt;int32&gt;
+                                                        </span></div>
+                                                    <div>
+                                                        <div class="sc-iBzEeX sc-cOifOu coaOfs ekuuTt">
+                                                            <p>Insert a withGameTypeDates to return season information
+                                                                for all gameTypes.</p>
+                                                            <ol>
+                                                                <li>Insert withGameTypeDates: <a
+                                                                        href="https://statsapi.mlb.com/api/v1/seasons/2017?sportId=1&amp;withGameTypeDates=true">https://statsapi.mlb.com/api/v1/seasons/2017?sportId=1&amp;withGameTypeDates=true</a>
+                                                                </li>
+                                                            </ol>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="last undefined">
+                                            <td class="sc-hBMUJo sc-fFSPTT eJvdeH ktTSbS" kind="field" title="fields">
+                                                <span class="sc-iemWCZ kMjgQu"></span><span>fields</span></td>
+                                            <td class="sc-bkbkJK gaTxIt">
+                                                <div>
+                                                    <div><span class="sc-fbIWvP sc-FRrlG JIFSj gDAJjz">Array of
+                                                        </span><span
+                                                            class="sc-fbIWvP sc-fXazdy JIFSj bbtMDo">strings</span><span>
+                                                            <span class="sc-fbIWvP sc-bTDOke JIFSj elpFbm"> unique
+                                                            </span></span></div>
+                                                    <div>
+                                                        <div class="sc-iBzEeX sc-cOifOu coaOfs ekuuTt">
+                                                            <p>Comma delimited list of specific fields to be returned.
+                                                                Format:
+                                                                topLevelNode, childNode, attribute</p>
+                                                            <p>Example: <a
+                                                                    href="https://statsapi.mlb.com/api/v1/seasons/2017?sportId=1&amp;fields=seasons,regularSeasonStartDate,regularSeasonEndDate">https://statsapi.mlb.com/api/v1/seasons/2017?sportId=1&amp;fields=seasons,regularSeasonStartDate,regularSeasonEndDate</a>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div>
+                                <h3 class="sc-htmcrh hJDFuu">Responses</h3>
+                                <div><button class="sc-eEVmNe gwEYzt"><svg class="sc-dIsUp gDqeGV" version="1.1"
+                                            viewBox="0 0 24 24" x="0" xmlns="http://www.w3.org/2000/svg" y="0"
+                                            aria-hidden="true">
+                                            <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 ">
+                                            </polygon>
+                                        </svg><strong class="sc-dTSzeu krkYvd">200 </strong><span
+                                            class="sc-Arkif gGzosX">
+                                            <p>OK</p>
+                                        </span></button></div>
+                                <div><button class="sc-eEVmNe cFREEZ" disabled=""><strong class="sc-dTSzeu krkYvd">401
+                                        </strong><span class="sc-Arkif gGzosX">
+                                            <p>Unauthorized</p>
+                                        </span></button></div>
+                                <div><button class="sc-eEVmNe cFREEZ" disabled=""><strong class="sc-dTSzeu krkYvd">403
+                                        </strong><span class="sc-Arkif gGzosX">
+                                            <p>Forbidden</p>
+                                        </span></button></div>
+                                <div><button class="sc-eEVmNe cFREEZ" disabled=""><strong class="sc-dTSzeu krkYvd">404
+                                        </strong><span class="sc-Arkif gGzosX">
+                                            <p>Not Found</p>
+                                        </span></button></div>
+                            </div>
+                        </div>
+                        <div class="sc-jSFjdj sc-gKAaRy dYGhuI fTsuzH">
+                            <div class="sc-xGAEC cBoHoo"><button class="sc-jHcXXw edhkaR"><span type="get"
+                                        class="sc-bQCEYZ eXfACm http-verb get">get</span><span
+                                        class="sc-dWBRfb cBCORQ">/v1/seasons/{seasonId}</span><svg
+                                        class="sc-dIsUp bvUgLx" style="margin-right: -25px;" version="1.1"
+                                        viewBox="0 0 24 24" x="0" xmlns="http://www.w3.org/2000/svg" y="0"
+                                        aria-hidden="true">
+                                        <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 "></polygon>
+                                    </svg></button>
+                                <div aria-hidden="true" class="sc-fXgAZx YzYlp">
+                                    <div class="sc-EZqKI iONckA">
+                                        <div class="sc-iBzEeX sc-cOifOu coaOfs ekuuTt"></div>
+                                        <div tabindex="0" role="button">
+                                            <div class="sc-jXcxbT dsQZCS">
+                                                <span>http://statsapi.mlb.com</span>/v1/seasons/{seasonId}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sc-cKRKFl cLybRg"></div>
+        </div>
+    </redoc>
+    <!-- <script src="https://unpkg.com/redoc@latest/bundles/redoc.standalone.js"> </script> -->
+
+</body>
+
+</html>

@@ -1,8 +1,24 @@
 NOTES:
 - broadcast data covers years 2000 - 2022
 
+GENERATE SWAGGER DOCS FROM URL:
+BASE:
+- https://redocly.github.io/redoc/?url={URL}
+Teams:
+- https://statsapi.mlb.com/docs/team/swagger.json
+Season:
+- https://statsapi.mlb.com/docs/season/swagger.json
+Person:
+- https://statsapi.mlb.com/docs/person/swagger.json
+
 BBREF Redirect URL:
 - https://www.baseball-reference.com/redirect.fcgi?player=1&mlb_ID={playerid}
+
+PLAYER POOL VALUES:
+    All
+    Qualified
+    Rookies
+    Qualified_rookies
 
 Event Types (formatted for "playLog"/"pitchLog"):
     calledStrike - pitch

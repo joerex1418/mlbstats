@@ -140,12 +140,14 @@ class Player:
         setattr(self,key,value)
 
     def career_stats(self,group,advanced=False):
-        """
-        # Career Stats
+        """Career Stats
+        
         Returns `pandas.Dataframe` of player's CAREER stats:
 
         - Valid values for `group` parameter are "hitting", "pitching", or "fielding"
-        - If `advanced` is `True`, class method will return a dataframe of player's advanced stats"""
+        - If `advanced` is `True`, class method will return a dataframe of player's advanced stats
+        
+        """
         if group == "hitting":
             if advanced is True:
                 return self.__hitting_career_reg_adv
