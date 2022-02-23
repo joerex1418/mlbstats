@@ -102,6 +102,8 @@ from .functions import league_fielding
 from .functions import league_hitting_advanced
 from .functions import league_pitching_advanced
 from .functions import league_leaders
+from .functions import fetch_team_data
+from .functions import team_appearances
 
 player_batting = player_hitting
 team_batting = team_hitting
@@ -180,4 +182,5 @@ from .team import team_leaders
 # from .async_mlb import get_league_responses
 
 
-
+# Data Objects =======
+from .functions import team

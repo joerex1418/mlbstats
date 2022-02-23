@@ -32,3 +32,14 @@ Event Types (formatted for "playLog"/"pitchLog"):
     double
     triple
     homeRun
+
+
+For consideration:
+    https://statsapi.mlb.com/api/v1/rosterTypes
+    https://statsapi.mlb.com/api/v1/teams/145/roster?rosterType=fullRoster
+    https://statsapi.mlb.com/api/v1/teams/145/roster?rosterType=allTime
+    https://statsapi.mlb.com/api/v1/fielderDetailTypes
+
+    https://statsapi.mlb.com/api/v1/sports/1/players?season=2021
+    https://statsapi.mlb.com/api/v1/game/632265/feed/color
+    https://statsapi.mlb.com/api/v1.1/game/632265/feed/live/diffPatch?startTimecode=20211003_002205&endTimecode=20211003_002249
