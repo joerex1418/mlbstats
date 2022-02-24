@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup as bs
 from types import SimpleNamespace as ns
 
 from .async_mlb import get_leaders
+from .async_mlb import get_responses
 
 # from .mlbdata import get_people_df
 from .mlbdata import get_season_info
@@ -1344,6 +1345,30 @@ def player_stats(mlbam,statGroup,statType,season=None,**kwargs) -> pd.DataFrame:
 
     return df
 
+def player_data(mlbam) -> dict[pd.DataFrame]:
+    """Fetch a variety of player information/stats in one API call
+
+    Parameters
+    ----------
+    mlbam : str or int
+        Official team MLB ID
+
+    season : int or str
+        season/year ID. If season is not specified, data for the entire franchise will be retrieved by default
+
+    ***
+
+    Keys for returned data
+    ---------------------------
+    "hitting" 
+    "hitting_advanced"
+    "pitching"
+    "pitching_advanced"
+    "fielding"
+
+    
+    """
+
 def player_search(name,sportId=1,**kwargs):
     """Search for a person using the API by name
     
@@ -2274,6 +2299,41 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
         pitch_adv_df = pd.DataFrame(data=pitch_adv_data).rename(columns=STATDICT)[pit_adv_cols].sort_values(by="season",ascending=False)
         field_df = pd.DataFrame(data=field_data).rename(columns=STATDICT)[fld_cols].sort_values(by="season",ascending=False)
 
+        # -- ASYNC STUFF HAPPENS HERE ------------------------------------------
+        team = get_teams_df()
+        team = team[team['mlbam']==int(mlbam)]
+        firstYear = team.iloc[0]["firstYear"]
+
+        urls = []
+        years = range(firstYear,int(default_season())+1)
+        for year in years:
+            urls.append(f"https://statsapi.mlb.com/api/v1/teams/{mlbam}?hydrate=standings&season={year}")
+        urls.append(f"https://statsapi.mlb.com/api/v1/teams/{mlbam}/roster/allTime")
+        urls.append(f"https://statsapi.mlb.com/api/v1/awards/MLBHOF/recipients")
+        urls.append(f"https://statsapi.mlb.com/api/v1/awards/RETIREDUNI_{mlbam}/recipients")
+        resps = get_responses(urls)
+        all_players = resps[-3]
+        hof_players = resps[-2]
+        retired_numbers = resps[-1]
+
+        hof_data = []
+        for a in hof_players["awards"]:
+            if a.get("team",{}).get("id") == int(mlbam):
+                p = a.get("player")
+                hof_data.append([
+                    a.get("season"),
+                    a.get("date"),
+                    p.get("id"),
+                    p.get("nameFirstLast"),
+                    p.get("primaryPosition",{}).get("abbreviation"),
+                    a.get("votes",""),
+                    a.get("notes","")
+                ])
+        hof_df = pd.DataFrame(data=hof_data,columns=['season','date','mlbam','name','pos','votes','notes'])
+
+        # ---------------------------------------------------------------------
+
+
         fetched_data = {
             "records":records.reset_index(drop=True),
             "standings":standings.reset_index(drop=True),
@@ -2282,6 +2342,9 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
             "pitching":pitch_df.reset_index(drop=True),
             "pitching_advanced":pitch_adv_df.reset_index(drop=True),
             "fielding":field_df.reset_index(drop=True),
+            "all_players":all_players,
+            "hof":hof_df,
+            "retired_numbers":retired_numbers
         }
 
     return fetched_data
@@ -5363,3 +5426,4 @@ def player_bio(mlbam):
         bio_p_tags = soup.find("span",id="Biographical_Information").findParent('h2').find_next_siblings('p')
 
         return bio_p_tags
+

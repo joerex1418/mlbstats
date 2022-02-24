@@ -4,3 +4,5 @@ from .season_managers import runit as get_season_managers
 from .yby_records import runit as get_updated_records
 from .tool_leaders import runit as get_leaders
 from .bios import runit as get_bios
+from .responses import runit as get_responses
+

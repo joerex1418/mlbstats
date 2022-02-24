@@ -126,7 +126,7 @@ from .functions import get_video_link
 # from .utils import draw_strikezone
 # from .utils import simplify_time
 # from .utils import prettify_time
-# from .utils import default_season
+from .utils import default_season
 # from .utils import prepare_game_data
 # from .utils import curr_year as current_year
 
@@ -181,6 +181,73 @@ from .team import team_leaders
 # from .async_mlb import get_season_managers
 # from .async_mlb import get_league_responses
 
+from .async_mlb import get_responses
 
-# Data Objects =======
-from .functions import team
+def demo():
+    urls = []
+    years = range(1901,2022)
+    for year in years:
+        urls.append(f"https://statsapi.mlb.com/api/v1/teams/145?hydrate=standings&season={year}")
+    return get_responses(urls)
+
+def get_team_main_data(mlbam):
+    import pandas as pd
+    team = teams()
+    team = team[team['mlbam']==int(mlbam)]
+    firstYear = team.iloc[0]["firstYear"]
+
+    urls = []
+    years = range(firstYear,int(mlb.default_season())+1)
+    for year in years:
+        urls.append(f"https://statsapi.mlb.com/api/v1/teams/{mlbam}?hydrate=standings&season={year}")
+    urls.append(f"https://statsapi.mlb.com/api/v1/teams/{mlbam}/roster/allTime")
+    urls.append(f"https://statsapi.mlb.com/api/v1/awards/MLBHOF/recipients")
+    urls.append(f"https://statsapi.mlb.com/api/v1/awards/RETIREDUNI_{mlbam}/recipients")
+    resps = get_responses(urls)
+    all_players = resps[-3]
+    hof_players = resps[-2]
+    retired_numbers = resps[-1]
+
+    hof_data = []
+    for a in hof_players["awards"]:
+        if a.get("team",{}).get("id") == int(mlbam):
+            p = a.get("player")
+            hof_data.append([
+                a.get("season"),
+                a.get("date"),
+                p.get("id"),
+                p.get("nameFirstLast"),
+                p.get("primaryPosition",{}).get("abbreviation"),
+                a.get("votes",""),
+                a.get("notes","")
+            ])
+    hof_df = pd.DataFrame(data=hof_data,columns=['season','date','mlbam','name','pos','votes','notes'])
+
+    parsed_data = {
+        "all_players":all_players,
+        "hof":hof_df,
+        "retired_numbers":retired_numbers
+    }
+
+    return parsed_data
+
+
+
+sit_codes = "h,a,d,n,g,t,3,4,5,6,7,8,9,10,11,l,r,vl,vr,sah,sbh,sti,twn,tls,taw,tal,b1,b2,b3,b4,b5,b6,b7,b8,b9,lo,i01,i02,i03,i04,i05,i06,i07,i08,i09,ix,e,r0,r1,r2,r3,r12,r23,r123,ron,ron2,risp,risp2,o0,o1,o2,fp,ac,bc,ec,2s,fc,c00,c01,c02,c10,c11,c12,c20,c21,c22,c30,c31,c32"
+test_urls = [
+    f"https://statsapi.mlb.com/api/v1/people/547989/stats?stats=statSplits&season={2015}&group=hitting&sitCodes={sit_codes}",
+    f"https://statsapi.mlb.com/api/v1/people/547989/stats?stats=statSplits&season={2016}&group=hitting&sitCodes={sit_codes}",
+    f"https://statsapi.mlb.com/api/v1/people/547989/stats?stats=statSplits&season={2017}&group=hitting&sitCodes={sit_codes}",
+    f"https://statsapi.mlb.com/api/v1/people/547989/stats?stats=statSplits&season={2018}&group=hitting&sitCodes={sit_codes}",
+    f"https://statsapi.mlb.com/api/v1/people/547989/stats?stats=statSplits&season={2019}&group=hitting&sitCodes={sit_codes}",
+    f"https://statsapi.mlb.com/api/v1/people/547989/stats?stats=statSplits&season={2020}&group=hitting&sitCodes={sit_codes}",
+    f"https://statsapi.mlb.com/api/v1/people/547989/stats?stats=statSplits&season={2021}&group=hitting&sitCodes={sit_codes}",
+
+    f"https://statsapi.mlb.com/api/v1/people/547989/stats?stats=statSplits&season={2015}&group=fielding&sitCodes={sit_codes}",
+    f"https://statsapi.mlb.com/api/v1/people/547989/stats?stats=statSplits&season={2016}&group=fielding&sitCodes={sit_codes}",
+    f"https://statsapi.mlb.com/api/v1/people/547989/stats?stats=statSplits&season={2017}&group=fielding&sitCodes={sit_codes}",
+    f"https://statsapi.mlb.com/api/v1/people/547989/stats?stats=statSplits&season={2018}&group=fielding&sitCodes={sit_codes}",
+    f"https://statsapi.mlb.com/api/v1/people/547989/stats?stats=statSplits&season={2019}&group=fielding&sitCodes={sit_codes}",
+    f"https://statsapi.mlb.com/api/v1/people/547989/stats?stats=statSplits&season={2020}&group=fielding&sitCodes={sit_codes}",
+    f"https://statsapi.mlb.com/api/v1/people/547989/stats?stats=statSplits&season={2021}&group=fielding&sitCodes={sit_codes}",
+]

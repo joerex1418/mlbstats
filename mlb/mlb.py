@@ -253,10 +253,6 @@ class Player:
         """NOT YET CONFIGURED"""
         pass
 
-    def play_log(self):
-        """NOT YET CONFIGURED"""
-        pass
-
     def hitting_splits(self,year=curr_year):
         bat_splits = player.bbrefSplits(self.bbrefID,year,"b")
         return bat_splits
