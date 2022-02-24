@@ -96,14 +96,14 @@ from .functions import team_hitting_advanced
 from .functions import team_pitching_advanced
 from .functions import team_roster
 from .functions import team_game_logs
+from .functions import team_data
+from .functions import team_appearances
 from .functions import league_hitting
 from .functions import league_pitching
 from .functions import league_fielding
 from .functions import league_hitting_advanced
 from .functions import league_pitching_advanced
 from .functions import league_leaders
-from .functions import fetch_team_data
-from .functions import team_appearances
 
 player_batting = player_hitting
 team_batting = team_hitting

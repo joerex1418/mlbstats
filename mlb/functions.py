@@ -2017,7 +2017,7 @@ def team_roster(mlbam,season=None,rosterType=None,**kwargs) -> pd.DataFrame:
 
     return df
 
-def fetch_team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",**kwargs) -> dict:
+def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",**kwargs) -> dict:
     """Fetch various team season data & information for a team in one API call
 
     Parameters
@@ -2031,6 +2031,26 @@ def fetch_team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S
     rosterType : str
         specify the type of roster to retrieve (Default is "40Man")
 
+    ***
+
+    Keys for Franchise Data (all year-by-year data)
+    ---------------------------
+    "records"
+    "standings"
+    "hitting" 
+    "hitting_advanced"
+    "pitching"
+    "pitching_advanced"
+    "fielding"
+
+    Keys Team Data for specific year
+    -----------------------------------
+    "records"
+    "standings"
+    "roster_hitting"
+    "roster_pitching"
+    "roster_fielding"
+
     
     """
     
@@ -2043,6 +2063,7 @@ def fetch_team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S
     if season is None:
         single_season = False
     else:
+        single_season = True
         _season = season
     if statGroup is None:
         statGroup = 'hitting,pitching,fielding'
@@ -2183,12 +2204,11 @@ def fetch_team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S
         roster_fielding_df = pd.DataFrame(data=roster_field_data).rename(columns=STATDICT)[fld_cols]
 
         fetched_data = {
-            "season":_season,
-            "records":records,
-            "standings":standings,
-            "roster_hitting":roster_hitting_df,
-            "roster_pitching":roster_pitching_df,
-            "roster_fielding":roster_fielding_df
+            "records":records.reset_index(drop=True),
+            "standings":standings.reset_index(drop=True),
+            "roster_hitting":roster_hitting_df.reset_index(drop=True),
+            "roster_pitching":roster_pitching_df.reset_index(drop=True),
+            "roster_fielding":roster_fielding_df.reset_index(drop=True)
         }
 
 
@@ -2255,19 +2275,19 @@ def fetch_team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S
         field_df = pd.DataFrame(data=field_data).rename(columns=STATDICT)[fld_cols].sort_values(by="season",ascending=False)
 
         fetched_data = {
-            "records":records,
-            "standings":standings,
-            "hitting":hit_df,
-            "hitting_advanced":hit_adv_df,
-            "pitching":pitch_df,
-            "pitching_advanced":pitch_adv_df,
-            "fielding":field_df,
+            "records":records.reset_index(drop=True),
+            "standings":standings.reset_index(drop=True),
+            "hitting":hit_df.reset_index(drop=True),
+            "hitting_advanced":hit_adv_df.reset_index(drop=True),
+            "pitching":pitch_df.reset_index(drop=True),
+            "pitching_advanced":pitch_adv_df.reset_index(drop=True),
+            "fielding":field_df.reset_index(drop=True),
         }
 
     return fetched_data
 
 def team_appearances(mlbam):
-    gt_types = {'F':'wild_card','D':'division','L':'league_series','W':'world_series','P':'playoffs'}
+    gt_types = {'F':'wild_card_series','D':'division_series','L':'league_series','W':'world_series','P':'playoffs'}
     sort_orders = {'F':1,'D':2,'L':3,'W':4}
     with requests.session() as sesh:
         data = []
