@@ -15,5 +15,5 @@ setuptools.setup(
     },
     license='GPU',
     packages=setuptools.find_packages(where='/simplestats-mlb/',include=["mlb"]),
-    install_requires=['requests','pandas','beautifulsoup4','async','aiohttp'],
+    install_requires=['requests','pandas','beautifulsoup4','async','aiohttp','nest_asyncio'],
 )
