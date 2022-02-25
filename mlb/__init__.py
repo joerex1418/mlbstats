@@ -179,14 +179,14 @@ from .utils_team import team_leaders
 # from .async_mlb import get_season_managers
 # from .async_mlb import get_league_responses
 
-from .async_mlb import get_responses
+from .async_mlb import fetch
 
 def demo():
     urls = []
     years = range(1901,2022)
     for year in years:
         urls.append(f"https://statsapi.mlb.com/api/v1/teams/145?hydrate=standings&season={year}")
-    return get_responses(urls)
+    return fetch(urls)
 
 
 sit_codes = "h,a,d,n,g,t,3,4,5,6,7,8,9,10,11,l,r,vl,vr,sah,sbh,sti,twn,tls,taw,tal,b1,b2,b3,b4,b5,b6,b7,b8,b9,lo,i01,i02,i03,i04,i05,i06,i07,i08,i09,ix,e,r0,r1,r2,r3,r12,r23,r123,ron,ron2,risp,risp2,o0,o1,o2,fp,ac,bc,ec,2s,fc,c00,c01,c02,c10,c11,c12,c20,c21,c22,c30,c31,c32"

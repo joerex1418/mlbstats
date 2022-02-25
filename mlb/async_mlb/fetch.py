@@ -7,7 +7,7 @@ nest_asyncio.apply()
 import time
 # import pandas as pd
 
-async def get_responses(urls:list):
+async def fetch(urls:list):
     retrieved_responses = []
     async with aiohttp.ClientSession() as session:
         tasks = []
@@ -26,10 +26,10 @@ async def get_responses(urls:list):
 
 def runit(urls:list):
     start = time.time()
-    # retrieved = asyncio.run(get_responses(urls))
+    # retrieved = asyncio.run(fetch(urls))
 
     loop = asyncio.get_event_loop()
-    retrieved = loop.run_until_complete(get_responses(urls))
+    retrieved = loop.run_until_complete(fetch(urls))
     print(f"--- {time.time() - start } seconds ---")
 
     return retrieved

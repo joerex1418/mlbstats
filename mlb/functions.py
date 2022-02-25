@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup as bs
 from types import SimpleNamespace as ns
 
 from .async_mlb import get_leaders
-from .async_mlb import get_responses
+from .async_mlb import fetch
 
 # from .mlbdata import get_people_df
 from .mlbdata import get_season_info
@@ -2078,7 +2078,7 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
     "roster_fielding"
 
     """
-    
+    _mlbam = mlbam
 
     records = get_yby_records()
     records = records[records['tm_mlbam']==int(mlbam)]
@@ -2259,7 +2259,7 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
         urls.append(f"https://statsapi.mlb.com/api/v1/teams/{mlbam}/roster/allTime")                                        # all_players
         urls.append(f"https://statsapi.mlb.com/api/v1/awards/MLBHOF/recipients")                                            # hof_players
         urls.append(f"https://statsapi.mlb.com/api/v1/awards/RETIREDUNI_{mlbam}/recipients")                                # retired_numbers
-        resps = get_responses(urls)
+        resps = fetch(urls)
 
         yby_data = resps[:-5]
         team_info = resps[-5]
@@ -2436,7 +2436,7 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
         hof_data = []
 
         for a in hof_players["awards"]:
-            if str(a.get("team",{}).get("id")) == str(mlbam):
+            if str(a.get("team",{}).get("id")) == str(_mlbam):
                 p = a.get("player")
                 hof_data.append([
                     a.get("season"),

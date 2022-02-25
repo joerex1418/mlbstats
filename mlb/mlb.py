@@ -45,16 +45,7 @@ from .utils import default_season
 from .utils import game_str_display
 
 
-
-class _desc:
-    def __new__(cls,name,mlbam):
-        self = object.__new__(cls)
-        self.name = name
-        self.mlbam = mlbam
-        
-        return self
-
-class _team:
+class _team_names:
     def __new__(cls,full,**tm_keys):
         self = object.__new__(cls)
 
@@ -69,20 +60,56 @@ class _team:
     def __repr__(self):
         return self.full
 
+class _venue:
+    def __new__(cls,name,mlbam,**kwargs):
+        self = object.__new__(cls)
+
+        # might add "historic" properties for venue
+        self.__name = name
+        self.__mlbam = mlbam
+        self.__dict__.update(**kwargs)
+
+        return self
+    
+    @property
+    def name(self):
+        return self.__name
+    
+    @property
+    def mlbam(self):
+        return self.__mlbam
+    
+    
+
+
 class _stat_group:
     def __new__(cls,**stats_types):
         self = object.__new__(cls)
-        self.__dict__.update(stats_types)
+
+        self.__reg = stats_types.get("reg",pd.DataFrame())
+        self.__adv = stats_types.get("adv",pd.DataFrame())
 
         return self
 
-    def __str__(self):
-        stat_labels = list(self.__dict__.keys())
-        return "\n".join(stat_labels)
+    @property
+    def reg(self) -> pd.DataFrame:
+        """Regular stats"""
+        return self.__reg
+    
+    @property
+    def adv(self) -> pd.DataFrame:
+        """Advanced stats"""
+        return self.__adv
 
-    def __repr__(self):
-        stat_labels = list(self.__dict__.keys())
-        return "\n".join(stat_labels)
+    @property
+    def regular(self) -> pd.DataFrame:
+        """Regular stats"""
+        return self.__reg
+
+    @property
+    def advanced(self) -> pd.DataFrame:
+        """Advanced stats"""
+        return self.__adv
     
 
 class _standings:
@@ -95,11 +122,14 @@ class _standings:
     
     @property
     def records(self):
+        """Year-by-year season records"""
         return self.__records
     
     @property
     def splits(self):
+        """Year-by-year season record splits"""
         return self.__splits
+
 
 class _roster:
     def __new__(cls,**rosters):
@@ -188,19 +218,20 @@ class _roster:
         return self.__right
 
     @property
-    def right(self) -> pd.DataFrame:
-        """All Right Fielders"""
-        return self.__right
+    def infield(self) -> pd.DataFrame:
+        """All Infielders"""
+        return self.__infield
 
     @property
-    def right(self) -> pd.DataFrame:
-        """All Right Fielders"""
-        return self.__right
+    def outfield(self) -> pd.DataFrame:
+        """All Outfielders"""
+        return self.__outfield
     
     @property
     def active(self) -> pd.DataFrame:
         """All active players"""
-        return self.active
+        return self.__active
+
 
 class franchise:
     def __init__(self,mlbam):
@@ -219,11 +250,11 @@ class franchise:
         hof             = data["hof"]
         retired         = data["retired_numbers"]
 
-        self.temp = data["temp"]
+        # self.temp = data["temp"]
         
         ti = team_info
-        self.mlbam = ti['mlbam']
-        self.name = _team(
+        self.__mlbam = ti['mlbam']
+        self.__names = _team_names(
             full=ti['full_name'],
             location=ti['location_name'],
             franchise=ti['franchise_name'],
@@ -232,19 +263,26 @@ class franchise:
             short=ti['short_name']
             )
         
-        self.standings = _standings(
+        self.__venue = _venue(
+            name=ti['venue_name'],
+            mlbam=ti['venue_mlbam']
+        )
+        
+        self.__standings = _standings(
             records=records,
             splits=record_splits
             )
 
-        self.hitting = _stat_group(reg=hitting,regular=hitting,adv=hitting_adv,advanced=hitting_adv)
-        self.pitching = _stat_group(reg=pitching,regular=pitching,adv=pitching_adv,advanced=pitching_adv)
-        self.fielding = _stat_group(reg=fielding,regular=fielding)
+        self.__yby_data = yby_data
 
-        self.legends = hof
-        self.retired = retired
+        self.__hitting = _stat_group(reg=hitting,adv=hitting_adv)
+        self.__pitching = _stat_group(reg=pitching,adv=pitching_adv)
+        self.__fielding = _stat_group(reg=fielding)
 
-        self.roster = _roster(
+        self.__legends = hof
+        self.__retired = retired
+
+        self.__roster = _roster(
             all         = roster,
             pitcher     = roster[roster['pos']=='P'].reset_index(drop=True),
             catcher     = roster[roster['pos']=='C'].reset_index(drop=True),
@@ -260,7 +298,7 @@ class franchise:
             outfield    = roster[roster['pos'].isin(['OF','LF','CF','RF'])].reset_index(drop=True),
             active      = roster[roster['status']=='Active']
         )
-        
+
 
     def __str__(self):
         return f'<class mlb.franchise - {self.full} >'
@@ -268,10 +306,55 @@ class franchise:
     def __repr__(self):
         return f'<class mlb.franchise> - {self.full}'
 
+    @property
+    def mlbam(self) -> int:
+        """Team's MLB Advanced Media ID"""
+        return int(self.__mlbam)
 
-    def keys(self):
-        first_layer = list(self.__dict__.keys())
-        return first_layer
+    @property
+    def names(self):
+        """Various names team names/aliases"""
+        return self.__names
+    
+    @property
+    def venue(self):
+        return self.__venue
+
+    @property
+    def standings(self):
+        """standings (records, record splits)"""
+        return self.__standings
+
+    @property
+    def raw_data(self):
+        return self.__yby_data
+
+    @property
+    def hitting(self):
+        return self.__hitting
+
+    @property
+    def pitching(self):
+        return self.__pitching
+
+    @property
+    def fielding(self):
+        return self.__fielding
+
+    @property
+    def roster(self):
+        """Roster data"""
+        return self.__roster
+
+    @property
+    def retired(self) -> pd.DataFrame:
+        """Retired numbers"""
+        return self.__retired
+
+    @property
+    def legends(self) -> pd.DataFrame:
+        return self.__legends
+
 
 
 class Player:
