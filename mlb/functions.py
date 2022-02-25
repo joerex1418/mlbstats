@@ -2269,7 +2269,9 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
         retired_numbers = resps[-1]
 
         # ---- Parsing 'team_info' --------- team_info_parsed
-        #       Includes basic team information and recent/upcoming schedule information
+
+        #        Includes basic team information and recent/upcoming schedule information
+
         team_info_parsed = {}
         teams = team_info["teams"][0]
         team_info_parsed["mlbam"]               = teams["id"]
@@ -2406,8 +2408,7 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
             'jersey_number',
             'pos',
             'status',
-            'status_code'
-            ]
+            'status_code']
         rost_data = []
 
         for p in all_players["roster"]:
@@ -2433,8 +2434,9 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
 
         # ---- Parsing 'hof_players' --------
         hof_data = []
+
         for a in hof_players["awards"]:
-            if a.get("team",{}).get("id") == int(mlbam):
+            if str(a.get("team",{}).get("id")) == str(mlbam):
                 p = a.get("player")
                 hof_data.append([
                     a.get("season"),
@@ -2464,8 +2466,8 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
         retired_numbers_df = pd.DataFrame(data=retired_numbers_data,columns=['season','date','number','mlbam','name','pos'])
 
         fetched_data = {
-            "records":records.reset_index(drop=True),
-            "standings":standings.reset_index(drop=True),
+            "record_splits":records.reset_index(drop=True),
+            "records":standings.reset_index(drop=True),
             "yby_data":yby_data,
             "team_info":team_info_parsed,
             "hitting":hit_df.reset_index(drop=True),
@@ -2475,7 +2477,8 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
             "fielding":field_df.reset_index(drop=True),
             "all_players":all_players_df,
             "hof":hof_df,
-            "retired_numbers":retired_numbers_df
+            "retired_numbers":retired_numbers_df,
+            "temp":hof_players,
         }
 
     return fetched_data

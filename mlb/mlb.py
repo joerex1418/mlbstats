@@ -20,6 +20,8 @@ from .mlbdata import get_yby_records
 # from .mlbdata import get_teams_df
 # from .mlbdata import get_seasons_df
 
+from types import GenericAlias
+
 from .constants import BASE
 from .constants import POSITION_DICT
 # from .constants import BBREF_ENDPOINTS
@@ -52,7 +54,7 @@ class _desc:
         
         return self
 
-class _team_namespace:
+class _team:
     def __new__(cls,full,**tm_keys):
         self = object.__new__(cls)
 
@@ -83,21 +85,129 @@ class _stat_group:
         return "\n".join(stat_labels)
     
 
-class _records:
+class _standings:
     def __new__(cls,records,splits=None):
         self = object.__new__(cls)
-        self.overview = records
-        self.splits = splits
+        self.__records = records
+        self.__splits = splits
 
         return self
-        
+    
+    @property
+    def records(self):
+        return self.__records
+    
+    @property
+    def splits(self):
+        return self.__splits
+
+class _roster:
+    def __new__(cls,**rosters):
+        self = object.__new__(cls)
+        # self.__dict__.update(rosters)
+        self.__all      = rosters["all"]
+        self.__pitcher  = rosters["pitcher"]
+        self.__catcher  = rosters["catcher"]
+        self.__first    = rosters["first"]
+        self.__second   = rosters["second"]
+        self.__third    = rosters["third"]
+        self.__short    = rosters["short"]
+        self.__left     = rosters["left"]
+        self.__center   = rosters["center"]
+        self.__right    = rosters["right"]
+        self.__dh       = rosters["dh"]
+        self.__infield  = rosters['infield']
+        self.__outfield = rosters['outfield']
+        self.__active   = rosters['active']
+
+        return self
+    
+    def __get__(self):
+        return self.all
+
+    def __getitem__(self,__attr) -> pd.DataFrame:
+        return getattr(self,__attr)
+    
+    def __len__(self) -> int:
+        return len(self.all)
+
+    def __call__(self,_pos=None) -> pd.DataFrame:
+        df = self.all
+        if _pos is not None:
+            df = df[df['pos']==_pos]
+        return df
+
+    @property
+    def all(self) -> pd.DataFrame:
+        """Alltime Roster"""
+        return self.__all
+
+    @property
+    def pitcher(self) -> pd.DataFrame:
+        """All Pitchers"""
+        return self.__pitcher
+
+    @property
+    def catcher(self) -> pd.DataFrame:
+        """All Catchers"""
+        return self.__catcher
+
+    @property
+    def first(self) -> pd.DataFrame:
+        """All First Basemen"""
+        return self.__first
+
+    @property
+    def second(self) -> pd.DataFrame:
+        """All Second Basemen"""
+        return self.__second
+
+    @property
+    def third(self) -> pd.DataFrame:
+        """All Third Basemen"""
+        return self.__third
+
+    @property
+    def short(self) -> pd.DataFrame:
+        """All Shortstops"""
+        return self.__short
+
+    @property
+    def left(self) -> pd.DataFrame:
+        """All Left Fielders"""
+        return self.__left
+
+    @property
+    def center(self) -> pd.DataFrame:
+        """All Center Fielders"""
+        return self.__center
+
+    @property
+    def right(self) -> pd.DataFrame:
+        """All Right Fielders"""
+        return self.__right
+
+    @property
+    def right(self) -> pd.DataFrame:
+        """All Right Fielders"""
+        return self.__right
+
+    @property
+    def right(self) -> pd.DataFrame:
+        """All Right Fielders"""
+        return self.__right
+    
+    @property
+    def active(self) -> pd.DataFrame:
+        """All active players"""
+        return self.active
 
 class franchise:
     def __init__(self,mlbam):
         data = team_data(mlbam)
 
-        standings       = data["standings"]
-        records         = data["records"] # like standings splits
+        records         = data["records"]
+        record_splits   = data["record_splits"] # like standings splits
         yby_data        = data["yby_data"]
         team_info       = data["team_info"]
         hitting         = data["hitting"]
@@ -105,13 +215,15 @@ class franchise:
         pitching        = data["pitching"]
         pitching_adv    = data["pitching_advanced"]
         fielding        = data["fielding"]
-        all_players     = data["all_players"]
+        roster          = data["all_players"]
         hof             = data["hof"]
         retired         = data["retired_numbers"]
+
+        self.temp = data["temp"]
         
         ti = team_info
         self.mlbam = ti['mlbam']
-        self.name = _team_namespace(
+        self.name = _team(
             full=ti['full_name'],
             location=ti['location_name'],
             franchise=ti['franchise_name'],
@@ -120,21 +232,35 @@ class franchise:
             short=ti['short_name']
             )
         
-        self.records = _records(
-            records=standings,
-            splits=records
+        self.standings = _standings(
+            records=records,
+            splits=record_splits
             )
 
-        self.standings = self.records
-        self.hitting = _stat_group(reg=hitting,adv=hitting_adv)
-        self.pitching = _stat_group(reg=pitching,adv=pitching_adv)
-        self.fielding = _stat_group(reg=fielding)
+        self.hitting = _stat_group(reg=hitting,regular=hitting,adv=hitting_adv,advanced=hitting_adv)
+        self.pitching = _stat_group(reg=pitching,regular=pitching,adv=pitching_adv,advanced=pitching_adv)
+        self.fielding = _stat_group(reg=fielding,regular=fielding)
 
+        self.legends = hof
         self.retired = retired
 
-        self.hall_of_fame = hof
-        self.legends = self.hall_of_fame
-        self.hof = self.hall_of_fame
+        self.roster = _roster(
+            all         = roster,
+            pitcher     = roster[roster['pos']=='P'].reset_index(drop=True),
+            catcher     = roster[roster['pos']=='C'].reset_index(drop=True),
+            first       = roster[roster['pos']=='1B'].reset_index(drop=True),
+            second      = roster[roster['pos']=='2B'].reset_index(drop=True),
+            third       = roster[roster['pos']=='3B'].reset_index(drop=True),
+            short       = roster[roster['pos']=='SS'].reset_index(drop=True),
+            left        = roster[roster['pos']=='LF'].reset_index(drop=True),
+            center      = roster[roster['pos']=='CF'].reset_index(drop=True),
+            right       = roster[roster['pos']=='RF'].reset_index(drop=True),
+            dh          = roster[roster['pos']=='DH'].reset_index(drop=True),
+            infield     = roster[roster['pos'].isin(['1B','2B','3B','SS'])].reset_index(drop=True),
+            outfield    = roster[roster['pos'].isin(['OF','LF','CF','RF'])].reset_index(drop=True),
+            active      = roster[roster['status']=='Active']
+        )
+        
 
     def __str__(self):
         return f'<class mlb.franchise - {self.full} >'
