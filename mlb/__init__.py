@@ -60,7 +60,7 @@ Data
 
 from .mlb import Player
 from .mlb import Team
-from .mlb import Franchise
+from .mlb import franchise
 from .mlb import League
 from .mlb import Game
 
@@ -111,7 +111,6 @@ team_batting = team_hitting
 from .functions import game_highlights
 from .functions import get_video_link
 
-
 # from .constants import STATDICT
 
 # from .utils import utc_zone
@@ -145,7 +144,6 @@ from .mlbdata import get_teams_df as teams
 from .mlbdata import get_people_df as people
 from .mlbdata import get_venues_df as venues
 from .mlbdata import get_seasons_df as seasons
-from .mlbdata import get_franchise_df as franchise
 from .mlbdata import get_standings_df as standings
 from .mlbdata import get_yby_records as yby_records
 from .mlbdata import get_hall_of_fame as hall_of_fame
@@ -168,7 +166,7 @@ from .transactions import prospects as get_prospects
 from .transactions import free_agents as get_free_agents
 from .transactions import transactions as get_transactions
 
-from .team import team_leaders
+from .utils_team import team_leaders
 
 # from .league import leaders_players
 # from .league import stats_and_standings

@@ -43,3 +43,42 @@ For consideration:
     https://statsapi.mlb.com/api/v1/sports/1/players?season=2021
     https://statsapi.mlb.com/api/v1/game/632265/feed/color
     https://statsapi.mlb.com/api/v1.1/game/632265/feed/live/diffPatch?startTimecode=20211003_002205&endTimecode=20211003_002249
+
+
+
+class StatsAPI:
+    class stats:
+        pass
+
+    class people:
+        def __new__(cls,mlbam):
+            self = object.__new__(cls)
+            self.mlbam = mlbam
+            return self
+
+        def info(self):
+            url = BASE + f"/people/{self.mlbam}"
+            resp = requests.get(url)
+            return resp.json()
+
+        def stats(self,statType,statGroup,season=None,**kwargs):
+            
+            if season is not None:
+                season = default_season()
+            params = {
+                "stats":statType,
+                "group":statGroup,
+                "season":season
+            }
+            url = BASE + f"/people/{self.mlbam}/stats"
+            resp = requests.get(url,params)
+            return resp.json()
+
+    class team:
+        pass
+
+    class teams:
+        pass
+
+    class standings:
+        pass

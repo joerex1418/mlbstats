@@ -5,12 +5,13 @@ import datetime as dt
 # from bs4 import BeautifulSoup as bs
 
 from . import player
-from . import team
-from . import franchise
+from . import utils_team
 from . import league
 
 # from .async_mlb import get_leaders
 from .async_mlb import get_team_responses
+
+from .functions import team_data
 
 from .mlbdata import get_people_df
 from .mlbdata import get_yby_records
@@ -41,7 +42,112 @@ from .utils import prettify_time
 from .utils import default_season
 from .utils import game_str_display
 
- 
+
+
+class _desc:
+    def __new__(cls,name,mlbam):
+        self = object.__new__(cls)
+        self.name = name
+        self.mlbam = mlbam
+        
+        return self
+
+class _team_namespace:
+    def __new__(cls,full,**tm_keys):
+        self = object.__new__(cls)
+
+        self.full = full
+        self.__dict__.update(tm_keys)
+
+        return self
+    
+    def __str__(self):
+        return self.full
+    
+    def __repr__(self):
+        return self.full
+
+class _stat_group:
+    def __new__(cls,**stats_types):
+        self = object.__new__(cls)
+        self.__dict__.update(stats_types)
+
+        return self
+
+    def __str__(self):
+        stat_labels = list(self.__dict__.keys())
+        return "\n".join(stat_labels)
+
+    def __repr__(self):
+        stat_labels = list(self.__dict__.keys())
+        return "\n".join(stat_labels)
+    
+
+class _records:
+    def __new__(cls,records,splits=None):
+        self = object.__new__(cls)
+        self.overview = records
+        self.splits = splits
+
+        return self
+        
+
+class franchise:
+    def __init__(self,mlbam):
+        data = team_data(mlbam)
+
+        standings       = data["standings"]
+        records         = data["records"] # like standings splits
+        yby_data        = data["yby_data"]
+        team_info       = data["team_info"]
+        hitting         = data["hitting"]
+        hitting_adv     = data["hitting_advanced"]
+        pitching        = data["pitching"]
+        pitching_adv    = data["pitching_advanced"]
+        fielding        = data["fielding"]
+        all_players     = data["all_players"]
+        hof             = data["hof"]
+        retired         = data["retired_numbers"]
+        
+        ti = team_info
+        self.mlbam = ti['mlbam']
+        self.name = _team_namespace(
+            full=ti['full_name'],
+            location=ti['location_name'],
+            franchise=ti['franchise_name'],
+            mascot=ti['team_name'],
+            club=ti['club_name'],
+            short=ti['short_name']
+            )
+        
+        self.records = _records(
+            records=standings,
+            splits=records
+            )
+
+        self.standings = self.records
+        self.hitting = _stat_group(reg=hitting,adv=hitting_adv)
+        self.pitching = _stat_group(reg=pitching,adv=pitching_adv)
+        self.fielding = _stat_group(reg=fielding)
+
+        self.retired = retired
+
+        self.hall_of_fame = hof
+        self.legends = self.hall_of_fame
+        self.hof = self.hall_of_fame
+
+    def __str__(self):
+        return f'<class mlb.franchise - {self.full} >'
+
+    def __repr__(self):
+        return f'<class mlb.franchise> - {self.full}'
+
+
+    def keys(self):
+        first_layer = list(self.__dict__.keys())
+        return first_layer
+
+
 class Player:
     """
     # Player
@@ -291,7 +397,7 @@ class Team:
         if season is None:
             season = default_season()
 
-        self.__info             = team.team(teamID,season)
+        self.__info             = utils_team.team(teamID,season)
         self.__year             = season
         self.__team_df          = self.__info["team_df"]
         self.__franchise_df     = self.__info["franchise_df"]
@@ -516,7 +622,7 @@ class Team:
     def team_splits(self,season=None,s_type="b"):
         if season is None:
             season = self.__year
-        return team.bbrefSplits(self.__bbrefID,season=season,s_type=s_type)
+        return utils_team.bbrefSplits(self.__bbrefID,season=season,s_type=s_type)
 
     def transactions(self):
         df = self.__transactions
@@ -653,163 +759,6 @@ class Team:
         non_active = df[df["status"]!="Active"]
         df = pd.concat([active,non_active])
         return df
-
-
-class Franchise:
-    """
-    # Franchise
-
-    teamID : str | int
-        Team's official MLB ID
-    """
-    def __init__(self,teamID):
-        _info = franchise.franchise_info(teamID)
-
-        self.__franchise_df      = _info["franchise_df"]
-        self.firstYear           = _info["firstYear"]
-        self.recentYear          = _info["recentYear"]
-        self.fullName            = _info["fullName"]
-        self.locationName        = _info["locationName"]
-        self.clubName            = _info["clubName"]
-        self.mlbam               = _info["mlbam"]
-        self.franchID            = _info["franchID"]
-        self.bbrefID             = _info["bbrefID"]
-        self.retroID             = _info["retroID"]
-        self.fileCode            = _info["fileCode"]
-        self.__lgDiv             = _info["lgDiv"]
-        self.curr_venue_mlbam  = _info["venueCurrent_mlbam"]
-        self.__venueList         = _info["venueList"]
-        self.venues            = _info["venueDict"]
-
-        self.__ybyRecords        = franchise.franchise_records(teamID)
-        self.__ybyStats          = franchise.franchise_stats(self.mlbam)
-
-        self.__total_GP          = self.__ybyRecords.G.astype("int").sum()
-        self.__total_wins        = self.__ybyRecords.W.astype("int").sum()
-        self.__total_losses      = self.__ybyRecords.L.astype("int").sum()
-        self.gp                  = self.__total_GP
-        self.w                   = self.__total_wins
-        self.l                   = self.__total_losses
-
-        # self.__postseason_appearances = _info["postseason_appearances"] # postseason appearance function is WIP
-
-        self.__attrs = {
-            "franchise":        self.__franchise_df,
-            "firstyear":        self.firstYear,
-            "recentyear":       self.recentYear,
-            "fullname":         self.fullName,
-            "locationname":     self.locationName,
-            "clubname":         self.clubName,
-            "mlbam":            self.mlbam,
-            "franchid":         self.franchID,
-            "bbrefid":          self.bbrefID,
-            "retroid":          self.retroID,
-            "filecode":         self.fileCode,
-            "league":           self.__lgDiv,
-            "venue_mlbam":      self.curr_venue_mlbam,
-            "venues":           self.venues,
-            "gp":               self.__total_GP,
-            "gamesplayed":      self.__total_GP,
-            "games_played":     self.__total_GP,
-            "wins":             self.__total_wins,
-            "w":                self.__total_wins,
-            "losses":           self.__total_losses,
-            "l":                self.__total_losses,
-        }
-    
-    def __repr__(self) -> str:
-        return f"""<SimpleStats Franchise - '{self.fullName}' | mlbam ID: '{self.mlbam}' | baseball-reference ID: '{self.bbrefID}' | years: '{self.firstYear} - {self.recentYear}'>"""
-
-    def __getitem__(self,item):
-        return getattr(item)
-
-    def info(self):
-        numYears = self.recentYear - self.firstYear+1
-        activeYears = f"{self.firstYear} - {self.recentYear}"
-        games_played = self.__total_GP
-        wins = self.__total_wins
-        losses = self.__total_losses
-        venues = self.venues
-        return {"numYears":numYears,"activeYears":activeYears,"gamesPlayed":games_played,"totalWins":wins,"totalLosses":losses,"venues":venues}
-
-    def ybyRecords(self,return_type="df"):
-        if return_type == "df":
-            return self.__ybyRecords.reset_index(drop=True)
-        elif return_type == "prefmt":
-            # return tabulate(self.__ybyRecords.reset_index(drop=False),"keys","simple",numalign="center",stralign="left")
-            pass
-
-    def ybyStats(self,group,combined=True,return_type="df"):
-        """Doc string needed"""
-        if group.lower() not in ("hitting","hittingadv","pitching","pitchingadv","fielding"):
-            print(f"get value, '{group}' not a valid parameter")
-            return None
-
-        if combined is False:
-            return self.__ybyStats[group]
-
-        if "hitting" in group.lower():
-            reg_df = self.__ybyStats["hitting"].set_index("Season",drop=False)
-            adv_df = self.__ybyStats["hittingAdv"].set_index("Season")
-            combined = reg_df.join(adv_df)
-            combined = combined.reset_index(drop=True)
-        elif "pitching" in group.lower():
-            reg_df = self.__ybyStats["pitching"].set_index("Season",drop=False)
-            adv_df = self.__ybyStats["pitchingAdv"].set_index("Season")
-            combined = reg_df.join(adv_df)
-            combined = combined.reset_index(drop=True)
-        elif "fielding" in group.lower():
-            combined = self.__ybyStats["fielding"]
-        else:
-            print("Options are 'hitting', 'pitching' or 'fielding'")
-            return None
-        if return_type == "df":
-            return combined
-        elif return_type == "prefmt":
-            # return tabulate(combined,"keys","simple",numalign="center",stralign="left",showindex=False)
-            pass
-        elif return_type == "html":
-            return combined
-
-    def playoffHistory(self):
-        pass # postseason appearance function is WIP
-        # return self.__postseason_appearances
-
-    def mlbam(self):
-        return self.mlbam
-
-    def franchID(self):
-        return self.franchID
-
-    def fullName(self,year=None):
-        if year is None:
-            return self.fullName
-        else:
-            return self.__franchise_df[self.__franchise_df["yearID"]==year]["fullName"].item()
-
-    def locationName(self,year=None):
-        if year is None:
-            return self.locationName
-        else:
-            return self.__franchise_df[self.__franchise_df["yearID"]==year]["locationName"].item()
-
-    def clubName(self,year=None):
-        if year is None:
-            return self.clubName
-        else:
-            return self.__franchise_df[self.__franchise_df["yearID"]==year]["clubName"].item()
-
-    def bbrefID(self,year=None):
-        if year is None:
-            return self.bbrefID
-        else:
-            return self.__franchise_df[self.__franchise_df["yearID"]==year]["bbrefID"].item()
-
-    def retroID(self,year=None):
-        if year is None:
-            return self.retroID
-        else:
-            return self.__franchise_df[self.__franchise_df["yearID"]==year]["retroID"].item()
 
 
 class League:
@@ -3331,39 +3280,3 @@ class Game:
         pass
     
 
-class StatsAPI:
-    class stats:
-        pass
-
-    class people:
-        def __new__(cls,mlbam):
-            self = object.__new__(cls)
-            self.mlbam = mlbam
-            return self
-
-        def info(self):
-            url = BASE + f"/people/{self.mlbam}"
-            resp = requests.get(url)
-            return resp.json()
-
-        def stats(self,statType,statGroup,season=None,**kwargs):
-            
-            if season is not None:
-                season = default_season()
-            params = {
-                "stats":statType,
-                "group":statGroup,
-                "season":season
-            }
-            url = BASE + f"/people/{self.mlbam}/stats"
-            resp = requests.get(url,params)
-            return resp.json()
-
-    class team:
-        pass
-
-    class teams:
-        pass
-
-    class standings:
-        pass
