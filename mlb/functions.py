@@ -1346,7 +1346,7 @@ def player_stats(mlbam,statGroup,statType,season=None,**kwargs) -> pd.DataFrame:
 
     return df
 
-def player_data(mlbam) -> dict[pd.DataFrame]:
+def player_data(*mlbams,season=None) -> dict[pd.DataFrame]:
     """Fetch a variety of player information/stats in one API call
 
     Parameters
@@ -1366,9 +1366,24 @@ def player_data(mlbam) -> dict[pd.DataFrame]:
     "pitching"
     "pitching_advanced"
     "fielding"
-
     
     """
+    url_list = []
+    if season is not None:
+        statType = "season,seasonAdvanced"
+        seasonQuery = f"&season={season}"
+    else:
+        statType = "career,careerAdvanced"
+        seasonQuery = ""
+
+    statGroup = "hitting,pitching,fielding"
+    for _mlbam in mlbams:
+        url_list.append(BASE + f"/people/{_mlbam}/stats?stats={statType}&group={statGroup}{seasonQuery}")
+        
+    
+    responses = fetch(url_list)
+
+    return responses
 
 def player_search(name,sportId=1,**kwargs):
     """Search for a person using the API by name

@@ -42,13 +42,17 @@ def player(playerID) -> dict:
         mlbam = int(player_df["mlbam"])
         retroID = player_df["retroID"]
         bbrefIDminors = player_df["bbrefIDminors"]
+
     statTypes = "career,careerAdvanced,yearByYear,yearByYearAdvanced,pitchArsenal"
     sitCodes = "[h,a]"
     statGroups = "hitting,fielding,pitching"
     hydrate = f"stats(type=[{statTypes}],group=[{statGroups}],gameType=[R,P],sitCodes={sitCodes}),rosterEntries,education,xrefId,draft,awards,transactions"
     url = BASE + f"/people?personIds={mlbam}&hydrate={hydrate}"
+    print("")
+    print(url)
+    print("")
     playerPage = requests.get(url).json()
-    
+
     player = playerPage["people"][0]
     
     primaryPosition = player["primaryPosition"]["abbreviation"]

@@ -19,7 +19,7 @@ async def fetch(urls:list):
         
         for response in responses:
             
-            resp = await response.json()
+            resp = await response.text()
 
             retrieved_responses.append(resp)
         

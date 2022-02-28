@@ -60,6 +60,7 @@ class _team_names:
     def __repr__(self):
         return self.full
 
+
 class _venue:
     def __new__(cls,name,mlbam,**kwargs):
         self = object.__new__(cls)
@@ -80,8 +81,6 @@ class _venue:
         return self.__mlbam
     
     
-
-
 class _stat_group:
     def __new__(cls,**stats_types):
         self = object.__new__(cls)
