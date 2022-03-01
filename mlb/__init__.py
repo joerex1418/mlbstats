@@ -57,12 +57,12 @@ Data
 - broadcasts
 
 """
-
-from .mlb import Player
-from .mlb import Team
-from .mlb import franchise
-from .mlb import League
-from .mlb import Game
+from .classes import player
+from .classes import Player
+from .classes import Team
+from .classes import franchise
+from .classes import League
+from .classes import Game
 
 from .functions import play_search
 from .functions import pitch_search
@@ -182,6 +182,10 @@ from .utils_team import team_leaders
 
 from .async_mlb import fetch
 from .async_mlb import fetch_text
+
+
+
+
 
 def demo():
     urls = []

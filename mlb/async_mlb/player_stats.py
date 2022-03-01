@@ -32,6 +32,8 @@ async def parse_data(response,idx,mlbam):
     pass
 
 async def get_player_responses(mlbam,season):
+    """** deprecated **
+    """
     parsed_data = []
 
     statTypes = "season,seasonAdvanced"

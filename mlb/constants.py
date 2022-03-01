@@ -725,7 +725,7 @@ STATDICT = {
             'postSeasonEndDate':'Post-Season End',
             'seasonStartDate':'Season Start',
             'seasonEndDate':'Season End',
-            "season":"Season",
+            "season":"season",
             "runsScored":"R",
             "runsAllowed":"RA",
             "runDifferential":"RunDiff",
@@ -736,6 +736,8 @@ STATDICT = {
             "sportGamesBack":"GB",
             "League":"Lg",
             "Division":"Div",
+            "bequeathedRunners":"BQ",
+            "bequeathedRunnersScored":"BQS",
             103:"AL",
             104:"NL",
             200:"AL West",
@@ -773,9 +775,9 @@ STATDICT = {
             "earned_run_avg":"ERA",
             "pitches":"Pitch Ct",
             "split_group":"split_group",
-            'season':"Season",
+            'season':"season",
             'tm_mlbam':"tm_mlbam",
-            'tm_name':"Team", 
+            'tm_name':"tm_name", 
             'tm_bbrefID':"tm_bbrefID",
             'lg_mlbam':"lg_mlbam",
             'lg_abbrv':"League",
@@ -838,7 +840,15 @@ STATDICT = {
             "eventType":"eventType"
             }
 
-BAT_FIELDS = (
+COLS_HIT = ['G','GO','AO','R','2B','3B','HR','SO','BB','IBB','H','HBP','AVG','AB','OBP','SLG','OPS','CS','SB','SB%','GIDP','P','PA','TB','RBI','LOB','sB','sF','BABIP','GO/AO','CI','AB/HR']
+COLS_HIT_ADV = ['PA','TB','LOB','sB','sF','BABIP','exBH','HBP','GIDP','GIDPO','P','P/PA','BB/PA','SO/PA','HR/PA','BB/SO','ISO','ROE','WO','FO','TS','Whiffs','BIP','PO','LO','GO','FH','PH','LH','GH']
+COLS_PIT = ['G','GS','GO','AO','R','2B','3B','HR','SO','BB','IBB','H','HBP','AVG','AB','OBP','SLG','OPS','CS','SB','SB%','GIDP','P','ERA','IP','W','L','SV','SVO','HLD','BS','ER','WHIP','BF','O','GP','CG','ShO','K','K%','HB','BK','WP','PK','TB','GO/AO','W%','P/Inn','GF','SO:BB','SO/9','BB/9','H/9','R/9','HR/9','IR','IRS','CI','sB','sF']
+COLS_PIT_ADV = ['W%','R/9','BF','BABIP','OBP','SLG','OPS','SO/9','BB/9','HR/9','H/9','SO:BB','IR','IRS','BQ','BQS','SB','CS','QS','GF','2B','3B','GIDP','GIDPO','WP','BK','PK','TS','Whiffs','BIP','RS','K%','P/Inn','P/PA','BB/PA','SO/PA','HR/PA','BB/SO','ISO','FO','PO','LO','GO','FH','PH','LH','GH']
+COLS_FLD = ['A','PO','E','Ch','FLD%','position','RF/G','RF/9','INNs','G','GS','DP','TP','thE']
+W_SEASON = ['season','game_type','tm_mlbam','tm_name','lg_mlbam','lg_name']
+WO_SEASON = ['game_type','tm_mlbam','tm_name','lg_mlbam','lg_name']
+
+BAT_FIELDS = [
     'gamesPlayed',
     'atBats',
     'plateAppearances',
@@ -869,9 +879,9 @@ BAT_FIELDS = (
     'sacBunts',
     'sacFlies',
     'catchersInterference',
-    'atBatsPerHomeRun')
+    'atBatsPerHomeRun']
 
-BAT_FIELDS_ADV = (
+BAT_FIELDS_ADV = [
     "totalSwings",
     "swingAndMisses",
     "ballsInPlay",
@@ -894,8 +904,9 @@ BAT_FIELDS_ADV = (
     "flyHits",
     "popHits",
     "lineHits"
-        )
-PITCH_FIELDS = (
+]
+
+PITCH_FIELDS = [
     'gamesPitched',
     'gamesStarted',
     'gamesFinished',
@@ -953,8 +964,8 @@ PITCH_FIELDS = (
     'homeRunsPer9',
     'catchersInterference',
     'inheritedRunners',
-    'inheritedRunnersScored')
-PITCH_FIELDS_ADV = (
+    'inheritedRunnersScored']
+PITCH_FIELDS_ADV = [
     'babip',
     'qualityStarts',
     'gidp',
@@ -976,8 +987,8 @@ PITCH_FIELDS_ADV = (
     'groundHits',
     'flyHits',
     'popHits',
-    'lineHits')
-FIELD_FIELDS = (
+    'lineHits']
+FIELD_FIELDS = [
     "games",
     "gamesStarted",
     "innings",
@@ -990,9 +1001,9 @@ FIELD_FIELDS = (
     "rangeFactorPer9Inn",
     "doublePlays",
     "triplePlays",
-    "fielding")
+    "fielding"]
 
-YBY_BAT_FIELDS = (
+YBY_BAT_FIELDS = [
     'gamesPlayed',
     'atBats',
     'plateAppearances',
@@ -1012,9 +1023,9 @@ YBY_BAT_FIELDS = (
     'slg',
     'ops',
     'sacBunts',
-    'sacFlies')
+    'sacFlies']
 
-YBY_BAT_FIELDS_ADV = (
+YBY_BAT_FIELDS_ADV = [
     'totalSwings',
     'swingAndMisses',
     'babip',
@@ -1028,9 +1039,9 @@ YBY_BAT_FIELDS_ADV = (
     'groundHits',
     'flyHits',
     'popHits',
-    'lineHits')
+    'lineHits']
 
-YBY_PITCH_FIELDS = (
+YBY_PITCH_FIELDS = [
     'gamesPitched',
     'wins',
     'losses',
@@ -1057,9 +1068,9 @@ YBY_PITCH_FIELDS = (
     'stolenBasePercentage',
     'strikes',
     'strikePercentage',
-    'wildPitches')
+    'wildPitches']
 
-YBY_PITCH_FIELDS_ADV = (
+YBY_PITCH_FIELDS_ADV = [
     'totalSwings',
     'swingAndMisses',
     'groundOuts',
@@ -1069,9 +1080,9 @@ YBY_PITCH_FIELDS_ADV = (
     'groundHits',
     'flyHits',
     'popHits',
-    'lineHits')
+    'lineHits']
 
-YBY_FIELD_FIELDS = (
+YBY_FIELD_FIELDS = [
     "games",
     "gamesStarted",
     "innings",
@@ -1084,9 +1095,9 @@ YBY_FIELD_FIELDS = (
     "rangeFactorPer9Inn",
     "doublePlays",
     "triplePlays",
-    "fielding")
+    "fielding"]
   
-ybyPerformance_fields = (
+ybyPerformance_fields = [
     "gamesPlayed",
     "wins",
     "losses",
@@ -1095,7 +1106,7 @@ ybyPerformance_fields = (
     "runsAllowed",
     "runDifferential",
     "leagueRank",
-    "divisionRank")
+    "divisionRank"]
 
 staff_dict = {
     'Assistant Catching Coach': 'Coaches',

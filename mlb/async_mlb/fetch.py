@@ -27,12 +27,13 @@ async def fetch(urls:list):
     
     return retrieved_responses
 
-def runit(urls:list):
+def runit(urls:list,**kwargs):
     start = time.time()
     # retrieved = asyncio.run(fetch(urls))
 
     loop = asyncio.get_event_loop()
     retrieved = loop.run_until_complete(fetch(urls))
-    print(f"--- {time.time() - start } seconds ---")
+    if kwargs.get("_log") is True:
+        print(f"--- {time.time() - start } seconds ---")
 
     return retrieved

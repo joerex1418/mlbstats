@@ -19,7 +19,7 @@ from .constants import bbref_hit_log_fields
 from .constants import bbref_pitch_log_fields
 from .constants import bbref_field_log_fields
 from .constants import BBREF_SPLITS
-from .constants import sitCodes
+# from .constants import sitCodes
 
 from .utils import curr_year
 
