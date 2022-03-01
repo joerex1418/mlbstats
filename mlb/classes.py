@@ -504,9 +504,9 @@ class player:
         )
 
     @property
-    def bio(self):
+    def bio(self) -> list[str]:
         """Player bio (from Baseball-Reference Bullpen Page"""
-        return int(self.__bio)
+        return self.__bio
 
     @property
     def name(self):

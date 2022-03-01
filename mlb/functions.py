@@ -61,11 +61,10 @@ async def _parse_player_data(data,session):
     if type(data) is dict:
         return data
     else:
-        start_time_bio = time.time()
         soup = bs(data,'lxml',parse_only=SoupStrainer("a"))
-        href = soup.find("a",text="View Player Info")["href"]
-        resp = await session.get(href)
-        bio_page = await resp.text()
+        href_url = soup.find("a",text="View Player Info")["href"]
+        resp = await session.get(href_url) #await session.get(href_url)
+        bio_page = await resp.text() #await resp.text()
         soup = bs(bio_page,'lxml')
 
         all_ps = soup.find(id="mw-content-text").find("div",class_="mw-parser-output").find("h2").find_all_next("p")
