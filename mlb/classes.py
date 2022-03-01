@@ -489,7 +489,7 @@ class player:
 
         self.__education = ns(
             highschool=edu[edu["type"]=="highschool"],
-            college=edu[edu["type"]=="college"]
+            college=edu[edu["type"]=="college"],
         )
 
         jersey_numbers = []
