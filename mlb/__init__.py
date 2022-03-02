@@ -112,7 +112,14 @@ team_batting = team_hitting
 from .functions import game_highlights
 from .functions import get_video_link
 
-# from .constants import STATDICT
+from .constants import (
+    STATDICT,
+    COLS_HIT,
+    COLS_HIT_ADV,
+    COLS_PIT,
+    COLS_PIT_ADV,
+    COLS_FLD
+)
 
 # from .utils import utc_zone
 # from .utils import et_zone
@@ -168,12 +175,6 @@ from .transactions import free_agents as get_free_agents
 from .transactions import transactions as get_transactions
 
 from .utils_team import team_leaders
-
-# from .league import leaders_players
-# from .league import stats_and_standings
-# from .league import team_stats as lg_team_stats
-# from .league import player_stats as lg_player_stats
-# from .league import standings as lg_standings
 
 # from .async_mlb import get_leaders
 # from .async_mlb import get_team_responses

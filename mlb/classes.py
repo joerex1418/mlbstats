@@ -78,6 +78,60 @@ class _stat_group:
         self.__pit  = _p
         self.__fld  = _f
 
+class _league:
+    def __init__(self,**kwargs):
+        self.__mlbam = kwargs.get("mlbam")
+        self.__name = kwargs.get("name")
+        self.__short = kwargs.get("short")
+        self.__abbrv = kwargs.get("abbrv")
+    
+    @property
+    def mlbam(self):
+        """Official League MLB ID"""
+        return self.__mlbam
+
+    @property
+    def name(self):
+        """League's full name"""
+        return self.__name
+
+    @property
+    def short(self):
+        """League short name"""
+        return self.__short
+
+    @property
+    def abbrv(self):
+        """League abbreviation"""
+        return self.__abbrv
+
+    @property
+    def abbreviation(self):
+        """League abbreviation"""
+        return self.__abbrv
+
+class _stat_collection:
+    """stat type collection instance"""
+    def __init__(self,**kwargs):
+        self.__dict__.update(kwargs)
+    
+    def __getitem__(self,_item):
+        return getattr(_item)
+
+class _stat_data:
+    """stat data instance"""
+    def __init__(self,_df):
+        self.__df = _df
+    
+    def __call__(self,_col=None,_val=None):
+        df = self.__df
+        if len(df) == 0:
+            return None
+        elif _col is None or _val is None:
+            return df
+        else:
+            return df[df[_col]==_val]
+
 class _stats:
     """instance for collection of stat types/groups
     
@@ -269,7 +323,7 @@ class franchise:
         
         ti = team_info
         self.__mlbam = ti['mlbam']
-        self.__names = _team_names(
+        self.__name = _team_names(
             full=ti['full_name'],
             location=ti['location_name'],
             franchise=ti['franchise_name'],
@@ -277,6 +331,14 @@ class franchise:
             club=ti['club_name'],
             short=ti['short_name']
             )
+        
+
+        self.__league = _league(
+            mlbam=ti['league_mlbam'],
+            name=ti['league_name'],
+            short=ti['league_short'],
+            abbrv=ti['league_abbrv']
+        )
         
         self.__venue = _venue(
             name=ti['venue_name'],
@@ -320,6 +382,7 @@ class franchise:
             active      = roster[roster['status']=='Active']
         )
 
+        self.__first_year = int(ti['first_year'])
 
     def __str__(self):
         return f'<class mlb.franchise - {self.full} >'
@@ -333,9 +396,9 @@ class franchise:
         return int(self.__mlbam)
 
     @property
-    def names(self):
+    def name(self):
         """Various names team names/aliases"""
-        return self.__names
+        return self.__name
     
     @property
     def venue(self):
@@ -355,7 +418,7 @@ class franchise:
         return self.__stats
 
     @property
-    def roster(self):
+    def roster(self) -> _roster:
         """Roster data"""
         return self.__roster
 
@@ -367,6 +430,14 @@ class franchise:
     @property
     def legends(self) -> pd.DataFrame:
         return self.__legends
+    
+    @property
+    def league(self) -> _league:
+        return self.__league
+
+    @property
+    def first_year(self) -> int:
+        return self.__first_year
 
 
 class player:
@@ -387,19 +458,18 @@ class player:
 
     def __init__(self,mlbam):
         pdata = player_data(mlbam)
-        pbio = pdata["bio"]
-        pinfo = pdata["info"]
-        pstats = pdata["stats"]
+        pbio    = pdata["bio"]
+        pinfo   = pdata["info"]
+        pstats  = pdata["stats"]
         pawards = pdata["awards"]
-        ptrx = pdata["transactions"]
+        ptrx    = pdata["transactions"]
 
         # pinfo contains ('currentTeam','rosterEntries','education','draft')
         self.__bio                  = pbio
         self.__mlbam                = pinfo["mlbam"]
         self.__bbrefID              = pinfo["bbrefID"]
-        # self.__retroID              = pinfo["retroID"]
-        # self.__bbrefIDminors        = pinfo["bbrefIDminors"]
         self.__primary_position     = pinfo["primary_position"]
+        self.__givenName            = pinfo["givenName"]
         self.__fullName             = pinfo["fullName"]
         self.__firstName            = pinfo["firstName"]
         self.__middleName           = pinfo["middleName"]
@@ -407,7 +477,7 @@ class player:
         self.__nickName             = pinfo["nickName"]
         self.__pronunciation        = pinfo["pronunciation"]
         self.__primaryNumber        = pinfo["primary_number"]
-        self.__currentAge           = pinfo["currentAge"]
+        self.__current_age          = pinfo["currentAge"]
         self.__birthDate            = pinfo["birthDate"]
         self.__birthCity            = pinfo["birthCity"]
         self.__birthState           = pinfo["birthState"]
@@ -444,6 +514,7 @@ class player:
         )
 
         self.__name = ns(
+            given=self.__givenName,
             full=self.__fullName,
             first=self.__firstName,
             middle=self.__middleName,
@@ -451,45 +522,94 @@ class player:
             nick=self.__nickName,
             pronunciation=self.__pronunciation
         )
+
+        bd = self.__birthDate
+        if bd != "":
+            bd  = dt.datetime.strptime(bd,r"%Y-%m-%d")
+            bdy = bd.year
+            bdm = bd.strftime(r"%B")
+            bdd = str(int(bd.day))
+            bdl = f"{bdm} {bdd}, {bdy}"
+        else:
+            bd  = None
+            bdy = None
+            bdm = None
+            bdd = None
+            bdl = "-"
         self.__birth = ns(
             date=self.__birthDate,
+            date_long=bdl,
+            year=bdy,
+            month=bdm,
+            day=bdd,
             city=self.__birthCity,
             state=self.__birthState,
             country=self.__birthCountry
         )
+        
+        dd = self.__deathDate
+        if dd != "":
+            dd  = dt.datetime.strptime(dd,r"%Y-%m-%d")
+            ddy = dd.year
+            ddm = dd.strftime(r"%B")
+            ddd = str(int(dd.day))
+            ddl = f"{ddm} {ddd}, {ddy}"
+        else:
+            dd  = None
+            ddy = None
+            ddm = None
+            ddd = None
+            ddl = "-"
         self.__death = ns(
             date=self.__deathDate,
+            date_long=ddl,
+            year=ddy,
+            month=ddm,
+            day=ddd,
             city=self.__deathCity,
             state=self.__deathState,
             country=self.__deathCountry
         )
 
-        self.__stats = ns(
+        # STATS
+        self.__stats = _stat_collection(
             career=ns(
                 hitting=_stats(
-                    reg=pstats["hitting"]["career"],
-                    adv=pstats["hitting"]["career_advanced"]),
+                    reg=_stat_data(pstats["hitting"]["career"]),
+                    adv=_stat_data(pstats["hitting"]["career_advanced"])),
                 pitching=_stats(
-                    reg=pstats["pitching"]["career"],
-                    adv=pstats["pitching"]["career_advanced"]),
+                    reg=_stat_data(pstats["pitching"]["career"]),
+                    adv=_stat_data(pstats["pitching"]["career_advanced"])),
                 fielding=_stats(
-                    reg=pstats["fielding"]["career"])
+                    reg=_stat_data(pstats["fielding"]["career"]))
                 ),
             yby=ns(
                 hitting=_stats(
-                    reg=pstats["hitting"]["yby"],
-                    adv=pstats["hitting"]["yby_advanced"]),
+                    reg=_stat_data(pstats["hitting"]["yby"]),
+                    adv=_stat_data(pstats["hitting"]["yby_advanced"])),
                 pitching=_stats(
-                    reg=pstats["pitching"]["yby"],
-                    adv=pstats["pitching"]["yby_advanced"]),
+                    reg=_stat_data(pstats["pitching"]["yby"]),
+                    adv=_stat_data(pstats["pitching"]["yby_advanced"])),
                 fielding=_stats(
-                    reg=pstats["fielding"]["yby"])
+                    reg=_stat_data(pstats["fielding"]["yby"]))
                 ),
-            )
+        )
+
+        _hs_df = edu[edu["type"]=="highschool"]
+        _co_df = edu[edu["type"]=="college"]
+        if len(_hs_df) > 0:
+            self.__highschool = f'{_hs_df.iloc[0]["school"]} ({_hs_df.iloc[0]["city"]}, {_hs_df.iloc[0]["state"]})'
+        else:
+            self.__highschool = "-"
+        if len(_co_df) > 0:
+            self.__college = _co_df.iloc[0]["school"]
+        else:
+            self.__college = "-"
 
         self.__education = ns(
-            highschool=edu[edu["type"]=="highschool"],
-            college=edu[edu["type"]=="college"],
+            schools=edu,
+            highschool=self.__highschool,
+            college=self.__college
         )
 
         jersey_numbers = []
@@ -502,6 +622,13 @@ class player:
             primary=self.__primaryNumber,
             all=jersey_numbers
         )
+
+
+    def __str__(self):
+        return f"<mlb.player; {self.__fullName} | {self.__mlbam}>"
+
+    def __repr__(self):
+        return f"<mlb.player; {self.__fullName} | {self.__mlbam}>"
 
     @property
     def bio(self) -> list[str]:
@@ -519,7 +646,6 @@ class player:
         - name.last
         - name.nick (*Nickname)
         - name.pronunciation
-
 
         """
 
@@ -576,7 +702,7 @@ class player:
     @property
     def age(self) -> int:
         """Player's age"""
-        return int(self.__currentAge)
+        return int(self.__current_age)
 
     @property
     def weight(self) -> int:
@@ -648,6 +774,7 @@ class player:
         """Player's education information
         
         Keys:
+        - edu.schools
         - edu.highschool
         - edu.college
 

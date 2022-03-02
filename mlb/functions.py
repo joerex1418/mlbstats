@@ -14,8 +14,11 @@ from bs4 import SoupStrainer
 from types import SimpleNamespace as ns
 
 
-from .async_mlb import get_leaders
-from .async_mlb import fetch
+from .async_mlb import (
+    fetch,
+    get_leaders,
+    _determine_loop
+)
 
 from .mlbdata import get_people_df
 from .mlbdata import get_season_info
@@ -57,6 +60,7 @@ from .constants import (
 # ===============================================================
 # ASYNC
 # ===============================================================
+
 async def _parse_player_data(data,session):
     if type(data) is dict:
         return data
@@ -65,7 +69,7 @@ async def _parse_player_data(data,session):
         href_url = soup.find("a",text="View Player Info")["href"]
         resp = await session.get(href_url) #await session.get(href_url)
         bio_page = await resp.text() #await resp.text()
-        soup = bs(bio_page,'lxml')
+        soup = bs(bio_page,'lxml',parse_only=SoupStrainer(['div','h2','p']))
 
         all_ps = soup.find(id="mw-content-text").find("div",class_="mw-parser-output").find("h2").find_all_next("p")
         for idx,p in enumerate(all_ps):
@@ -74,7 +78,7 @@ async def _parse_player_data(data,session):
         return all_ps
 
 
-async def _fetch_player_data(urls):
+async def _fetch_player_data(urls,_get_bio=None):
     retrieved_responses = []
     async with aiohttp.ClientSession() as session:
         tasks = []
@@ -84,7 +88,7 @@ async def _fetch_player_data(urls):
         responses = await asyncio.gather(*tasks)
         
         for resp_idx, response in enumerate(responses):
-            if resp_idx == 0:
+            if resp_idx == 0 and _get_bio is True:
                 resp = await response.text()
             else:
                 resp = await response.json()
@@ -96,11 +100,12 @@ async def _fetch_player_data(urls):
         await session.close()
     
     return retrieved_responses
+
 # ===============================================================
 # PLAYER Functions
 # ===============================================================
 
-def player_data(_mlbam,season=None,**kwargs) -> dict[pd.DataFrame,dict]:
+def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
     """Fetch a variety of player information/stats in one API call
 
     Parameters
@@ -120,27 +125,26 @@ def player_data(_mlbam,season=None,**kwargs) -> dict[pd.DataFrame,dict]:
 
     url_list = []
 
-    if season is not None:
-        statType = "season,seasonAdvanced"
-        seasonQuery = f"&season={season}"
-    else:
-        statType = "career,careerAdvanced,yearByYear,yearByYearAdvanced"
-        seasonQuery = ""
+    statType = "career,careerAdvanced,yearByYear,yearByYearAdvanced"
+    seasonQuery = ""
 
     statGroup = "hitting,pitching,fielding"
-
-    url_list.append(       f"https://www.baseball-reference.com/redirect.fcgi?player=1&mlb_ID={_mlbam}")    # player_bio
+    if kwargs.get("_get_bio") is True:
+        url_list.append(       f"https://www.baseball-reference.com/redirect.fcgi?player=1&mlb_ID={_mlbam}")    # player_bio
     query = f"stats={statType}&gameType=R,P&group={statGroup}{seasonQuery}"
     url_list.append(BASE + f"/people/{_mlbam}/stats?{query}")                                               # player_stats
     url_list.append(BASE + f"/people/{_mlbam}/awards")                                                      # player_awards
     url_list.append(BASE + f"/transactions?playerId={_mlbam}")                                              # player_transactions
     url_list.append(BASE + f"/people/{_mlbam}?hydrate=currentTeam,rosterEntries,education,draft")           # player_info
     
-    loop = asyncio.get_event_loop()
-    start = time.time()
-    responses = loop.run_until_complete(_fetch_player_data(url_list))
-
-    _player_bio         = responses[-5]
+    
+    # loop = asyncio.get_event_loop()
+    loop = _determine_loop()
+    responses = loop.run_until_complete(_fetch_player_data(url_list,_get_bio=kwargs.get("_get_bio")))
+    if kwargs.get("_get_bio") is True:
+        _player_bio     = responses[-5]
+    else:
+        _player_bio     = [""]
     player_stats        = responses[-4]["stats"]
     player_awards       = responses[-3]["awards"]
     player_transactions = responses[-2]["transactions"]
@@ -154,20 +158,20 @@ def player_data(_mlbam,season=None,**kwargs) -> dict[pd.DataFrame,dict]:
 
     # Parsing 'player_stats'
     hitting = {
-        "career":None,
-        "career_advanced":None,
-        "yby":None,
-        "yby_advanced":None
+        "career":pd.DataFrame(),
+        "career_advanced":pd.DataFrame(),
+        "yby":pd.DataFrame(),
+        "yby_advanced":pd.DataFrame()
         }
     pitching = {
-        "career":None,
-        "career_advanced":None,
-        "yby":None,
-        "yby_advanced":None
+        "career":pd.DataFrame(),
+        "career_advanced":pd.DataFrame(),
+        "yby":pd.DataFrame(),
+        "yby_advanced":pd.DataFrame()
         }
     fielding = {
-        "career":None,
-        "yby":None
+        "career":pd.DataFrame(),
+        "yby":pd.DataFrame()
         }
 
     _player_stats = {
@@ -323,7 +327,7 @@ def player_data(_mlbam,season=None,**kwargs) -> dict[pd.DataFrame,dict]:
                 stats["lg_name"] = lg_name
 
                 data.append(pd.Series(stats))
-            df = pd.DataFrame(data=data).rename(columns=STATDICT)[W_SEASON+COLS_HIT]
+            df = pd.DataFrame(data=data).rename(columns=STATDICT)[W_SEASON+COLS_HIT].sort_values(by="season",ascending=False)
             hitting["yby"] = df
 
         elif st == "yearByYearAdvanced" and sg == "hitting":
@@ -348,7 +352,7 @@ def player_data(_mlbam,season=None,**kwargs) -> dict[pd.DataFrame,dict]:
                 stats["lg_name"] = lg_name
 
                 data.append(pd.Series(stats))
-            df = pd.DataFrame(data=data).rename(columns=STATDICT)[W_SEASON+COLS_HIT_ADV]
+            df = pd.DataFrame(data=data).rename(columns=STATDICT)[W_SEASON+COLS_HIT_ADV].sort_values(by="season",ascending=False)
             hitting["yby_advanced"] = df
 
         elif st == "yearByYear" and sg == "pitching":
@@ -373,7 +377,7 @@ def player_data(_mlbam,season=None,**kwargs) -> dict[pd.DataFrame,dict]:
                 stats["lg_name"] = lg_name
 
                 data.append(pd.Series(stats))
-            df = pd.DataFrame(data=data).rename(columns=STATDICT)[W_SEASON+COLS_PIT]
+            df = pd.DataFrame(data=data).rename(columns=STATDICT)[W_SEASON+COLS_PIT].sort_values(by="season",ascending=False)
             pitching["yby"] = df
 
         elif st == "yearByYearAdvanced" and sg == "pitching":
@@ -398,7 +402,7 @@ def player_data(_mlbam,season=None,**kwargs) -> dict[pd.DataFrame,dict]:
                 stats["lg_name"] = lg_name
 
                 data.append(pd.Series(stats))
-            df = pd.DataFrame(data=data).rename(columns=STATDICT)[W_SEASON+COLS_PIT_ADV]
+            df = pd.DataFrame(data=data).rename(columns=STATDICT)[W_SEASON+COLS_PIT_ADV].sort_values(by="season",ascending=False)
             pitching["yby_advanced"] = df
 
         elif st == "yearByYear" and sg == "fielding":
@@ -424,7 +428,7 @@ def player_data(_mlbam,season=None,**kwargs) -> dict[pd.DataFrame,dict]:
                 stats["lg_name"] = lg_name
 
                 data.append(pd.Series(stats))
-            df = pd.DataFrame(data=data).rename(columns=STATDICT)[W_SEASON+COLS_FLD]
+            df = pd.DataFrame(data=data).rename(columns=STATDICT)[W_SEASON+COLS_FLD].sort_values(by="season",ascending=False)
             fielding["yby"] = df
 
     # Parsing 'roster_entries'
@@ -480,7 +484,8 @@ def player_data(_mlbam,season=None,**kwargs) -> dict[pd.DataFrame,dict]:
         "mlbam":                _mlbam,
         "bbrefID":              pdf["bbrefID"],
         "primary_position":     player_info["primaryPosition"]["abbreviation"],
-        "fullName":             player_info["fullFMLName"],
+        "givenName":            player_info["fullFMLName"],
+        "fullName":             player_info["fullName"],
         "firstName":            player_info["firstName"],
         "middleName":           player_info.get("middleName","--"),
         "lastName":             player_info["lastName"],
@@ -2340,11 +2345,11 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
                     field_data.append(stats)
 
 
-        hit_df = pd.DataFrame(data=hit_data).rename(columns=STATDICT)[hit_cols].sort_values(by="season",ascending=False)
-        hit_adv_df = pd.DataFrame(data=hit_adv_data).rename(columns=STATDICT)[hit_adv_cols].sort_values(by="season",ascending=False)
-        pitch_df = pd.DataFrame(data=pitch_data).rename(columns=STATDICT)[pit_cols].sort_values(by="season",ascending=False)
-        pitch_adv_df = pd.DataFrame(data=pitch_adv_data).rename(columns=STATDICT)[pit_adv_cols].sort_values(by="season",ascending=False)
-        field_df = pd.DataFrame(data=field_data).rename(columns=STATDICT)[fld_cols].sort_values(by="season",ascending=False)
+        hit_df = pd.DataFrame(data=hit_data).rename(columns=STATDICT)[['season']+COLS_HIT].sort_values(by="season",ascending=False)
+        hit_adv_df = pd.DataFrame(data=hit_adv_data).rename(columns=STATDICT)[['season']+COLS_HIT_ADV].sort_values(by="season",ascending=False)
+        pitch_df = pd.DataFrame(data=pitch_data).rename(columns=STATDICT)[['season']+COLS_PIT].sort_values(by="season",ascending=False)
+        pitch_adv_df = pd.DataFrame(data=pitch_adv_data).rename(columns=STATDICT)[['season']+COLS_PIT_ADV].sort_values(by="season",ascending=False)
+        field_df = pd.DataFrame(data=field_data).rename(columns=STATDICT)[['season']+COLS_FLD].sort_values(by="season",ascending=False)
 
         # ---- Parsing 'all_players' --------
 

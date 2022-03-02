@@ -7,6 +7,13 @@ nest_asyncio.apply()
 
 import time
 # import pandas as pd
+def _determine_loop():
+    try:
+        return asyncio.get_event_loop()
+    except:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        return asyncio.get_event_loop()
 
 async def fetch(urls:list):
     retrieved_responses = []
@@ -31,7 +38,8 @@ def runit(urls:list,**kwargs):
     start = time.time()
     # retrieved = asyncio.run(fetch(urls))
 
-    loop = asyncio.get_event_loop()
+    # loop = asyncio.get_event_loop()
+    loop = _determine_loop()
     retrieved = loop.run_until_complete(fetch(urls))
     if kwargs.get("_log") is True:
         print(f"--- {time.time() - start } seconds ---")
