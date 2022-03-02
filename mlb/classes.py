@@ -35,7 +35,7 @@ from .utils import default_season
 from .utils import game_str_display
 
 
-class _team_names:
+class _team:
     def __new__(cls,full,**tm_keys):
         self = object.__new__(cls)
 
@@ -49,7 +49,6 @@ class _team_names:
     
     def __repr__(self):
         return self.full
-
 
 class _venue:
     def __new__(cls,name,mlbam,**kwargs):
@@ -70,7 +69,6 @@ class _venue:
     def mlbam(self):
         return self.__mlbam
     
-
 class _stat_group:
     def __init__(self,_type,_h=None,_p=None,_f=None):
         self.__type = _type
@@ -167,7 +165,6 @@ class _stats:
         """Advanced stats"""
         return self.__adv
     
-
 class _standings:
     def __new__(cls,records,splits=None):
         self = object.__new__(cls)
@@ -323,7 +320,7 @@ class franchise:
         
         ti = team_info
         self.__mlbam = ti['mlbam']
-        self.__name = _team_names(
+        self.__name = _team(
             full=ti['full_name'],
             location=ti['location_name'],
             franchise=ti['franchise_name'],
@@ -500,6 +497,7 @@ class player:
         self.__last_game            = pinfo["last_game"]
         self.__roster_entries       = pinfo["roster_entries"]
         self.__draft                = pinfo["draft"]
+        debut_data                  = pinfo["debut_data"]
 
         self.teams                  = teams
 
@@ -601,11 +599,21 @@ class player:
         _hs_df = edu[edu["type"]=="highschool"]
         _co_df = edu[edu["type"]=="college"]
         if len(_hs_df) > 0:
-            self.__highschool = f'{_hs_df.iloc[0]["school"]} ({_hs_df.iloc[0]["city"]}, {_hs_df.iloc[0]["state"]})'
+            self.__highschool = ns(
+                name=_hs_df.iloc[0]["school"],
+                city=_hs_df.iloc[0]["city"],
+                state=_hs_df.iloc[0]["state"]
+            )
+            # self.__highschool = f'{_hs_df.iloc[0]["school"]} ({_hs_df.iloc[0]["city"]}, {_hs_df.iloc[0]["state"]})'
         else:
             self.__highschool = "-"
         if len(_co_df) > 0:
-            self.__college = _co_df.iloc[0]["school"]
+            self.__college = ns(
+                name=_co_df.iloc[0]["school"],
+                city=_co_df.iloc[0]["city"],
+                state=_co_df.iloc[0]["state"]
+            )
+            # self.__college = _co_df.iloc[0]["school"]
         else:
             self.__college = "-"
 
@@ -626,7 +634,41 @@ class player:
             all=jersey_numbers
         )
 
-
+        if len(debut_data) > 0:
+            debut_data = debut_data[0]["splits"][0]
+            team = debut_data.get("team",{})
+            opponent = debut_data.get("opponent",{})
+            date_obj = dt.datetime.strptime(self.__first_game,r"%Y-%m-%d")
+            self.__debut = ns(
+                date=self.__first_game,
+                date_long=date_obj.strftime(r"%B %d, %Y"),
+                date_short=date_obj.strftime(r"%b %d, %Y"),
+                gamepk=debut_data["game"]["gamePk"],
+                team=_team(
+                    full=team.get("name"),
+                    mlbam=team.get("id"),
+                    team=team.get("teamName"),
+                    short=team.get("shortName"),
+                    club=team.get("clubName"),
+                    location=team.get("locationName"),
+                    franchise=team.get("franchiseName"),
+                    season=team.get("season"),
+                    slug=f"{team.get('clubName').lower().replace(' ','-')}-{team.get('id')}",
+                ),
+                opponent=_team(
+                    full=opponent.get("name"),
+                    mlbam=opponent.get("id"),
+                    team=opponent.get("teamName"),
+                    short=opponent.get("shortName"),
+                    club=opponent.get("clubName"),
+                    location=opponent.get("locationName"),
+                    franchise=opponent.get("franchiseName"),
+                    season=opponent.get("season"),
+                    slug=f"{opponent.get('clubName').lower().replace(' ','-')}-{team.get('id')}",
+                )
+            )
+        else:
+            debut_data = {}
     def __str__(self):
         return f"<mlb.player; {self.__fullName} | {self.__mlbam}>"
 
@@ -741,6 +783,11 @@ class player:
     def is_active(self) -> bool:
         """Player's active status"""
         return self.__is_active
+    
+    @property
+    def debut(self):
+        """Data for player's MLB Debut Game"""
+        return self.__debut
 
     @property
     def first_year(self) -> int:
