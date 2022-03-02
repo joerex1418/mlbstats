@@ -55,7 +55,7 @@ from .constants import (
     W_SEASON,
     WO_SEASON
 )
-# from .constants import sitCodes
+from .constants import sitCodes
 
 # ===============================================================
 # ASYNC
@@ -122,6 +122,9 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
     
     pdf = get_people_df().set_index("mlbam")
     pdf = pdf.loc[_mlbam]
+
+    tdf = get_teams_df()
+    
 
     url_list = []
 
@@ -547,7 +550,6 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
     except:
         _player_awards = pd.DataFrame()
     
-
     try:
         trx_columns = ("name","mlbam","tr_type","tr","description","date","e_date","r_date","fr","fr_mlbam","to","to_mlbam")
         trx_data = []
@@ -587,12 +589,29 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
     except:
         _player_transactions = pd.DataFrame()
 
+    if _player_info['primary_position'] == "P":
+        _df = _player_stats['pitching']['yby']
+    else:
+        _df = _player_stats['hitting']['yby']
+    
+    _teams = {}
+    all_tm_mlbams = list(set(_df['tm_mlbam']))
+    for tm_id in all_tm_mlbams:
+        tm = tdf[tdf['mlbam']==int(tm_id)].iloc[0]
+        _teams[str(tm_id)] = {
+            "full":tm['fullName'],
+            "location":tm["locationName"],
+            "club":tm["clubName"],
+            "slug":f'{tm["clubName"].lower().replace(" ","-")}-{tm["mlbam"]}'
+        }
+
     fetched_data = {
         "bio":_player_bio,
         "info":_player_info,
         "stats":_player_stats,
         "awards":_player_awards,
-        "transactions":_player_transactions
+        "transactions":_player_transactions,
+        "teams":_teams,
     }
 
     return fetched_data
@@ -2201,8 +2220,9 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
         for year in years:
             urls.append(f"https://statsapi.mlb.com/api/v1/teams/{mlbam}?hydrate=standings&season={year}")                   # yby_data
         # for year in years:
-        #     query = f"stats=statSplits&season={year}&sitCodes={sitCodes}&group=hitting,pitching,fielding"
-        #     urls.append(f"https://statsapi.mlb.com/api/v1/teams/{mlbam}/stats?{query}")                                     # team_splits
+            # for scode in sitCodes:
+                # query = f"stats=statSplits&season={year}&sitCodes={scode}&group=hitting,pitching,fielding"
+                # urls.append(f"https://statsapi.mlb.com/api/v1/teams/{mlbam}/stats?{query}")                                     # team_splits
 
         hydrations = f"nextSchedule(limit=5),previousSchedule(limit=1,season={default_season()}),league,division"           # ---- (hydrations for 'team_info') ----
         urls.append(BASE + f"/teams/{mlbam}?hydrate={hydrations}")                                                          # team_info
@@ -2294,12 +2314,6 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
         # ---- Parsing 'team_stats' --------
         team_stats_json = team_stats # using alias to for consistency
 
-        hit_cols = ['season','G','R','2B','3B','HR','BB','H','HBP','AVG','AB','OBP','SLG','OPS','SB','PA','TB','RBI','sB','AB/HR','CS','SB%','P','LOB','SO','BABIP','GIDP','sF','IBB','GO','AO','GO/AO','CI']
-        pit_cols = ['season','G','GS','R','HR','SO','BB','H','HBP','AVG','AB','OBP','ERA','IP','W','L','SV','ER','WHIP','BF','O','GP','CG','ShO','HB','BK','WP','W%','GF','SO:BB','SO/9','BB/9','H/9','R/9','HR/9','sB','sF','IBB','SVO','BS','GO','AO','2B','3B','SLG','OPS','CS','SB','SB%','GIDP','P','HLD','K','K%','PK','TB','GO/AO','P/Inn','CI']
-        fld_cols = ['season','A','PO','E','Ch','FLD%','RF/G','RF/9','INNs','G','GS','DP','TP','thE']
-        hit_adv_cols = ['season','PA','TB','sB','exBH','HBP','BB/PA','HR/PA','ISO','P','P/PA','LOB','BABIP','SO/PA','BB/SO','GIDP','sF','GIDPO','ROE','WO','FO','TS','Whiffs','BIP','PO','LO','GO','FH','PH','LH','GH']
-        pit_adv_cols = ['season','W%','R/9','BF','BABIP','OBP','SO/9','BB/9','HR/9','H/9','SO:BB','GF','WP','BK','BB/PA','SO/PA','HR/PA','BB/SO','SLG','OPS','SB','CS','QS','2B','3B','GIDP','GIDPO','PK','TS','Whiffs','BIP','RS','K%','P/Inn','P/PA','ISO','FO','PO','LO','GO','FH','PH','LH','GH']
-
         hit_data = []
         hit_adv_data = []
         pitch_data = []
@@ -2344,12 +2358,39 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
                     stats["season"] = season
                     field_data.append(stats)
 
+        stat_dict = {
+            'hit_df'       : pd.DataFrame(data=hit_data).rename(columns=STATDICT),
+            'hit_adv_df'   : pd.DataFrame(data=hit_adv_data).rename(columns=STATDICT),
+            'pitch_df'     : pd.DataFrame(data=pitch_data).rename(columns=STATDICT),
+            'pitch_adv_df' : pd.DataFrame(data=pitch_adv_data).rename(columns=STATDICT),
+            'field_df'     : pd.DataFrame(data=field_data).rename(columns=STATDICT),
+        }
 
-        hit_df = pd.DataFrame(data=hit_data).rename(columns=STATDICT)[['season']+COLS_HIT].sort_values(by="season",ascending=False)
-        hit_adv_df = pd.DataFrame(data=hit_adv_data).rename(columns=STATDICT)[['season']+COLS_HIT_ADV].sort_values(by="season",ascending=False)
-        pitch_df = pd.DataFrame(data=pitch_data).rename(columns=STATDICT)[['season']+COLS_PIT].sort_values(by="season",ascending=False)
-        pitch_adv_df = pd.DataFrame(data=pitch_adv_data).rename(columns=STATDICT)[['season']+COLS_PIT_ADV].sort_values(by="season",ascending=False)
-        field_df = pd.DataFrame(data=field_data).rename(columns=STATDICT)[['season']+COLS_FLD].sort_values(by="season",ascending=False)
+        # need to remove any stats that are not available at the team-level (e.g. "IR","IRS","BQ","BQS" etc.)
+        df_keys_dict = {
+            "0":COLS_HIT,
+            "1":COLS_HIT_ADV,
+            "2":COLS_PIT,
+            "3":COLS_PIT_ADV,
+            "4":COLS_FLD
+        }
+
+        for idx,df_name in enumerate(stat_dict.keys()):
+            cols = df_keys_dict[str(idx)]
+            df = stat_dict[df_name]
+            for col in cols[:]:
+                if col not in df.columns:
+                    cols.remove(col)
+            
+            stat_dict[df_name] = df[['season'] + cols].sort_values(by="season",ascending=False)
+
+
+
+        hit_df          = stat_dict['hit_df']
+        hit_adv_df      = stat_dict['hit_adv_df']
+        pitch_df        = stat_dict['pitch_df']
+        pitch_adv_df    = stat_dict['pitch_adv_df']
+        field_df        = stat_dict['field_df']
 
         # ---- Parsing 'all_players' --------
 

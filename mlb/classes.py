@@ -463,6 +463,7 @@ class player:
         pstats  = pdata["stats"]
         pawards = pdata["awards"]
         ptrx    = pdata["transactions"]
+        teams   = pdata["teams"]
 
         # pinfo contains ('currentTeam','rosterEntries','education','draft')
         self.__bio                  = pbio
@@ -499,6 +500,8 @@ class player:
         self.__last_game            = pinfo["last_game"]
         self.__roster_entries       = pinfo["roster_entries"]
         self.__draft                = pinfo["draft"]
+
+        self.teams                  = teams
 
         edu = pinfo["education"]
 
