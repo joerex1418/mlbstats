@@ -197,17 +197,6 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
             "9":W_SEASON+COLS_FLD
         }
     stat_dict = {
-        # "career_hit":None,
-        # "career_hit_adv":None,
-        # "yby_hit":None,
-        # "yby_hit_adv":None,
-        # "career_pit":None,
-        # "career_pit_adv":None,
-        # "yby_pit":None,
-        # "yby_pit_adv":None,
-        # "career_fld":None,
-        # "yby_fld":None,
-
         "career_hit":pd.DataFrame(),
         "career_hit_adv":pd.DataFrame(),
         "career_pit":pd.DataFrame(),
@@ -487,8 +476,10 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
         for col in cols[:]:
             if col not in df.columns:
                 cols.remove(col)
-        
-        stat_dict[df_name] = df[cols].sort_values(by="season",ascending=False)
+        if int(idx) >= 5:
+            stat_dict[df_name] = df[cols].sort_values(by="season",ascending=False)
+        else:
+            stat_dict[df_name] = df[cols]#.sort_values(by="Season",ascending=False)
     
     hitting["career"]           = stat_dict["career_hit"]
     hitting["career_advanced"]  = stat_dict["career_hit_adv"]
