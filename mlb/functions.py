@@ -476,7 +476,7 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
         for col in cols[:]:
             if col not in df.columns:
                 cols.remove(col)
-        if int(idx) >= 5:
+        if int(idx) >= 5 and len(df)>0:
             stat_dict[df_name] = df[cols].sort_values(by="season",ascending=False)
         else:
             stat_dict[df_name] = df[cols]#.sort_values(by="Season",ascending=False)
@@ -2078,7 +2078,7 @@ def player_search(name,sportId=1,**kwargs):
 # TEAM Functions
 # ===============================================================
 
-def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",**kwargs) -> dict:
+def franchise_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",**kwargs) -> dict:
     """Fetch various team season data & information for a team in one API call
 
     Parameters
@@ -2284,10 +2284,6 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
 
         for year in years:
             urls.append(f"https://statsapi.mlb.com/api/v1/teams/{mlbam}?hydrate=standings&season={year}")                   # yby_data
-        # for year in years:
-            # for scode in sitCodes:
-                # query = f"stats=statSplits&season={year}&sitCodes={scode}&group=hitting,pitching,fielding"
-                # urls.append(f"https://statsapi.mlb.com/api/v1/teams/{mlbam}/stats?{query}")                                     # team_splits
 
         hydrations = f"nextSchedule(limit=5),previousSchedule(limit=1,season={default_season()}),league,division"           # ---- (hydrations for 'team_info') ----
         urls.append(BASE + f"/teams/{mlbam}?hydrate={hydrations}")                                                          # team_info
@@ -2295,6 +2291,10 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
         urls.append(f"https://statsapi.mlb.com/api/v1/teams/{mlbam}/roster/allTime")                                        # all_players
         urls.append(f"https://statsapi.mlb.com/api/v1/awards/MLBHOF/recipients")                                            # hof_players
         urls.append(f"https://statsapi.mlb.com/api/v1/awards/RETIREDUNI_{mlbam}/recipients")                                # retired_numbers
+
+        # https://statsapi.mlb.com/api/v1/teams/stats/leaders?season=2021&leaderCategories=wins,losses
+        # https://statsapi.mlb.com/api/v1/teams/145/roster/coach?season=1904
+
         resps = fetch(urls)
 
         yby_data = resps[:-5]
@@ -2310,6 +2310,8 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
 
         team_info_parsed = {}
         teams = team_info["teams"][0]
+        lg  = teams.get("league")
+        div = teams.get("division")
         team_info_parsed["mlbam"]               = teams["id"]
         team_info_parsed["full_name"]           = teams["name"]
         team_info_parsed["location_name"]       = teams["locationName"]
@@ -2320,8 +2322,6 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
         team_info_parsed["venue_mlbam"]         = teams.get("venue",{}).get("id","")
         team_info_parsed["venue_name"]          = teams.get("venue",{}).get("name","")
         team_info_parsed["first_year"]          = teams["firstYearOfPlay"]
-        lg = teams.get("league")
-        div = teams.get("division")
         team_info_parsed["league_mlbam"]        = lg.get("id","")
         team_info_parsed["league_name"]         = lg.get("name","")
         team_info_parsed["league_short"]        = lg.get("nameShort","")
@@ -2330,6 +2330,7 @@ def team_data(mlbam,season=None,statGroup=None,rosterType=None,gameType="S,R,P",
         team_info_parsed["div_name"]            = div.get("name","")
         team_info_parsed["div_short"]           = div.get("nameShort","")
         team_info_parsed["div_abbrv"]           = div.get("abbreviation","")
+        team_info_parsed["season"]              = teams["season"]
 
         sched_prev_data = []
         for d in teams.get("previousGameSchedule",{}).get("dates",[{}]):

@@ -11,7 +11,7 @@ from . import league
 
 from .async_mlb import get_team_responses
 
-from .functions import team_data
+from .functions import franchise_data
 from .functions import player_data
 
 from .mlbdata import get_people_df
@@ -279,6 +279,16 @@ class _roster:
     def outfield(self) -> pd.DataFrame:
         """All Outfielders"""
         return self.__outfield
+
+    @property
+    def dh(self) -> pd.DataFrame:
+        """All Outfielders"""
+        return self.__dh
+
+    @property
+    def designated_hitter(self) -> pd.DataFrame:
+        """All Outfielders"""
+        return self.__dh
     
     @property
     def active(self) -> pd.DataFrame:
@@ -302,7 +312,7 @@ class franchise:
     
     """
     def __init__(self,mlbam):
-        data = team_data(mlbam)
+        data = franchise_data(mlbam)
 
         records         = data["records"]
         record_splits   = data["record_splits"] # like standings splits
@@ -335,6 +345,12 @@ class franchise:
             name=ti['league_name'],
             short=ti['league_short'],
             abbrv=ti['league_abbrv']
+        )
+        self.__division = _league(
+            mlbam=ti['div_mlbam'],
+            name=ti['div_name'],
+            short=ti['div_short'],
+            abbrv=ti['div_abbrv']
         )
         
         self.__venue = _venue(
@@ -374,12 +390,14 @@ class franchise:
             center      = roster[roster['pos']=='CF'].reset_index(drop=True),
             right       = roster[roster['pos']=='RF'].reset_index(drop=True),
             dh          = roster[roster['pos']=='DH'].reset_index(drop=True),
+            designated_hitter = roster[roster['pos']=='DH'].reset_index(drop=True),
             infield     = roster[roster['pos'].isin(['1B','2B','3B','SS'])].reset_index(drop=True),
             outfield    = roster[roster['pos'].isin(['OF','LF','CF','RF'])].reset_index(drop=True),
             active      = roster[roster['status']=='Active']
         )
 
         self.__first_year = int(ti['first_year'])
+        self.__last_year = int(ti.get("last_year",default_season()))
 
     def __str__(self):
         return f'<class mlb.franchise - {self.full} >'
@@ -431,10 +449,18 @@ class franchise:
     @property
     def league(self) -> _league:
         return self.__league
+    
+    @property
+    def division(self) -> _league:
+        return self.__division
 
     @property
     def first_year(self) -> int:
         return self.__first_year
+
+    @property
+    def last_year(self) -> int:
+        return self.__last_year
 
 
 class player:

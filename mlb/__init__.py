@@ -97,7 +97,7 @@ from .functions import team_hitting_advanced
 from .functions import team_pitching_advanced
 from .functions import team_roster
 from .functions import team_game_logs
-from .functions import team_data
+from .functions import franchise_data
 from .functions import team_appearances
 from .functions import league_hitting
 from .functions import league_pitching
@@ -121,6 +121,7 @@ from .constants import (
     COLS_FLD
 )
 
+from .utils import default_season
 # from .utils import utc_zone
 # from .utils import et_zone
 # from .utils import ct_zone
@@ -133,7 +134,6 @@ from .constants import (
 # from .utils import draw_strikezone
 # from .utils import simplify_time
 # from .utils import prettify_time
-from .utils import default_season
 # from .utils import prepare_game_data
 # from .utils import curr_year as current_year
 
