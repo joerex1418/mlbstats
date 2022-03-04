@@ -14,3 +14,4 @@ HALL_OF_FAME_CSV = os.path.join(os.path.dirname(__file__),'data/hall_of_fame.csv
 BROADCASTS_CSV = os.path.join(os.path.dirname(__file__),'data/broadcasts.csv')
 BBREF_BATTING_DATA_CSV = os.path.join(os.path.dirname(__file__),'data/bbref_war_hit.csv')
 BBREF_PITCHING_DATA_CSV = os.path.join(os.path.dirname(__file__),'data/bbref_war_pitch.csv')
+LEAGUES_CSV = os.path.join(os.path.dirname(__file__),'data/leagues.csv')

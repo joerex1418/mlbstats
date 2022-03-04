@@ -1,7 +1,16 @@
 import requests
 import pandas as pd
 
-from .paths import BIOS_CSV, HALL_OF_FAME_CSV, PEOPLE_CSV, YBY_RECORDS_CSV, VENUES_CSV, BBREF_BATTING_DATA_CSV, BBREF_PITCHING_DATA_CSV
+from .paths import (
+    BIOS_CSV,
+    HALL_OF_FAME_CSV,
+    PEOPLE_CSV,
+    YBY_RECORDS_CSV,
+    VENUES_CSV,
+    BBREF_BATTING_DATA_CSV,
+    BBREF_PITCHING_DATA_CSV,
+    LEAGUES_CSV
+)
 
 from .async_mlb import get_updated_records
 from .async_mlb import get_bios
@@ -324,3 +333,39 @@ def update_bbref_pitching_war(return_df=False,replace_existing=True):
     if return_df is True:
         return df
 
+def update_leagues(return_df=False,replace_existing=True):
+    divs_url = "https://statsapi.mlb.com/api/v1/divisions?sportId=1&hydrate=league"
+    lgs_url  = "https://statsapi.mlb.com/api/v1/leagues?sportId=1"
+
+    data = []
+
+    with requests.session() as sesh:
+        divs_resp = sesh.get(divs_url)
+        lgs_resp = sesh.get(lgs_url)
+
+    for lg in lgs_resp.json()["leagues"]:
+        data.append([
+            lg.get("id"),
+            lg.get("name"),
+            lg.get("nameShort","-"),
+            lg.get("abbreviation"),
+            0,
+            "-",
+        ])
+
+    for div in divs_resp.json()["divisions"]:
+        data.append([
+            div.get("id"),
+            div.get("name"),
+            div.get("nameShort","-"),
+            div.get("abbreviation"),
+            div.get("league",{}).get("id",0),
+            div.get("league",{}).get("name","-"),
+        ])
+    
+    df = pd.DataFrame(data=data,columns=['mlbam','name_full','name_short','abbreviation','parent_mlbam','parent_name'])
+
+    if replace_existing is True:
+        df.to_csv(LEAGUES_CSV,index=False)
+    if return_df is True:
+        return df

@@ -629,6 +629,18 @@ def game_str_display(game_obj):
     final_output = "\n".join(to_print)
     return final_output.replace("|",vl)
 
+class timeutils:
+    utc_zone = utc_zone
+    et_zone = et_zone
+    ct_zone = ct_zone
+    mt_zone = mt_zone
+    pt_zone = pt_zone
+    
+    class fmt:
+        standard = standard_format
+        military = military_format
+        iso = iso_format
+        isoms = iso_format_ms
 
 
 

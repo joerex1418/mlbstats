@@ -369,6 +369,27 @@ def get_bbref_pitching_war_df() -> pd.DataFrame:
     df = pd.read_csv(BBREF_PITCHING_DATA_CSV)
     return df
 
+def get_leages_df() -> pd.DataFrame:
+    try:
+        # engine = create_engine(f"sqlite:///{os.path.abspath('SimpleStatsMLB/baseball.db')}")
+        # engine = create_engine(f"sqlite:///{os.path.abspath('simplestats/baseball.db')}")
+        # engine = create_engine(BASEBALL_DB)
+        # conn = engine.connect()
+        # df = pd.read_sql_table(table_name='people',con=conn,index_col=False,coerce_float=False).drop(columns=['index'])
+        # conn.close()
+        
+        df = pd.read_csv(LEAGUES_CSV,index_col=False)
+
+        return df
+
+    except Exception as e:
+        print(e)
+        try:
+            pass
+            # conn.close()
+        except:
+            pass
+
 def save_teams():
     try:
         df = get_teams_df()
@@ -435,3 +456,4 @@ def save_standings():
 def save_all():
     for s in (save_teams,save_yby_records,save_standings,save_people,save_bios,save_seasons,save_venues):
         s()
+
