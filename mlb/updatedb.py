@@ -348,6 +348,7 @@ def update_leagues(return_df=False,replace_existing=True):
             lg.get("id"),
             lg.get("name"),
             lg.get("nameShort","-"),
+            '-',
             lg.get("abbreviation"),
             0,
             "-",
@@ -358,12 +359,13 @@ def update_leagues(return_df=False,replace_existing=True):
             div.get("id"),
             div.get("name"),
             div.get("nameShort","-"),
+            div.get("nameShort","-")[3:],
             div.get("abbreviation"),
             div.get("league",{}).get("id",0),
             div.get("league",{}).get("name","-"),
         ])
     
-    df = pd.DataFrame(data=data,columns=['mlbam','name_full','name_short','abbreviation','parent_mlbam','parent_name'])
+    df = pd.DataFrame(data=data,columns=['mlbam','name_full','name_short','div_part','abbreviation','parent_mlbam','parent_name'])
 
     if replace_existing is True:
         df.to_csv(LEAGUES_CSV,index=False)

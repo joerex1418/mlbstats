@@ -1,15 +1,15 @@
-mlbam,name_full,name_short,abbreviation,parent_mlbam,parent_name
-103,American League,American,AL,0,-
-104,National League,National,NL,0,-
-114,Cactus League,Cactus,CL,0,-
-115,Grapefruit League,Grapefruit,GL,0,-
-100,American Association,-,AA,0,-
-105,Players League,-,PL,0,-
-101,Union Association,-,UA,0,-
-106,Federal League,-,FL,0,-
-200,American League West,AL West,ALW,103,American League
-201,American League East,AL East,ALE,103,American League
-202,American League Central,AL Central,ALC,103,American League
-203,National League West,NL West,NLW,104,National League
-204,National League East,NL East,NLE,104,National League
-205,National League Central,NL Central,NLC,104,National League
+mlbam,name_full,name_short,div_part,abbreviation,parent_mlbam,parent_name
+103,American League,American,-,AL,0,-
+104,National League,National,-,NL,0,-
+114,Cactus League,Cactus,-,CL,0,-
+115,Grapefruit League,Grapefruit,-,GL,0,-
+100,American Association,-,-,AA,0,-
+105,Players League,-,-,PL,0,-
+101,Union Association,-,-,UA,0,-
+106,Federal League,-,-,FL,0,-
+200,American League West,AL West,West,ALW,103,American League
+201,American League East,AL East,East,ALE,103,American League
+202,American League Central,AL Central,Central,ALC,103,American League
+203,National League West,NL West,West,NLW,104,National League
+204,National League East,NL East,East,NLE,104,National League
+205,National League Central,NL Central,Central,NLC,104,National League
