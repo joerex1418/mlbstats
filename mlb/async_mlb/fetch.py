@@ -36,9 +36,6 @@ async def fetch(urls:list):
 
 def runit(urls:list,**kwargs):
     start = time.time()
-    # retrieved = asyncio.run(fetch(urls))
-
-    # loop = asyncio.get_event_loop()
     loop = _determine_loop()
     retrieved = loop.run_until_complete(fetch(urls))
     if kwargs.get("_log") is True:

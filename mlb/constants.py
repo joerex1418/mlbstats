@@ -842,6 +842,8 @@ STATDICT = {
             "eventType":"eventType"
             }
 
+COLS_SEASON = ['season','hasWildcard','preSeasonStartDate','preSeasonEndDate','seasonStartDate','springStartDate','springEndDate','regularSeasonStartDate','lastDate1stHalf','allStarDate','firstDate2ndHalf','regularSeasonEndDate','postSeasonStartDate','postSeasonEndDate','seasonEndDate','offSeasonStartDate','offSeasonEndDate','seasonLevelGamedayType','gameLevelGamedayType','qualifierPlateAppearances','qualifierOutsPitched']
+
 COLS_HIT = [
     'G',
     'AB',

@@ -501,10 +501,10 @@ def game_str_display(game_obj):
     now_batting = matchup.get("atBat",{})
     now_pitching = matchup.get("pitching",{})
 
-    now_batting_id = now_batting["id"]
+    now_batting_id = now_batting.get("id","-")
     now_batting_name = now_batting.get("name","-")
 
-    now_pitching_id = now_pitching["id"]
+    now_pitching_id = now_pitching.get("id","-")
     now_pitching_name = now_pitching.get("name","-")
 
     ball_ct = str(gm.balls)

@@ -50,6 +50,7 @@ class _team:
     def __repr__(self):
         return self.full
 
+
 class _venue:
     def __new__(cls,name,mlbam,**kwargs):
         self = object.__new__(cls)
@@ -68,13 +69,15 @@ class _venue:
     @property
     def mlbam(self):
         return self.__mlbam
-    
+
+
 class _stat_group:
     def __init__(self,_type,_h=None,_p=None,_f=None):
         self.__type = _type
         self.__hit  = _h
         self.__pit  = _p
         self.__fld  = _f
+
 
 class _league:
     def __init__(self,**kwargs):
@@ -108,6 +111,7 @@ class _league:
         """League abbreviation"""
         return self.__abbrv
 
+
 class _stat_collection:
     """stat type collection instance"""
     def __init__(self,**kwargs):
@@ -115,6 +119,7 @@ class _stat_collection:
     
     def __getitem__(self,_item):
         return getattr(_item)
+
 
 class _stat_data:
     """stat data instance"""
@@ -129,6 +134,7 @@ class _stat_data:
             return df
         else:
             return df[df[_col]==_val]
+
 
 class _stats:
     """instance for collection of stat types/groups
@@ -164,7 +170,8 @@ class _stats:
     def advanced(self) -> pd.DataFrame:
         """Advanced stats"""
         return self.__adv
-    
+
+
 class _standings:
     def __new__(cls,records,splits=None):
         self = object.__new__(cls)
@@ -2244,11 +2251,19 @@ class Game:
         self.__venue        = gameData["venue"]
 
         self.__officials    = self.__boxscore.get("officials",[{},{},{},{}])
+        
+        if len(self.__officials) != 0:
+            self.__ump_home     = self.__officials[0].get("official",{})
+            self.__ump_first    = self.__officials[1].get("official",{})
+            self.__ump_second   = self.__officials[2].get("official",{})
+            self.__ump_third    = self.__officials[3].get("official",{})
+        
+        else:
+            self.__ump_home     = {}
+            self.__ump_first    = {}
+            self.__ump_second   = {}
+            self.__ump_third    = {}
 
-        self.__ump_home     = self.__officials[0].get("official",{})
-        self.__ump_first    = self.__officials[1].get("official",{})
-        self.__ump_second   = self.__officials[2].get("official",{})
-        self.__ump_third    = self.__officials[3].get("official",{})
         self.__umpires      = {"home":self.__ump_home,"first":self.__ump_first,"second":self.__ump_second,"third":self.__ump_third}
      
      # ALL PLAYERS IN GAME
@@ -2296,9 +2311,9 @@ class Game:
         self.__curr_offense         = self.__linescore["offense"]
         self.__curr_play            = liveData["plays"].get("currentPlay",{})
 
-        self.balls                  = self.__linescore.get("balls","-")
-        self.strikes                = self.__linescore.get("strikes","-")
-        self.outs                   = self.__linescore.get("outs","-")
+        self.balls                  = self.__linescore.get("balls",0)
+        self.strikes                = self.__linescore.get("strikes",0)
+        self.outs                   = self.__linescore.get("outs",0)
         self.inning                 = self.__linescore.get("currentInning","-")
         self.inning_ordinal         = self.__linescore.get("currentInningOrdinal","-")
         self.inning_state           = self.__linescore.get("inningState","-")
@@ -3470,7 +3485,7 @@ class Game:
         
         """
         # these stats will be only for this CURRENT GAME (with the exception of a player's batting average stat)
-        if self.gameState == "Live" or self.gameState == "Final":
+        if self.gameState == "Live" or self.gameState == "Final" or self.gameState == "Preview":
             tm = self.__away_stats["batting"]
             players = self.__away_player_data
             # headers = ["Player","Pos","AB","R","H","RBI","SO","BB","AVG","HR","2B","3B","FO","GO","IBB","SacBunts","SacFlies","GIDP","batting","substitute","bbrefID","mlbam"]
@@ -3573,7 +3588,7 @@ class Game:
         >>>
         """
         # these stats will be only for this CURRENT GAME (with the exception of a player's batting average stat)
-        if self.gameState == "Live" or self.gameState == "Final":
+        if self.gameState == "Live" or self.gameState == "Final" or self.gameState == "Preview":
             tm = self.__home_stats["batting"]
             players = self.__home_player_data
             headers = ["Player","Pos","AB","R","H","RBI","SO","BB","AVG","HR","2B","3B","FO","GO","IBB","SacBunts","SacFlies","GIDP","batting","substitute","mlbam"]

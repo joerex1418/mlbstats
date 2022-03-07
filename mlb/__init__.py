@@ -166,6 +166,7 @@ from .updatedb import update_hof
 from .updatedb import update_bios
 from .updatedb import update_people
 from .updatedb import update_venues
+from .updatedb import update_seasons
 from .updatedb import update_leagues
 from .updatedb import update_yby_records
 from .updatedb import update_bbref_hitting_war

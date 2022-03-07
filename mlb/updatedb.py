@@ -1,6 +1,8 @@
 import requests
 import pandas as pd
 
+from .constants import COLS_SEASON
+
 from .paths import (
     BIOS_CSV,
     HALL_OF_FAME_CSV,
@@ -9,7 +11,8 @@ from .paths import (
     VENUES_CSV,
     BBREF_BATTING_DATA_CSV,
     BBREF_PITCHING_DATA_CSV,
-    LEAGUES_CSV
+    LEAGUES_CSV,
+    SEASONS_CSV
 )
 
 from .async_mlb import get_updated_records
@@ -198,6 +201,36 @@ def update_hof(return_df=False,replace_existing=True):
             # engine.dispose()
         except:
             pass
+        if return_df is True:
+            return df
+
+def update_seasons(return_df=False,replace_existing=True):
+    cols = COLS_SEASON
+    date_cols = ['preSeasonStartDate','preSeasonEndDate','seasonStartDate','seasonEndDate','springStartDate','springEndDate','regularSeasonStartDate','regularSeasonEndDate','allStarDate','postSeasonStartDate','postSeasonEndDate','offSeasonStartDate','offSeasonEndDate']
+
+    url = "https://statsapi.mlb.com/api/v1/seasons/all?sportId=1"
+    
+    resp = requests.get(url)
+
+    data = []
+    for s in resp.json()["seasons"]:
+        data.append(pd.Series(s))
+    
+    df = pd.DataFrame(data=data).sort_values(by='seasonId',ascending=False).rename(columns={'seasonId':'season','offseasonStartDate':'offSeasonStartDate'})[cols]
+
+    df[date_cols] = df[date_cols].apply(pd.to_datetime,format=r"%Y-%m-%d")
+
+    if replace_existing is False:
+        return df
+
+
+    try:
+        df.to_csv(SEASONS_CSV,index=False)
+
+        if return_df is True:
+            return df
+    except Exception as e:
+        print(e)
         if return_df is True:
             return df
 

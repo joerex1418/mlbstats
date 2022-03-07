@@ -11,8 +11,6 @@ import nest_asyncio
 nest_asyncio.apply()
 from bs4 import BeautifulSoup as bs
 from bs4 import SoupStrainer
-from types import SimpleNamespace as ns
-
 
 from .async_mlb import (
     fetch,
@@ -38,15 +36,15 @@ from .utils import ct_zone
 from .utils import mt_zone
 from .utils import pt_zone
 
-from .constants import BASE
-from .constants import BAT_FIELDS
-from .constants import BAT_FIELDS_ADV
-from .constants import PITCH_FIELDS
-from .constants import PITCH_FIELDS_ADV
-from .constants import FIELD_FIELDS
-from .constants import STATDICT
-from .constants import LEAGUE_IDS
 from .constants import (
+    BASE,
+    BAT_FIELDS,
+    BAT_FIELDS_ADV,
+    PITCH_FIELDS,
+    PITCH_FIELDS_ADV,
+    FIELD_FIELDS,
+    STATDICT,
+    LEAGUE_IDS,
     COLS_HIT,
     COLS_HIT_ADV,
     COLS_PIT,
@@ -3464,6 +3462,7 @@ def league_leaders(season=None,statGroup=None,playerPool="Qualified"):
 
     return {"hitting":hit_df,"pitching":pitch_df}
 
+
 # ===============================================================
 # MISC Functions
 # ===============================================================
@@ -5451,6 +5450,7 @@ def last_game(teamID):
     teamID = str(teamID)
 
     season_info = get_season_info()
+    
 
     if season_info['in_progress'] is None:
         m = 12
@@ -5463,9 +5463,11 @@ def last_game(teamID):
         y = curr_date.year
         season = season_info['in_progress']
 
-    url = BASE + f"/teams/{teamID}?hydrate=previousSchedule(date={m}/{d}/{y},inclusive=True,limit=1,season={season},gameType=[S,R,P])"
+    url = BASE + f"/teams/{teamID}?hydrate=previousSchedule(date={m}/{d}/{y},inclusive=True,limit=1,season={season},gameType=[S,R,D,W,F,C,L])"
 
     resp = requests.get(url)
+
+    print(url)
 
     result = resp.json()["teams"][0]["previousGameSchedule"]["dates"][0]["games"][0]
     gamePk = result.get("gamePk","")
@@ -5476,10 +5478,10 @@ def last_game(teamID):
     away = result.get("teams",{}).get("away",{}).get("team",{}).get("name","-")
     home = result.get("teams",{}).get("home",{}).get("team",{}).get("name","-")
     if str(away_mlbam) == str(teamID):
-        opp = "@ " + home
+        opp = f"@ {home}"
         opp_mlbam = home_mlbam
     elif str(home_mlbam) == str(teamID):
-        opp = "vs " + away
+        opp = f"vs {away}"
         opp_mlbam = away_mlbam
     df = pd.DataFrame(data=[[gamePk,opp,opp_mlbam,gameDate,gameType]],columns=("gamePk","opponent","opp_mlbam","date","gameType"))
 
@@ -5510,10 +5512,10 @@ def next_game(teamID):
     away = result.get("teams",{}).get("away",{}).get("team",{}).get("name","-")
     home = result.get("teams",{}).get("home",{}).get("team",{}).get("name","-")
     if str(away_mlbam) == str(teamID):
-        opp = "@ " + home
+        opp = f"@ {home}"
         opp_mlbam = home_mlbam
     elif str(home_mlbam) == str(teamID):
-        opp = "vs " + away
+        opp = f"vs {away}"
         opp_mlbam = away_mlbam
     df = pd.DataFrame(data=[[gamePk,opp,opp_mlbam,gameDate,gameType]],columns=("gamePk","opponent","opp_mlbam","date","gameType"))
     
