@@ -57,10 +57,11 @@ Data
 - broadcasts
 
 """
+from .classes import franchise
+from .classes import team
 from .classes import player
 from .classes import Player
 from .classes import Team
-from .classes import franchise
 from .classes import League
 from .classes import Game
 

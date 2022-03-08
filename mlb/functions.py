@@ -25,6 +25,7 @@ from .mlbdata import get_bios_df
 from .mlbdata import get_teams_df
 from .mlbdata import get_yby_records
 from .mlbdata import get_standings_df
+from .mlbdata import get_leages_df
 
 from .utils import curr_year
 from .utils import curr_date
@@ -38,6 +39,7 @@ from .utils import pt_zone
 
 from .constants import (
     BASE,
+    GAME_TYPES_ALL,
     BAT_FIELDS,
     BAT_FIELDS_ADV,
     PITCH_FIELDS,
@@ -99,6 +101,29 @@ async def _fetch_player_data(urls,_get_bio=None,_mlbam=None):
                 resp = await response.json()
             
             parsed_data = await _parse_player_data(data=resp,session=session,_url=str(response.url),_mlbam=_mlbam)
+
+            retrieved_responses.append(parsed_data)
+        
+        await session.close()
+    
+    return retrieved_responses
+
+async def _parse_team_data(data,session:aiohttp.ClientSession,_url):
+    return data
+
+async def _fetch_team_data(urls):
+    retrieved_responses = []
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        for url in urls:
+            tasks.append(session.get(url, ssl=False))
+
+        responses = await asyncio.gather(*tasks)
+        
+        for resp_idx, response in enumerate(responses):
+            resp = await response.json()
+            
+            parsed_data = await _parse_team_data(data=resp,session=session,_url=str(response.url))
 
             retrieved_responses.append(parsed_data)
         
@@ -989,6 +1014,26 @@ def franchise_data(mlbam,**kwargs) -> dict:
 
     return fetched_data
 
+def team_data(_mlbam,_season,**kwargs) -> dict:
+    lgs_df = get_leages_df().set_index('mlbam')
+    tms_df = get_teams_df()
+    tms_df = tms_df[tms_df['yearID']==int(_season)]
+    statGroups = "hitting,pitching,fielding"
+    statTypes = "season,seasonAdvanced"
+    url_list = [
+        f"{BASE}/teams/{_mlbam}?season={_season}hydrate=standings",
+        f"{BASE}/schedule?sportId=1&teamId={_mlbam}&season={_season}&gameType={GAME_TYPES_ALL}",
+        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group={statGroups}&season={_season}",
+        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&season={_season}",
+        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&season={_season}",
+        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&season={_season}",
+        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}",
+        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type={statTypes},group=hitting,season={_season}))",
+        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type={statTypes},group=pitching,season={_season}))",
+        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type={statTypes},group=fielding,season={_season}))",
+        # f"{BASE}/teams/{_mlbam}/stats?stats=vsTeam&group=hitting&season={_mlbam}&opposingTeamId={oppTeamId}",
+    ]
+
 # ===============================================================
 # PLAYER Functions
 # ===============================================================
@@ -1032,7 +1077,6 @@ def player_hitting(mlbam,*args,**kwargs) -> pd.DataFrame:
     league_mlbam_col = []
     league_col = []
     game_type_col = []
-
 
     stat_data = []
 

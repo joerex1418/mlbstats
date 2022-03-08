@@ -469,6 +469,30 @@ class franchise:
     def last_year(self) -> int:
         return self.__last_year
 
+class team:
+    """# team
+
+    Represents a collection of team data for a single year
+
+    Parameters
+    ----------
+
+    mlbam : int or str
+        Player's official MLB ID
+
+    season : int or str
+        Retrieve data for a specific season. Default value is None -- retrieves data for the most recent season
+    
+    """
+    def __init__(self,mlbam,season=None):
+        if season is None:
+            season = default_season()
+
+        self.__mlbam = int(mlbam)
+        self.__season = int(season)
+
+        
+        
 
 class player:
     """# player
@@ -480,9 +504,6 @@ class player:
 
     mlbam : int or str
         Player's official MLB ID
-
-    season : int or str
-        retrieve data for a specific season
 
     """
 
@@ -2207,7 +2228,7 @@ class Game:
     
     def __init__(self,gamePk,timecode=None,tz="ct"):
         game_id = gamePk
-        self.__people = get_people_df()
+        # self.__people = get_people_df()
         self.__tz = tz
         self.game_id = game_id
         self.gamePk  = game_id
@@ -2341,7 +2362,7 @@ class Game:
             except:
                 pass
 
-        self.__str_display = game_str_display(self)
+        # self.__str_display = game_str_display(self)
 
     def __str__(self):
         return f"mlb.Game | gamePk {self.game_id} | {self.__away_team_abbrv} ({self.__away_rhe.get('runs',0)}) @ {self.__home_team_abbrv} ({self.__home_rhe.get('runs',0)})"
@@ -2352,15 +2373,12 @@ class Game:
     def __getitem__(self,key):
         return getattr(self,key)
 
-    def __call__(self, *args, **kwds):
-        pass
-
-    def overview(self):
-        print(self.__str_display)
+    # def overview(self):
+    #     print(self.__str_display)
 
     def umpires(self,base=None):
         """
-        Get info for umpires. If 'base' is None, all umpire data are returned
+        Get info for umpires. If 'base' is None, all umpire data is returned
         """
         if base is None:
             return self.__umpires
@@ -3422,7 +3440,7 @@ class Game:
        #
         return df
 
-    # TEAMS' INDIVIDUAL BATTER STATS (should also be used to display as batting order tables)
+    # TEAMS' INDIVIDUAL BATTER STATS
     def away_batting_stats(self) -> pd.DataFrame:
         """
         Get current game batting stats for players on AWAY team
@@ -4014,12 +4032,6 @@ class Game:
         resp = requests.get(url)
         return resp.json()
 
-    def batter_events(self,playerid):
-        """This class method has not been configured yet"""
-
-    def pitcher_events(self,playerid):
-        """This class method has not been configured yet"""
-
     def context_splits(self,batterID,pitcherID):  #  applicable DYNAMIC splits for the current matchup
         """This class method has not been configured yet"""
         pass
@@ -4030,14 +4042,6 @@ class Game:
 
     def home_season_stats(self):
         """This method has not been configured yet"""
-        pass
-
-    def away_splits(self): # applicable STATIC splits for the AWAY team
-        """This class method has not been configured yet"""
-        pass
-
-    def home_splits(self): # applicable STATIC splits for the HOME team
-        """This class method has not been configured yet"""
         pass
     
 
