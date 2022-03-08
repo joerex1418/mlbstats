@@ -5,6 +5,23 @@ from tabulate import tabulate
 from .constants import ZONE_TOP_STANDARD
 from .constants import ZONE_BOTTOM_STANDARD
 
+from .constants import (
+    BAT_FIELDS,
+    BAT_FIELDS_ADV,
+    PITCH_FIELDS,
+    PITCH_FIELDS_ADV,
+    FIELD_FIELDS,
+    STATDICT,
+    LEAGUE_IDS,
+    COLS_HIT,
+    COLS_HIT_ADV,
+    COLS_PIT,
+    COLS_PIT_ADV,
+    COLS_FLD,
+    W_SEASON,
+    WO_SEASON
+)
+
 from .mlbdata import get_season_info
 
 today_date = dt.datetime.today()
@@ -641,6 +658,16 @@ class timeutils:
         military = military_format
         iso = iso_format
         isoms = iso_format_ms
+
+class keys:
+    stats = STATDICT
+    hit = COLS_HIT
+    hit_adv = COLS_HIT_ADV
+    pitch = COLS_PIT
+    pitch_adv = COLS_PIT_ADV
+    field = COLS_FLD
+    other_cols_with_season = W_SEASON
+    other_cols_wo_season = WO_SEASON
 
 
 

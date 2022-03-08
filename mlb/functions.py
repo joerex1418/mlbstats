@@ -5451,7 +5451,6 @@ def last_game(teamID):
 
     season_info = get_season_info()
     
-
     if season_info['in_progress'] is None:
         m = 12
         d = 1

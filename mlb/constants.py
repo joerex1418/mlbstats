@@ -782,9 +782,8 @@ STATDICT = {
             'tm_name':"tm_name", 
             'tm_bbrefID':"tm_bbrefID",
             'lg_mlbam':"lg_mlbam",
-            'lg_abbrv':"League",
+            'lg_abbrv':"lg_abbrv",
             'div_mlbam':"div_mlbam",
-            'div_short':"Division",
             'v_mlbam':"v_mlbam",
             'G':"G", 
             'W':"W", 
@@ -840,7 +839,7 @@ STATDICT = {
             "event":"event_type",
             "event_type":"event_type",
             "eventType":"eventType"
-            }
+        }
 
 COLS_SEASON = ['season','hasWildcard','preSeasonStartDate','preSeasonEndDate','seasonStartDate','springStartDate','springEndDate','regularSeasonStartDate','lastDate1stHalf','allStarDate','firstDate2ndHalf','regularSeasonEndDate','postSeasonStartDate','postSeasonEndDate','seasonEndDate','offSeasonStartDate','offSeasonEndDate','seasonLevelGamedayType','gameLevelGamedayType','qualifierPlateAppearances','qualifierOutsPitched']
 

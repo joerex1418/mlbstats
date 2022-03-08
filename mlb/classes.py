@@ -2447,40 +2447,6 @@ class Game:
             "away":{},
             "home":{}
         }
-    
-        rhe = self.__linescore["teams"]
-        away_rhe = (rhe["away"]["runs"],rhe["away"]["hits"],rhe["away"]["errors"])
-        home_rhe = (rhe["home"]["runs"],rhe["home"]["hits"],rhe["home"]["errors"])
-        curr_inning = self.__linescore["currentInning"]
-        headers = [""]
-        for i in range(1,curr_inning+1):headers.append(i)
-        for i in ["R","H","E"]:headers.append(i)
-        away_row = [self.__away_team]
-        home_row = [self.__home_team]
-        inn_dfs = {}
-        for inn in self.__linescore["innings"]:
-            try:away_r = inn["away"]["runs"]
-            except:away_r = "-"
-            away_h = inn["away"]["hits"]
-            away_e = inn["away"]["errors"]
-
-            try:home_r = inn["home"]["runs"]
-            except:home_r = "-"
-            home_h = inn["home"]["hits"]
-            home_e = inn["home"]["errors"]
-
-            away_row_inn = [self.__away_team,away_r,away_h,away_e]
-            home_row_inn = [self.__home_team,home_r,home_h,home_e]
-            inn_df = pd.DataFrame(data=[away_row_inn,home_row_inn],columns=["","R","H","E"])
-            inn_dfs[inn["num"]] = inn_df
-
-            away_row.append(away_r)
-            home_row.append(home_r)
-        for i in away_rhe:away_row.append(i)
-        for i in home_rhe:home_row.append(i)
-        df = pd.DataFrame(data=[away_row,home_row],columns=headers)
-        # return df,inn_dfs
-        return inn_dfs
 
     def situation(self) -> dict:
         """Returns a python dictionary detailing the current game situation (count, outs, men-on, batting queue):
@@ -2571,19 +2537,19 @@ class Game:
 
     def venue(self) -> dict:
         v = self.__venue
-        venue_name = v["name"]
+        venue_name  = v["name"]
         venue_mlbam = v["id"]
-        fieldInfo = v["fieldInfo"]
-        capacity = fieldInfo["capacity"]
-        roof = fieldInfo["roofType"]
-        turf = fieldInfo["turfType"]
+        fieldInfo   = v["fieldInfo"]
+        capacity    = fieldInfo["capacity"]
+        roof        = fieldInfo["roofType"]
+        turf        = fieldInfo["turfType"]
         try:
             dimensions = {
-                "leftLine":fieldInfo["leftLine"],
-                "leftCenter":fieldInfo["leftCenter"],
-                "center":fieldInfo["center"],
-                "rightCenter":fieldInfo["rightCenter"],
-                "rightLine":fieldInfo["rightLine"]
+                "leftLine":     fieldInfo["leftLine"],
+                "leftCenter":   fieldInfo["leftCenter"],
+                "center":       fieldInfo["center"],
+                "rightCenter":  fieldInfo["rightCenter"],
+                "rightLine":    fieldInfo["rightLine"]
             }
         except:
             dimensions = {
@@ -2594,32 +2560,32 @@ class Game:
                 "rightLine":None
             }
         loc = v["location"]
-        latitude = loc.get("defaultCoordinates",{}).get("latitude",None)
-        longitude = loc.get("defaultCoordinates",{}).get("longitude",None)
-        address1 = loc.get("address1",None)
-        address2 = loc.get("address2",None)
-        city = loc.get("city",None)
-        state = loc.get("state",None)
+        latitude    = loc.get("defaultCoordinates",{}).get("latitude",None)
+        longitude   = loc.get("defaultCoordinates",{}).get("longitude",None)
+        address1    = loc.get("address1",None)
+        address2    = loc.get("address2",None)
+        city        = loc.get("city",None)
+        state       = loc.get("state",None)
         stateAbbrev = loc.get("stateAbbrev",None)
-        zipCode = loc.get("postalCode",None)
-        phone = loc.get("phone",None)
+        zipCode     = loc.get("postalCode",None)
+        phone       = loc.get("phone",None)
 
         return {
-            "name":venue_name,
-            "mlbam":venue_mlbam,
-            "capacity":capacity,
-            "roof":roof,
-            "turf":turf,
-            "dimensions":dimensions,
-            "lat":latitude,
-            "long":longitude,
-            "address1":address1,
-            "address2":address2,
-            "city":city,
-            "state":state,
-            "stateAbbrev":stateAbbrev,
-            "zipCode":zipCode,
-            "phone":phone
+            "name":         venue_name,
+            "mlbam":        venue_mlbam,
+            "capacity":     capacity,
+            "roof":         roof,
+            "turf":         turf,
+            "dimensions":   dimensions,
+            "lat":          latitude,
+            "long":         longitude,
+            "address1":     address1,
+            "address2":     address2,
+            "city":         city,
+            "state":        state,
+            "stateAbbrev":  stateAbbrev,
+            "zipCode":      zipCode,
+            "phone":        phone
         }
 
     def diamond(self,print_as_df=True):
@@ -2649,15 +2615,15 @@ class Game:
         df = pd.DataFrame(curr_diamond)
 
         diamond = {
-            "pitcher":{"name":self.__curr_defense["pitcher"]["fullName"],"id":self.__curr_defense["pitcher"]["id"]},
-            "catcher":{"name":self.__curr_defense["catcher"]["fullName"],"id":self.__curr_defense["catcher"]["id"]},
-            "first":{"name":self.__curr_defense["first"]["fullName"],"id":self.__curr_defense["first"]["id"]},
-            "second":{"name":self.__curr_defense["second"]["fullName"],"id":self.__curr_defense["second"]["id"]},
-            "third":{"name":self.__curr_defense["third"]["fullName"],"id":self.__curr_defense["third"]["id"]},
+            "pitcher":  {"name":self.__curr_defense["pitcher"]["fullName"],"id":self.__curr_defense["pitcher"]["id"]},
+            "catcher":  {"name":self.__curr_defense["catcher"]["fullName"],"id":self.__curr_defense["catcher"]["id"]},
+            "first":    {"name":self.__curr_defense["first"]["fullName"],"id":self.__curr_defense["first"]["id"]},
+            "second":   {"name":self.__curr_defense["second"]["fullName"],"id":self.__curr_defense["second"]["id"]},
+            "third":    {"name":self.__curr_defense["third"]["fullName"],"id":self.__curr_defense["third"]["id"]},
             "shortstop":{"name":self.__curr_defense["shortstop"]["fullName"],"id":self.__curr_defense["shortstop"]["id"]},
-            "left":{"name":self.__curr_defense["left"]["fullName"],"id":self.__curr_defense["left"]["id"]},
-            "center":{"name":self.__curr_defense["center"]["fullName"],"id":self.__curr_defense["center"]["id"]},
-            "right":{"name":self.__curr_defense["right"]["fullName"],"id":self.__curr_defense["right"]["id"]},
+            "left":     {"name":self.__curr_defense["left"]["fullName"],"id":self.__curr_defense["left"]["id"]},
+            "center":   {"name":self.__curr_defense["center"]["fullName"],"id":self.__curr_defense["center"]["id"]},
+            "right":    {"name":self.__curr_defense["right"]["fullName"],"id":self.__curr_defense["right"]["id"]},
         }
 
         return diamond
