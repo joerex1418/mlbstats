@@ -99,6 +99,7 @@ from .functions import team_pitching_advanced
 from .functions import team_roster
 from .functions import team_game_logs
 from .functions import franchise_data
+from .functions import team_data
 from .functions import team_appearances
 from .functions import league_hitting
 from .functions import league_pitching
@@ -123,9 +124,10 @@ from .constants import (
 )
 
 
-from .utils import default_season
-from .utils import timeutils
 from .utils import keys
+from .utils import timeutils
+from .utils import default_season
+from .utils import metadata
 # from .utils import utc_zone
 # from .utils import et_zone
 # from .utils import ct_zone
@@ -186,6 +188,7 @@ from .utils_team import team_leaders
 from .async_mlb import fetch
 from .async_mlb import fetch_text
 
+from .api import api
 
 
 

@@ -3,6 +3,8 @@ import time
 import pytz
 # import numpy as np
 import requests
+from urllib.parse import unquote
+
 import pandas as pd
 import datetime as dt
 import asyncio
@@ -108,10 +110,258 @@ async def _fetch_player_data(urls,_get_bio=None,_mlbam=None):
     
     return retrieved_responses
 
-async def _parse_team_data(data,session:aiohttp.ClientSession,_url):
+
+async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.DataFrame,_mlbam):
+    if f"/teams/{_mlbam}?season=" in _url:
+        team_info_parsed = {}
+        teams : dict = data["teams"][0]
+        lg_mlbam  = teams.get("league",{}).get("id",0)
+        lg_row      = lgs_df.loc[int(lg_mlbam)]
+        div_mlbam = teams.get("division",{}).get("id",0)
+        div_row     = lgs_df.loc[int(div_mlbam)]
+        team_info_parsed["mlbam"]               = teams["id"]
+        team_info_parsed["full_name"]           = teams["name"]
+        team_info_parsed["location_name"]       = teams["locationName"]
+        team_info_parsed["franchise_name"]      = teams["franchiseName"]
+        team_info_parsed["team_name"]           = teams["teamName"]
+        team_info_parsed["club_name"]           = teams["clubName"]
+        team_info_parsed["short_name"]          = teams["shortName"]
+        team_info_parsed["venue_mlbam"]         = teams.get("venue",{}).get("id","")
+        team_info_parsed["venue_name"]          = teams.get("venue",{}).get("name","")
+        team_info_parsed["first_year"]          = teams["firstYearOfPlay"]
+        team_info_parsed["league_mlbam"]        = lg_mlbam
+        team_info_parsed["league_name"]         = lg_row["name_full"]
+        team_info_parsed["league_short"]        = lg_row["name_short"]
+        team_info_parsed["league_abbrv"]        = lg_row["abbreviation"]
+        team_info_parsed["div_mlbam"]           = div_mlbam
+        team_info_parsed["div_name"]            = div_row["name_full"]
+        team_info_parsed["div_short"]           = div_row["name_short"]
+        team_info_parsed["div_abbrv"]           = div_row["abbreviation"]
+        team_info_parsed["season"]              = teams["season"]
+
+        return team_info_parsed
+
+    elif "/schedule?sportId=1&teamId=" in _url:
+        sched_data = []
+        dates_dict_array : list[dict] = data.get("dates",[{}])
+        for d in dates_dict_array:
+            date_obj = dt.datetime.strptime(d["date"],r"%Y-%m-%d")
+            games : list[dict] = d["games"]
+            for gm in games:
+                away        = gm.get("teams",{}).get("away")
+                home        = gm.get("teams",{}).get("home")
+                away_obj    = away.get("team",{})
+                home_obj    = home.get("team",{})
+
+                aw_lg_mlbam = away_obj.get('league',{}).get('id',0)
+                aw_lg_row = lgs_df.loc[int(aw_lg_mlbam)]
+                aw_div_mlbam = away_obj.get('division',{}).get('id',0)
+                aw_div_row = lgs_df.loc[int(aw_div_mlbam)]
+
+
+                hm_lg_mlbam = away_obj.get('league',{}).get('id',0)
+                hm_lg_row = lgs_df.loc[int(hm_lg_mlbam)]
+                hm_div_mlbam = away_obj.get('division',{}).get('id',0)
+                hm_div_row = lgs_df.loc[int(hm_div_mlbam)]
+
+                is_win = False
+                is_home = True if home_obj.get("id") == int(_mlbam) else False
+                if home_obj.get("id") == int(_mlbam):
+                    is_home = True
+                    if home.get('isWinner') is True:
+                        is_win = True
+                else:
+                    is_home = False
+                    if away.get('isWinner') is True:
+                        is_win = True
+
+
+                venue = gm.get('venue',{})
+                status = gm.get('status',{})
+                gamePk = gm.get("gamePk")
+
+                recap_title = ""
+                recap_desc = ""
+                recap_url = ""
+                recap_avail = False
+                media = gm.get("content",{}).get("media",{})
+                epgAlt = media.get("epgAlternate",[{}])
+                for e in epgAlt:
+                    if e.get("title") == "Daily Recap":
+                        epg_items = e.get("items")
+                        gotUrl = False
+                        for i in epg_items:
+                            recap_title = i.get("title","")
+                            recap_desc = i.get("description")
+                            for p in i.get("playbacks",[{}]):
+                                playback_type = p.get("name")
+                                if playback_type == "mp4Avc" or playback_type == "highBit":
+                                    recap_url = p.get("url")
+                                    gotUrl = True
+                                    recap_avail = True
+                                    break
+                            if gotUrl is True:
+                                break
+
+                sched_data.append([
+                    gm.get("season"),
+                    date_obj,
+                    gamePk,
+                    gm.get("gameType"),
+                    status.get('abstractGameState','-'),
+                    status.get('detailedState','-'),
+                    is_home,
+                    is_win,
+                    away_obj.get("id"),
+                    away_obj.get("name"),
+                    away_obj.get("locationName"),
+                    away_obj.get("franchiseName"),
+                    away_obj.get("clubName"),
+                    aw_lg_mlbam,
+                    aw_lg_row['name_full'],
+                    aw_lg_row['name_short'],
+                    aw_lg_row['abbreviation'],
+                    aw_div_mlbam,
+                    aw_div_row['name_full'],
+                    aw_div_row['name_short'],
+                    aw_div_row['abbreviation'],
+                    away.get("score",0),
+                    home_obj.get("id"),
+                    home_obj.get("name"),
+                    home_obj.get("locationName"),
+                    home_obj.get("franchiseName"),
+                    home_obj.get("clubName"),
+                    hm_lg_mlbam,
+                    hm_lg_row['name_full'],
+                    hm_lg_row['name_short'],
+                    hm_lg_row['abbreviation'],
+                    hm_div_mlbam,
+                    hm_div_row['name_full'],
+                    hm_div_row['name_short'],
+                    hm_div_row['abbreviation'],
+                    home.get("score",0),
+                    gm.get('gameNumber'),
+                    False if gm.get("doubleHeader") == "N" else True,
+                    gm.get("seriesGameNumber"),
+                    gm.get("gamesInSeries"),
+                    gm.get('seriesDescription'),
+                    gm.get('scheduledInnings'),
+                    gm.get('rescheduleGameDate'),
+                    gm.get('rescheduledFromDate'),
+                    venue.get('id','-'),
+                    venue.get('name','-'),
+                    recap_title,
+                    recap_desc,
+                    recap_url,
+                    recap_avail,
+                ])
+        sched_df = pd.DataFrame(
+            data=sched_data,
+
+            columns=[
+                'season',
+                'date',
+                'gamePk',
+                'game_type',
+                'status_abstract',
+                'status_detailed',
+                'is_home',
+                'is_win',
+                'away_mlbam',
+                'away_name',
+                'away_location',
+                'away_franchise',
+                'away_club',
+                'away_lg_mlbam',
+                'away_lg_name',
+                'away_lg_short',
+                'away_lg_abbrv',
+                'away_div_mlbam',
+                'away_div_name',
+                'away_div_short',
+                'away_div_abbrv',
+                'away_score',
+                'home_mlbam',
+                'home_name',
+                'home_location',
+                'home_franchise',
+                'home_club',
+                'home_lg_mlbam',
+                'home_lg_name',
+                'home_lg_short',
+                'home_lg_abbrv',
+                'home_div_mlbam',
+                'home_div_name',
+                'home_div_short',
+                'home_div_abbrv',
+                'home_score',
+                'day_game_number',
+                'double_header',
+                'series_game',
+                'series_length',
+                'series_description',
+                'scheduled_inns',
+                'reschedule_date_to',
+                'rescheduled_date_from',
+                'venue_mlbam',
+                'venue_name',
+                'recap_title',
+                'recap_desc',
+                'recap_url',
+                'recap_avail',
+                ])
+
+        return sched_df
+
+    elif "/roster/fullSeason?season=" in _url:
+        stat_data = []
+
+        roster : list[dict] = data['roster']
+        df_list = []
+
+        for personObj in roster:
+            p = personObj.get('person',{})
+            mlbam           = p.get('id',0)
+            name            = p.get('fullName','-')
+            jersey_number   = personObj.get('jerseyNumber','-')
+            position : str  = personObj.get('position',{}).get('abbreviation','-')
+            slug     : str  = p.get('nameSlug',str(mlbam))
+            status   : str  = p.get('status',{}).get('description','-')
+
+            pstats = p.get('stats')
+            if pstats is None:
+                continue
+
+            for statType_statGroup in pstats:
+                splits = statType_statGroup.get("splits",[{}])
+
+                for s in splits:
+                    stat = s.get("stat",{})
+                    team        = s.get("team",{})
+                    tm_mlbam    = team.get("id","")
+                    tm_name     = team.get("name","")
+
+                    stat['season']      = s.get('season','-')
+                    stat['mlbam']       = mlbam
+                    stat['name']        = name
+                    stat['slug']        = slug
+                    stat['tm_mlbam']    = tm_mlbam
+                    stat['tm_name']     = tm_name
+
+                    stat['jersey_number'] = jersey_number
+                    stat['position']      = position
+                    stat['game_type']     = s.get('gameType')
+
+                    stat_data.append(pd.Series(stat))
+
+        combined_df = pd.DataFrame(stat_data).rename(columns=STATDICT)
+
+        return combined_df
+
     return data
 
-async def _fetch_team_data(urls):
+
+async def _fetch_team_data(urls:list,lgs_df:pd.DataFrame,_mlbam):
     retrieved_responses = []
     async with aiohttp.ClientSession() as session:
         tasks = []
@@ -120,10 +370,10 @@ async def _fetch_team_data(urls):
 
         responses = await asyncio.gather(*tasks)
         
-        for resp_idx, response in enumerate(responses):
+        for response in responses:
             resp = await response.json()
             
-            parsed_data = await _parse_team_data(data=resp,session=session,_url=str(response.url))
+            parsed_data = await _parse_team_data(data=resp,session=session,_url=str(response.url),lgs_df=lgs_df,_mlbam=_mlbam)
 
             retrieved_responses.append(parsed_data)
         
@@ -134,6 +384,61 @@ async def _fetch_team_data(urls):
 # ===============================================================
 # Bulk Retrieval
 # ===============================================================
+
+def team_data(_mlbam,_season,**kwargs) -> dict | list:
+    lgs_df = get_leages_df().set_index('mlbam')
+    tms_df = get_teams_df()
+    tms_df = tms_df[tms_df['yearID']==int(_season)]
+
+    url_list = [
+        f"{BASE}/teams/{_mlbam}?season={_season}&hydrate=standings",
+        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[season],group=[hitting],season={_season}))",
+        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[season],group=[pitching],season={_season}))",
+        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[season],group=[fielding],season={_season}))",
+        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[hitting],season={_season}))",
+        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[pitching],season={_season}))",
+        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&season={_season}",
+        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&season={_season}",
+        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&season={_season}",
+        f"{BASE}/teams/{_mlbam}/roster/coach?season={_season}?hydrate=person",
+        f"{BASE}/draft/{_season}?sportId=1&teamId={_mlbam}"
+    ]
+
+
+    sched_hydrations = "game(content(media(epg))),team"
+    for m in range(12):
+        month = int(m) + 1
+        seas = int(_season)
+        date_obj_1 = dt.date(year=seas,month=month,day=1)
+        if month != 12:
+            date_obj_2 = dt.date(year=seas,month=month+1,day=1)
+        else:
+            seas = seas + 1
+            date_obj_2 = dt.date(year=seas,month=1,day=1)
+        date_obj_2 = date_obj_2 - dt.timedelta(days = 1)
+        
+        date_range_query = f"startDate={date_obj_1.strftime(r'%Y-%m-%d')}&endDate={date_obj_2.strftime(r'%Y-%m-%d')}"
+        url_to_add = f"{BASE}/schedule?sportId=1&teamId={_mlbam}&season={_season}&{date_range_query}&gameType={GAME_TYPES_ALL}&hydrate={sched_hydrations}"
+
+        url_list.append(url_to_add)
+
+    loop = _determine_loop()
+    team_data = loop.run_until_complete(_fetch_team_data(urls=url_list,lgs_df=lgs_df,_mlbam=_mlbam))
+
+    monthly_schedules_combined_df = pd.concat(team_data[-12:])
+
+    fetched_data = {
+        'team_info'   : team_data[0],
+        'hitting_reg' : team_data[1],
+        'pitching_reg': team_data[2],
+        'fielding_reg': team_data[3],
+        'hitting_adv' : team_data[4],
+        'pitching_adv': team_data[5],
+
+        'schedule'    : monthly_schedules_combined_df,
+    }
+
+    return fetched_data
 
 def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
     """Fetch a variety of player information/stats in one API call
@@ -1014,25 +1319,6 @@ def franchise_data(mlbam,**kwargs) -> dict:
 
     return fetched_data
 
-def team_data(_mlbam,_season,**kwargs) -> dict:
-    lgs_df = get_leages_df().set_index('mlbam')
-    tms_df = get_teams_df()
-    tms_df = tms_df[tms_df['yearID']==int(_season)]
-    statGroups = "hitting,pitching,fielding"
-    statTypes = "season,seasonAdvanced"
-    url_list = [
-        f"{BASE}/teams/{_mlbam}?season={_season}hydrate=standings",
-        f"{BASE}/schedule?sportId=1&teamId={_mlbam}&season={_season}&gameType={GAME_TYPES_ALL}",
-        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group={statGroups}&season={_season}",
-        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&season={_season}",
-        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&season={_season}",
-        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&season={_season}",
-        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}",
-        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type={statTypes},group=hitting,season={_season}))",
-        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type={statTypes},group=pitching,season={_season}))",
-        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type={statTypes},group=fielding,season={_season}))",
-        # f"{BASE}/teams/{_mlbam}/stats?stats=vsTeam&group=hitting&season={_mlbam}&opposingTeamId={oppTeamId}",
-    ]
 
 # ===============================================================
 # PLAYER Functions

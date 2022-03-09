@@ -370,7 +370,9 @@ def update_leagues(return_df=False,replace_existing=True):
     divs_url = "https://statsapi.mlb.com/api/v1/divisions?sportId=1&hydrate=league"
     lgs_url  = "https://statsapi.mlb.com/api/v1/leagues?sportId=1"
 
-    data = []
+    data = [
+        [0,'-','-','-','-',0,'-']
+    ]
 
     with requests.session() as sesh:
         divs_resp = sesh.get(divs_url)

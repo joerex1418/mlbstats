@@ -1,3 +1,5 @@
+import requests
+import pandas as pd
 import datetime as dt
 from dateutil import tz
 from tabulate import tabulate
@@ -668,6 +670,74 @@ class keys:
     field = COLS_FLD
     other_cols_with_season = W_SEASON
     other_cols_wo_season = WO_SEASON
+
+class metadata:
+    def __call__(self) -> list:
+        meta_list = [
+            'statGroups',
+            'statTypes',
+            'leagueLeaderTypes',
+            'baseballStats'
+        ]
+        meta_list.sort()
+        return meta_list
+
+    def baseballStats(df=False) -> list[dict] | pd.DataFrame:
+        url = "https://statsapi.mlb.com/api/v1/baseballStats"
+        data = []
+        resp = requests.get(url)
+        if df is True:
+            for d in resp.json():
+                stat_groups = []
+                for sg in d.get('statGroups',[{}]):
+                    stat_groups.append(sg.get('displayName'))
+                data.append([
+                    d.get('name','-'),
+                    d.get('lookupParam','-'),
+                    d.get('isCounting','-'),
+                    d.get('label','-'),
+                    True if 'hitting' in stat_groups else False,
+                    True if 'pitching' in stat_groups else False,
+                    True if 'fielding' in stat_groups else False,
+                    True if 'catching' in stat_groups else False,
+                    True if 'game' in stat_groups else False,
+                    d.get('orgTypes','-'),
+                    d.get('highLowTypes','-'),
+                    d.get('streakLevels','-'),
+                ])
+            return pd.DataFrame(data=data,columns=['name','lookupParam','isCounting','label','hitting','pitching','fielding','catching','game','orgTypes','highLowTypes','streakLevels'])
+        else:
+            return resp.json()
+
+    def leagueLeaderTypes(df=False) -> list | pd.DataFrame:
+        url = "https://statsapi.mlb.com/api/v1/leagueLeaderTypes"
+        data = []
+        resp = requests.get(url)
+        for i in resp.json():
+            data.append(i['displayName'])
+        return data
+
+    def statGroups(df=False) -> list | pd.DataFrame:
+        url = "https://statsapi.mlb.com/api/v1/statGroups"
+        data = []
+        resp = requests.get(url)
+        for i in resp.json():
+            data.append(i['displayName'])
+        if df is True:
+            return pd.DataFrame(data=data)
+        return data
+
+    def statTypes(df=False) -> list | pd.DataFrame:
+        url = "https://statsapi.mlb.com/api/v1/statTypes"
+        data = []
+        resp = requests.get(url)
+        for i in resp.json():
+            data.append(i['displayName'])
+        return data
+
+
+
+        
 
 
 

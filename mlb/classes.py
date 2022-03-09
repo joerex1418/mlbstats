@@ -469,6 +469,7 @@ class franchise:
     def last_year(self) -> int:
         return self.__last_year
 
+
 class team:
     """# team
 
@@ -491,9 +492,7 @@ class team:
         self.__mlbam = int(mlbam)
         self.__season = int(season)
 
-        
-        
-
+    
 class player:
     """# player
     
@@ -4044,5 +4043,3 @@ class Game:
         """This method has not been configured yet"""
         pass
     
-
-
