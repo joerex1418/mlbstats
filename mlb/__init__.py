@@ -3,67 +3,20 @@
 
 Author: Joe Rechenmacher
 
-
-Classes
--------
-- Player
-- Team
-- Franchise
-- League
-- Game
-
-Functions
----------
-- play_search
-- pitch_search
-- game_search
-- schedule_search
-- get_matchup_stats
-- leaderboards
-- last_game
-- next_game
-- find_team
-- find_player
-- find_venue
-- schedule
-- player_hitting
-- player_pitching
-- player_fielding
-- player_hitting_advanced
-- player_pitching_advanced
-- team_hitting
-- team_pitching
-- team_fielding
-- team_hitting_advanced
-- team_pitching_advanced
-- team_roster
-- league_hitting
-- league_pitching
-- league_fielding
-- league_hitting_advanced
-- league_pitching_advanced
-
-Data
-----
-- bios
-- teams
-- people
-- venues
-- seasons
-- franchise
-- standings
-- yby_records
-- hall_of_fame
-- broadcasts
-
 """
+
+from .classes import person
+from .classes import player
 from .classes import franchise
 from .classes import team
-from .classes import player
-from .classes import Player
-from .classes import Team
-from .classes import League
 from .classes import Game
+
+# from .classes import Player
+# from .classes import Team
+# from .classes import League
+
+# Parser objects
+from .classes import parser
 
 from .functions import play_search
 from .functions import pitch_search

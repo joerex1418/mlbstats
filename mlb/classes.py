@@ -5,137 +5,181 @@ import datetime as dt
 # from bs4 import BeautifulSoup as bs
 from types import SimpleNamespace as ns
 
-from . import player as player_mod
-from . import utils_team
-from . import league
+# from . import player as player_mod
+# from . import utils_team
+# from . import league
 
-from .async_mlb import get_team_responses
+# from .async_mlb import get_team_responses
 
+from .functions import team_data
 from .functions import franchise_data
 from .functions import player_data
 
-from .mlbdata import get_people_df
-from .mlbdata import get_yby_records
-# from .mlbdata import get_bios_df
-# from .mlbdata import get_season_info
-# from .mlbdata import get_teams_df
-# from .mlbdata import get_seasons_df
+# from .mlbdata import get_yby_records
+# from .mlbdata import get_people_df
 
 from .constants import BASE
 from .constants import POSITION_DICT
 
-from .utils import curr_year
-from .utils import curr_date
-from .utils import iso_format
+# from .utils import curr_year
 from .utils import iso_format_ms
 from .utils import utc_zone
-from .utils import simplify_time
 from .utils import prettify_time
 from .utils import default_season
-from .utils import game_str_display
 
+_mlbam = int
+_team_data = dict
 
-class _team:
-    def __new__(cls,full,**tm_keys):
-        self = object.__new__(cls)
+# class mlb_datetime:
+#     def __init__(self,_datetime_string):
+#         try:
+#             return dt.datetime.strptime(_datetime_string,r"%Y-%m-%d")
+#         except:
+#             return dt.datetime.strptime(_datetime_string,r"%m/%d/%Y")
 
-        self.full = full
-        self.__dict__.update(tm_keys)
+class parser:
+    class person:
+        def __init__(self,PersonData:dict):
+            data = PersonData
+            __name_data = {}
 
-        return self
-    
-    def __str__(self):
-        return self.full
-    
-    def __repr__(self):
-        return self.full
+            # position info
+            pos = data.get('primaryPosition',{})
+            __position_data = {
+                'code':pos.get('code','-'),
+                'name':pos.get('name','-'),
+                'type':pos.get('type','-'),
+                'abbrv':pos.get('abbreviation','-'),
+                'abbreviation':pos.get('abbreviation','-'),
+            }
+            
+            # birth info
+            __birth_data = {
+                'date':  md(data.get('birthDate','-')),
+                'city':  data.get('birthCity','-'),
+                'state': data.get('birthStateProvince','-'),
+                'province':data.get('birthStateProvince','-'),
+                'country' :data.get('birthCountry','-'),
+            }
 
+            # death info
+            __death_data = {
+                'date':  md(data.get('deathDate','-')),
+                'city':  data.get('deathCity','-'),
+                'state': data.get('deathStateProvince','-'),
+                'province':data.get('deathStateProvince','-'),
+                'country' :data.get('deathCountry','-'),
+            }
 
-class _venue:
-    def __new__(cls,name,mlbam,**kwargs):
-        self = object.__new__(cls)
+            for old_key,new_key in properties.person.items():
+                # print('')
+                # print(f"ORIGINAL KEY:\t{old_key}")
+                # print(f"NEW KEY:\t\t{old_key}")
 
-        # might add "historic" properties for venue
-        self.__name = name
-        self.__mlbam = mlbam
-        self.__dict__.update(**kwargs)
+                if 'name_' in new_key:
+                    __name_data[new_key[5:]] = data[old_key]
 
-        return self
-    
-    @property
-    def name(self):
-        return self.__name
-    
-    @property
-    def mlbam(self):
-        return self.__mlbam
+                elif new_key == "last_game_date":
+                    self.last_game = md(data.get(old_key,'-'))
 
+                else:
+                    setattr(self,new_key,data.get(old_key))
+            __debut_data = {
+                'date':md(data.get('mlbDebutDate','-')),
+                }
+            __last_game_data = {
+                'date':md(data.get('lastPlayedDate','-')),
+            }
 
-class _stat_group:
-    def __init__(self,_type,_h=None,_p=None,_f=None):
-        self.__type = _type
-        self.__hit  = _h
-        self.__pit  = _p
-        self.__fld  = _f
+            self.name       = mlb_wrapper(**__name_data)
+            self.position   = mlb_wrapper(**__position_data)
+            self.birth      = mlb_wrapper(**__birth_data)
+            self.death      = mlb_wrapper(**__death_data)
+            self.debut      = mlb_wrapper(**__debut_data)
+            self.last_game  = mlb_wrapper(**__last_game_data)
 
+            self.current_team = data.get('team',{})
 
-class _league:
-    def __init__(self,**kwargs):
-        self.__mlbam = kwargs.get("mlbam")
-        self.__name = kwargs.get("name")
-        self.__short = kwargs.get("short")
-        self.__abbrv = kwargs.get("abbrv")
-    
-    @property
-    def mlbam(self):
-        """Official League MLB ID"""
-        return self.__mlbam
+        def stats(**kwargs):
+            pass
+            
+class mlb_date:
+    """datetime.date wrapper for mlb date representations
 
-    @property
-    def name(self):
-        """League's full name"""
-        return self.__name
-
-    @property
-    def short(self):
-        """League short name"""
-        return self.__short
-
-    @property
-    def abbrv(self):
-        """League abbreviation"""
-        return self.__abbrv
-
-    @property
-    def abbreviation(self):
-        """League abbreviation"""
-        return self.__abbrv
-
-
-class _stat_collection:
-    """stat type collection instance"""
-    def __init__(self,**kwargs):
-        self.__dict__.update(kwargs)
-    
-    def __getitem__(self,_item):
-        return getattr(_item)
-
-
-class _stat_data:
-    """stat data instance"""
-    def __init__(self,_df):
-        self.__df = _df
-    
-    def __call__(self,_col=None,_val=None):
-        df = self.__df
-        if len(df) == 0:
-            return None
-        elif _col is None or _val is None:
-            return df
+    """
+    def __init__(self,_date_string):
+        if _date_string != "-":
+            d = dt.datetime.strptime(_date_string,r"%Y-%m-%d").date()
+            self.__date_obj = d
+            self.__date_str    = self.__date_obj.strftime(r"%Y-%m-%d")
+            self.__month_name  = d.strftime(r"%B")
+            self.__dow         = d.strftime(r"%A")
+            self.__day         = d.strftime(r"%d")
+            self.__month       = d.strftime(r"%m")
+            self.__year        = d.strftime(r"%Y")
+            
         else:
-            return df[df[_col]==_val]
+            self.__date_obj = None
+            self.__date_str    = '-'
+            self.__month_name  = '-'
+            self.__dow         = '-'
+            self.__month       = 0
+            self.__day         = 0
+            self.__year        = 0
 
+    def __repr__(self):
+        return self._date_str
 
+    def __str__(self):
+        return self._date_str
+    
+    def __call__(self) -> dt.date | None:
+        """Return datetime.date object"""
+        return self._date_obj
+
+    @property
+    def month(self) -> int:
+        return self.__month
+    
+    @property
+    def day(self) -> int:
+        return self.__day
+
+    @property
+    def year(self) -> int:
+        return self.__year
+
+    @property
+    def day_of_week(self) -> str:
+        return self.__dow
+    
+    @property
+    def month_name(self) -> str:
+        return self.__month_name
+
+    @property
+    def _date_obj(self) -> dt.date | None:
+        return self.__date_obj
+
+    @property
+    def _date_str(self) -> str:
+        return self.__date_str
+    
+class mlb_data_wrapper:
+    """## wrapper
+    Namespace/subscriptable object for interacting with nested data
+    
+    """
+    def __init__(self,**kwargs):
+        for _k,_v in kwargs.items():
+            setattr(self,_k,_v)
+
+    def __getitem__(self,_attr):
+        return getattr(self,_attr)
+        
+    def __call__(self,_attr):
+        return getattr(self,_attr)
+        
 class _stats:
     """instance for collection of stat types/groups
     
@@ -171,328 +215,145 @@ class _stats:
         """Advanced stats"""
         return self.__adv
 
+md = mlb_date
 
-class _standings:
-    def __new__(cls,records,splits=None):
-        self = object.__new__(cls)
-        self.__records = records
-        self.__splits = splits
+mlb_wrapper = mlb_data_wrapper
 
-        return self
-    
-    @property
-    def records(self):
-        """Year-by-year season records"""
-        return self.__records
-    
-    @property
-    def splits(self):
-        """Year-by-year season record splits"""
-        return self.__splits
+class properties:
+    person = dict(
+        id             = 'mlbam',
+        gender         = 'gender',
+        height         = 'height',
+        weight         = 'weight',
+        active         = 'is_active',
+        # birthDate      = 'birth_date',
+        # birthCity      = 'birth_city',
+        # birthStateProvince = 'birth_state',
+        # birthCountry   = 'birth_country',
+        # deathDate      = 'death_date',
+        # deathCity      = 'death_city',
+        # deathStateProvince = 'death_state',
+        # deathCountry   = 'death_country',
+        captain        = 'captain',
+        currentAge     = 'age',
+        currentTeam    = 'current_team',
+        draft          = 'draft',
+        draftYear      = 'draft_year',
+        education      = 'education',
+        firstName      = 'name_first',
+        middleName     = 'name_middle',
+        lastName       = 'name_last',
+        nameMatrilineal= 'name_matrilineal',
+        fullName       = 'name_full',
+        boxscoreName   = 'name_boxscore',
+        useName        = 'name_use',
+        nickName       = 'name_nick',
+        nameSlug       = 'name_slug',
+        firstLastName  = 'name_fl',
+        lastFirstName  = 'name_lf',
+        fullFMLName    = 'name_fml',
+        fullLFMName    = 'name_lfm',
+        pronunciation  = 'name_pronunciation',
+        isPlayer       = 'is_player',
+        isVerified     = 'is_verified',
+        # lastPlayedDate = 'last_game_date',
+        # mlbDebutDate   = 'debut_date',
+        link           = 'url',
+        nationality    = 'nationality',
+        primaryNumber  = 'jersey',
+        strikeZoneTop    = 'zone_top',
+        strikeZoneBottom = 'zone_bottom',
+      #  primaryPosition  = 'position',
+      #  jobEntries      = 'job_entries',
+      #  rosterEntries = '',
+      #  social = '',
+      #  stats = '',
+    )
 
-
-class _roster:
-    def __new__(cls,**rosters):
-        self = object.__new__(cls)
-        # self.__dict__.update(rosters)
-        self.__all      = rosters["all"]
-        self.__pitcher  = rosters["pitcher"]
-        self.__catcher  = rosters["catcher"]
-        self.__first    = rosters["first"]
-        self.__second   = rosters["second"]
-        self.__third    = rosters["third"]
-        self.__short    = rosters["short"]
-        self.__left     = rosters["left"]
-        self.__center   = rosters["center"]
-        self.__right    = rosters["right"]
-        self.__dh       = rosters["dh"]
-        self.__infield  = rosters['infield']
-        self.__outfield = rosters['outfield']
-        self.__active   = rosters['active']
-
-        return self
-    
-    def __get__(self):
-        return self.all
-
-    def __getitem__(self,__attr) -> pd.DataFrame:
-        return getattr(self,__attr)
-    
-    def __len__(self) -> int:
-        return len(self.all)
-
-    def __call__(self,_pos=None) -> pd.DataFrame:
-        df = self.all
-        if _pos is not None:
-            df = df[df['pos']==_pos]
-        return df
-
-    @property
-    def all(self) -> pd.DataFrame:
-        """Alltime Roster"""
-        return self.__all
-
-    @property
-    def pitcher(self) -> pd.DataFrame:
-        """All Pitchers"""
-        return self.__pitcher
-
-    @property
-    def catcher(self) -> pd.DataFrame:
-        """All Catchers"""
-        return self.__catcher
-
-    @property
-    def first(self) -> pd.DataFrame:
-        """All First Basemen"""
-        return self.__first
-
-    @property
-    def second(self) -> pd.DataFrame:
-        """All Second Basemen"""
-        return self.__second
-
-    @property
-    def third(self) -> pd.DataFrame:
-        """All Third Basemen"""
-        return self.__third
-
-    @property
-    def short(self) -> pd.DataFrame:
-        """All Shortstops"""
-        return self.__short
-
-    @property
-    def left(self) -> pd.DataFrame:
-        """All Left Fielders"""
-        return self.__left
-
-    @property
-    def center(self) -> pd.DataFrame:
-        """All Center Fielders"""
-        return self.__center
-
-    @property
-    def right(self) -> pd.DataFrame:
-        """All Right Fielders"""
-        return self.__right
-
-    @property
-    def infield(self) -> pd.DataFrame:
-        """All Infielders"""
-        return self.__infield
-
-    @property
-    def outfield(self) -> pd.DataFrame:
-        """All Outfielders"""
-        return self.__outfield
-
-    @property
-    def dh(self) -> pd.DataFrame:
-        """All Outfielders"""
-        return self.__dh
-
-    @property
-    def designated_hitter(self) -> pd.DataFrame:
-        """All Outfielders"""
-        return self.__dh
-    
-    @property
-    def active(self) -> pd.DataFrame:
-        """All active players"""
-        return self.__active
-
-
-class franchise:
-    """# franchise
-    
-    Get franchise data in bulk through a bunch of API calls (uses `async` and `aiohttp` libraries)
-    
-    Parameters
-    ----------
-
-    mlbam : int or str
-        Player's official MLB ID
-
-    season : int or str
-        retrieve data for a specific season
+   
+class person:
+    """Person instance
     
     """
-    def __init__(self,mlbam):
-        data = franchise_data(mlbam)
+    def __init__(
+        self,PersonData:dict,
+        **kwargs
+        ):
+        data = PersonData
+        __name_data = {}
 
-        records         = data["records"]
-        record_splits   = data["record_splits"] # like standings splits
-        yby_data        = data["yby_data"]
-        team_info       = data["team_info"]
-        hitting         = data["hitting"]
-        hitting_adv     = data["hitting_advanced"]
-        pitching        = data["pitching"]
-        pitching_adv    = data["pitching_advanced"]
-        fielding        = data["fielding"]
-        roster          = data["all_players"]
-        hof             = data["hof"]
-        retired         = data["retired_numbers"]
-
+        # position info
+        pos = data.get('primaryPosition',{})
+        __position_data = {
+            'code':pos.get('code','-'),
+            'name':pos.get('name','-'),
+            'type':pos.get('type','-'),
+            'abbrv':pos.get('abbreviation','-'),
+            'abbreviation':pos.get('abbreviation','-'),
+        }
         
-        ti = team_info
-        self.__mlbam = ti['mlbam']
-        self.__name = _team(
-            full=ti['full_name'],
-            location=ti['location_name'],
-            franchise=ti['franchise_name'],
-            mascot=ti['team_name'],
-            club=ti['club_name'],
-            short=ti['short_name']
-            )
+        # birth info
+        __birth_data = {
+            'date':  md(data.get('birthDate','-')),
+            'city':  data.get('birthCity','-'),
+            'state': data.get('birthStateProvince','-'),
+            'province':data.get('birthStateProvince','-'),
+            'country' :data.get('birthCountry','-'),
+        }
+
+        # death info
+        __death_data = {
+            'date':  md(data.get('deathDate','-')),
+            'city':  data.get('deathCity','-'),
+            'state': data.get('deathStateProvince','-'),
+            'province':data.get('deathStateProvince','-'),
+            'country' :data.get('deathCountry','-'),
+        }
+
+        for old_key,new_key in properties.person.items():
+            # print('')
+            # print(f"ORIGINAL KEY:\t{old_key}")
+            # print(f"NEW KEY:\t\t{old_key}")
+
+            if 'name_' in new_key:
+                __name_data[new_key[5:]] = data[old_key]
+
+            elif new_key == "last_game_date":
+                self.last_game = md(data.get(old_key,'-'))
+
+            else:
+                setattr(self,new_key,data.get(old_key))
+        __debut_data = {
+            'date':md(data.get('mlbDebutDate','-')),
+            }
+        __last_game_data = {
+            'date':md(data.get('lastPlayedDate','-')),
+        }
+
+        self.name       = mlb_wrapper(**__name_data)
+        self.position   = mlb_wrapper(**__position_data)
+        self.birth      = mlb_wrapper(**__birth_data)
+        self.death      = mlb_wrapper(**__death_data)
+        self.debut      = mlb_wrapper(**__debut_data)
+        self.last_game  = mlb_wrapper(**__last_game_data)
+
+        self.current_team = data.get('team',{})
+
+    def stats(self,**kwargs):
+        pass
+
+    @classmethod
+    def build(cls,*PersonData:dict,**kwargs):
+        """Create a 'person' instance from raw api data and/or keyword arguments
+
+        """
+        if len(PersonData) != 0:
+            data = PersonData[0]
+        else:
+            data = ''
+
+        return cls()
         
-
-        self.__league = _league(
-            mlbam=ti['league_mlbam'],
-            name=ti['league_name'],
-            short=ti['league_short'],
-            abbrv=ti['league_abbrv']
-        )
-        self.__division = _league(
-            mlbam=ti['div_mlbam'],
-            name=ti['div_name'],
-            short=ti['div_short'],
-            abbrv=ti['div_abbrv']
-        )
-        
-        self.__venue = _venue(
-            name=ti['venue_name'],
-            mlbam=ti['venue_mlbam']
-        )
-        
-        self.__standings = _standings(
-            records=records,
-            splits=record_splits
-            )
-
-        self.__yby_data = yby_data
-
-        self.__hitting = _stats(reg=hitting,adv=hitting_adv)
-        self.__pitching = _stats(reg=pitching,adv=pitching_adv)
-        self.__fielding = _stats(reg=fielding)
-
-        self.__stats = ns(
-            hitting=self.__hitting,
-            pitching=self.__pitching,
-            fielding=self.__fielding
-        )
-
-        self.__legends = hof
-        self.__retired = retired
-
-        self.__roster = _roster(
-            all         = roster,
-            pitcher     = roster[roster['pos']=='P'].reset_index(drop=True),
-            catcher     = roster[roster['pos']=='C'].reset_index(drop=True),
-            first       = roster[roster['pos']=='1B'].reset_index(drop=True),
-            second      = roster[roster['pos']=='2B'].reset_index(drop=True),
-            third       = roster[roster['pos']=='3B'].reset_index(drop=True),
-            short       = roster[roster['pos']=='SS'].reset_index(drop=True),
-            left        = roster[roster['pos']=='LF'].reset_index(drop=True),
-            center      = roster[roster['pos']=='CF'].reset_index(drop=True),
-            right       = roster[roster['pos']=='RF'].reset_index(drop=True),
-            dh          = roster[roster['pos']=='DH'].reset_index(drop=True),
-            designated_hitter = roster[roster['pos']=='DH'].reset_index(drop=True),
-            infield     = roster[roster['pos'].isin(['1B','2B','3B','SS'])].reset_index(drop=True),
-            outfield    = roster[roster['pos'].isin(['OF','LF','CF','RF'])].reset_index(drop=True),
-            active      = roster[roster['status']=='Active']
-        )
-
-        self.__first_year = int(ti['first_year'])
-        self.__last_year = int(ti.get("last_year",default_season()))
-
-    def __str__(self):
-        return f'<class mlb.franchise - {self.full} >'
-
-    def __repr__(self):
-        return f'<class mlb.franchise> - {self.full}'
-
-    @property
-    def mlbam(self) -> int:
-        """Team's MLB Advanced Media ID"""
-        return int(self.__mlbam)
-
-    @property
-    def name(self):
-        """Various names team names/aliases"""
-        return self.__name
-    
-    @property
-    def venue(self):
-        return self.__venue
-
-    @property
-    def standings(self):
-        """standings (records, record splits)"""
-        return self.__standings
-
-    @property
-    def raw_data(self):
-        return self.__yby_data
-
-    @property
-    def stats(self):
-        return self.__stats
-
-    @property
-    def roster(self) -> _roster:
-        """Roster data"""
-        return self.__roster
-
-    @property
-    def retired(self) -> pd.DataFrame:
-        """Retired numbers"""
-        return self.__retired
-
-    @property
-    def legends(self) -> pd.DataFrame:
-        return self.__legends
-    
-    @property
-    def league(self) -> _league:
-        return self.__league
-    
-    @property
-    def division(self) -> _league:
-        return self.__division
-
-    @property
-    def first_year(self) -> int:
-        return self.__first_year
-
-    @property
-    def last_year(self) -> int:
-        return self.__last_year
-
-
-class team:
-    """# team
-
-    Represents a collection of team data for a single year
-
-    Parameters
-    ----------
-
-    mlbam : int or str
-        Player's official MLB ID
-
-    season : int or str
-        Retrieve data for a specific season. Default value is None -- retrieves data for the most recent season
-    
-    """
-    def __init__(self,mlbam,season=None):
-        if season is None:
-            season = default_season()
-
-        self.__mlbam = int(mlbam)
-        self.__season = int(season)
-
-    
 class player:
     """# player
     
@@ -657,7 +518,6 @@ class player:
                 city=_hs_df.iloc[0]["city"],
                 state=_hs_df.iloc[0]["state"]
             )
-            # self.__highschool = f'{_hs_df.iloc[0]["school"]} ({_hs_df.iloc[0]["city"]}, {_hs_df.iloc[0]["state"]})'
         else:
             self.__highschool = "-"
         if len(_co_df) > 0:
@@ -666,7 +526,6 @@ class player:
                 city=_co_df.iloc[0]["city"],
                 state=_co_df.iloc[0]["state"]
             )
-            # self.__college = _co_df.iloc[0]["school"]
         else:
             self.__college = "-"
 
@@ -697,7 +556,7 @@ class player:
                 date_long=date_obj.strftime(r"%B %d, %Y"),
                 date_short=date_obj.strftime(r"%b %d, %Y"),
                 gamepk=debut_data["game"]["gamePk"],
-                team=_team(
+                team=mlb_wrapper(
                     full=team.get("name"),
                     mlbam=team.get("id"),
                     team=team.get("teamName"),
@@ -708,7 +567,7 @@ class player:
                     season=team.get("season"),
                     slug=f"{team.get('clubName').lower().replace(' ','-')}-{team.get('id')}",
                 ),
-                opponent=_team(
+                opponent=mlb_wrapper(
                     full=opponent.get("name"),
                     mlbam=opponent.get("id"),
                     team=opponent.get("teamName"),
@@ -722,15 +581,16 @@ class player:
             )
         else:
             debut_data = {}
+    
     def __str__(self):
-        return f"<mlb.player; {self.__fullName} | {self.__mlbam}>"
+        return self.__fullName
 
     def __repr__(self):
-        return f"<mlb.player; {self.__fullName} | {self.__mlbam}>"
+        return self.__fullName
 
     @property
     def bio(self) -> list[str]:
-        """Player bio (from Baseball-Reference Bullpen Page"""
+        """Player bio (from Baseball-Reference Bullpen Page)"""
         return self.__bio
 
     @property
@@ -957,1202 +817,671 @@ class player:
         return self.__transactions
 
 
-class Player:
+
+
+class _venue:
+    def __new__(cls,name,mlbam,**kwargs):
+        self = object.__new__(cls)
+
+        # might add "historic" properties for venue
+        self.__name = name
+        self.__mlbam = mlbam
+        self.__dict__.update(**kwargs)
+
+        return self
+    
+    @property
+    def name(self):
+        return self.__name
+    
+    @property
+    def mlbam(self):
+        return self.__mlbam
+
+
+class _league:
+    def __init__(self,**kwargs):
+        self.__mlbam = kwargs.get("mlbam")
+        self.__name = kwargs.get("name")
+        self.__short = kwargs.get("short")
+        self.__abbrv = kwargs.get("abbrv")
+    
+    @property
+    def mlbam(self):
+        """Official League MLB ID"""
+        return self.__mlbam
+
+    @property
+    def name(self):
+        """League's full name"""
+        return self.__name
+
+    @property
+    def short(self):
+        """League short name"""
+        return self.__short
+
+    @property
+    def abbrv(self):
+        """League abbreviation"""
+        return self.__abbrv
+
+    @property
+    def abbreviation(self):
+        """League abbreviation"""
+        return self.__abbrv
+
+
+class _stat_collection:
+    """stat type collection instance"""
+    def __init__(self,**kwargs):
+        self.__dict__.update(kwargs)
+    
+    def __getitem__(self,_item):
+        return getattr(_item)
+
+
+class _stat_data:
+    """stat data instance"""
+    def __init__(self,_df):
+        self.__df = _df
+    
+    def __call__(self,_col=None,_val=None):
+        df = self.__df
+        if len(df) == 0:
+            return None
+        elif _col is None or _val is None:
+            return df
+        else:
+            return df[df[_col]==_val]
+
+
+class _standings:
+    def __new__(cls,records,splits=None):
+        self = object.__new__(cls)
+        self.__records = records
+        self.__splits = splits
+
+        return self
+    
+    @property
+    def records(self):
+        """Year-by-year season records"""
+        return self.__records
+    
+    @property
+    def splits(self):
+        """Year-by-year season record splits"""
+        return self.__splits
+
+
+class _roster:
+    def __new__(cls,**rosters):
+        self = object.__new__(cls)
+        # self.__dict__.update(rosters)
+        self.__all      = rosters["all"]
+        self.__pitcher  = rosters["pitcher"]
+        self.__catcher  = rosters["catcher"]
+        self.__first    = rosters["first"]
+        self.__second   = rosters["second"]
+        self.__third    = rosters["third"]
+        self.__short    = rosters["short"]
+        self.__left     = rosters["left"]
+        self.__center   = rosters["center"]
+        self.__right    = rosters["right"]
+        self.__dh       = rosters["dh"]
+        self.__infield  = rosters['infield']
+        self.__outfield = rosters['outfield']
+        self.__active   = rosters['active']
+
+        return self
+    
+    def __get__(self):
+        return self.all
+
+    def __getitem__(self,__attr) -> pd.DataFrame:
+        return getattr(self,__attr)
+    
+    def __len__(self) -> int:
+        return len(self.all)
+
+    def __call__(self,_pos=None) -> pd.DataFrame:
+        df = self.all
+        if _pos is not None:
+            df = df[df['pos']==_pos]
+        return df
+
+    @property
+    def all(self) -> pd.DataFrame:
+        """Alltime Roster"""
+        return self.__all
+
+    @property
+    def pitcher(self) -> pd.DataFrame:
+        """All Pitchers"""
+        return self.__pitcher
+
+    @property
+    def catcher(self) -> pd.DataFrame:
+        """All Catchers"""
+        return self.__catcher
+
+    @property
+    def first(self) -> pd.DataFrame:
+        """All First Basemen"""
+        return self.__first
+
+    @property
+    def second(self) -> pd.DataFrame:
+        """All Second Basemen"""
+        return self.__second
+
+    @property
+    def third(self) -> pd.DataFrame:
+        """All Third Basemen"""
+        return self.__third
+
+    @property
+    def short(self) -> pd.DataFrame:
+        """All Shortstops"""
+        return self.__short
+
+    @property
+    def left(self) -> pd.DataFrame:
+        """All Left Fielders"""
+        return self.__left
+
+    @property
+    def center(self) -> pd.DataFrame:
+        """All Center Fielders"""
+        return self.__center
+
+    @property
+    def right(self) -> pd.DataFrame:
+        """All Right Fielders"""
+        return self.__right
+
+    @property
+    def infield(self) -> pd.DataFrame:
+        """All Infielders"""
+        return self.__infield
+
+    @property
+    def outfield(self) -> pd.DataFrame:
+        """All Outfielders"""
+        return self.__outfield
+
+    @property
+    def dh(self) -> pd.DataFrame:
+        """All Outfielders"""
+        return self.__dh
+
+    @property
+    def designated_hitter(self) -> pd.DataFrame:
+        """All Outfielders"""
+        return self.__dh
+    
+    @property
+    def active(self) -> pd.DataFrame:
+        """All active players"""
+        return self.__active
+
+
+class franchise:
+    """# franchise
+    
+    Get franchise data in bulk through a bunch of API calls (uses `async` and `aiohttp` libraries)
+    
+    Parameters
+    ----------
+
+    mlbam : int or str
+        Player's official MLB ID
+
+    season : int or str
+        retrieve data for a specific season
+    
     """
-    # Player
+    def __init__(self,mlbam):
+        data = franchise_data(mlbam)
+
+        records         = data["records"]
+        record_splits   = data["record_splits"] # like standings splits
+        yby_data        = data["yby_data"]
+        team_info       = data["team_info"]
+        hitting         = data["hitting"]
+        hitting_adv     = data["hitting_advanced"]
+        pitching        = data["pitching"]
+        pitching_adv    = data["pitching_advanced"]
+        fielding        = data["fielding"]
+        roster          = data["all_players"]
+        hof             = data["hof"]
+        retired         = data["retired_numbers"]
+        
+        ti = team_info
+        self.__mlbam = ti['mlbam']
+        self.__franchise = ti['franchise_name']
+        self.__name = mlb_wrapper(
+            full=ti['full_name'],
+            location=ti['location_name'],
+            franchise=self.__franchise,
+            mascot=ti['team_name'],
+            club=ti['club_name'],
+            short=ti['short_name']
+            )
+        
+
+        self.__league = _league(
+            mlbam=ti['league_mlbam'],
+            name=ti['league_name'],
+            short=ti['league_short'],
+            abbrv=ti['league_abbrv']
+        )
+        self.__division = _league(
+            mlbam=ti['div_mlbam'],
+            name=ti['div_name'],
+            short=ti['div_short'],
+            abbrv=ti['div_abbrv']
+        )
+        
+        self.__venue = _venue(
+            name=ti['venue_name'],
+            mlbam=ti['venue_mlbam']
+        )
+        
+        self.__standings = _standings(
+            records=records,
+            splits=record_splits
+            )
+
+        self.__yby_data = yby_data
+
+        self.__hitting = mlb_data_wrapper(reg=hitting,adv=hitting_adv)
+        self.__pitching = mlb_data_wrapper(reg=pitching,adv=pitching_adv)
+        self.__fielding = mlb_data_wrapper(reg=fielding)
+
+        self.__stats = mlb_data_wrapper(
+            hitting=self.__hitting,
+            pitching=self.__pitching,
+            fielding=self.__fielding
+        )
+
+        self.__legends = hof
+        self.__retired = retired
+
+        self.__roster = mlb_data_wrapper(
+            all         = roster,
+            pitcher     = roster[roster['pos']=='P'].reset_index(drop=True),
+            catcher     = roster[roster['pos']=='C'].reset_index(drop=True),
+            first       = roster[roster['pos']=='1B'].reset_index(drop=True),
+            second      = roster[roster['pos']=='2B'].reset_index(drop=True),
+            third       = roster[roster['pos']=='3B'].reset_index(drop=True),
+            short       = roster[roster['pos']=='SS'].reset_index(drop=True),
+            left        = roster[roster['pos']=='LF'].reset_index(drop=True),
+            center      = roster[roster['pos']=='CF'].reset_index(drop=True),
+            right       = roster[roster['pos']=='RF'].reset_index(drop=True),
+            dh          = roster[roster['pos']=='DH'].reset_index(drop=True),
+            designated_hitter = roster[roster['pos']=='DH'].reset_index(drop=True),
+            infield     = roster[roster['pos'].isin(['1B','2B','3B','SS'])].reset_index(drop=True),
+            outfield    = roster[roster['pos'].isin(['OF','LF','CF','RF'])].reset_index(drop=True),
+            active      = roster[roster['status']=='Active']
+        )
+
+        self.__first_year = int(ti['first_year'])
+        self.__last_year = int(ti.get("last_year",default_season()))
+
+    def __str__(self):
+        return self.__franchise
+
+    def __repr__(self):
+        return self.__franchise
+
+    @property
+    def mlbam(self) -> int:
+        """Team's MLB Advanced Media ID"""
+        return int(self.__mlbam)
+
+    @property
+    def name(self):
+        """Various names team names/aliases"""
+        return self.__name
+    
+    @property
+    def venue(self):
+        return self.__venue
+
+    @property
+    def standings(self):
+        """standings (records, record splits)"""
+        return self.__standings
+
+    @property
+    def raw_data(self):
+        return self.__yby_data
+
+    @property
+    def stats(self):
+        return self.__stats
+
+    @property
+    def roster(self) -> _roster:
+        """Roster data"""
+        return self.__roster
+
+    @property
+    def retired(self) -> pd.DataFrame:
+        """Retired numbers"""
+        return self.__retired
+
+    @property
+    def legends(self) -> pd.DataFrame:
+        return self.__legends
+    
+    @property
+    def league(self) -> _league:
+        return self.__league
+    
+    @property
+    def division(self) -> _league:
+        return self.__division
+
+    @property
+    def first_year(self) -> int:
+        return self.__first_year
+
+    @property
+    def last_year(self) -> int:
+        return self.__last_year
+
+
+class team:
+    """# team
+
+    Represents a collection of team data for a single year
 
     Parameters
     ----------
 
-    playerID : str | int
-        player's official MLB ID
-    """
-    def __init__(self,playerID):
-        _player = player_mod.player(playerID)
-        self.mlbam              = _player["mlbam"]
-        self.bbrefID            = _player["bbrefID"]
-        self.retroID            = _player["retroID"]
-        self.bbrefIDminors      = _player["bbrefIDminors"]
-        self.primaryPosition    = _player["primaryPosition"]
-        self.fullName           = _player["fullName"]
-        self.firstName          = _player["firstName"]
-        self.lastName           = _player["lastName"]
-        self.nickName           = _player["nickName"]
-        self.primaryNumber      = _player["primaryNumber"]
-        self.currentAge         = _player["currentAge"]
-        self.birthDate          = _player["birthDate"]
-        self.birthCity          = _player["birthCity"]
-        self.birthState         = _player["birthState"]
-        self.birthCountry       = _player["birthCountry"]
-        self.deathDate          = _player["deathDate"]
-        self.deathCity          = _player["deathCity"]
-        self.deathState         = _player["deathState"]
-        self.deathCountry       = _player["deathCountry"]
-        self.weight             = _player["weight"]
-        self.height             = _player["height"]
-        self.bats               = _player["bats"]
-        self.throws             = _player["throws"]
-        self.education          = _player["education"]
-        self.firstYear          = _player["firstYear"]
-        self.lastYear           = _player["lastYear"]
-        self.zoneBot            = _player["zoneBot"]
-        self.zoneTop            = _player["zoneTop"]
-        self.isActive           = _player["isActive"]
-        
-        self.__roster_entries   = _player["rosterEntries"]
-        self.__transactions     = _player["transactions"]
-        self.__drafts           = _player["drafts"]
-        self.__awards           = _player["awards"]
+    mlbam : int or str
+        Player's official MLB ID
 
-        try:
-            self.birth_dt = dt.datetime.strptime(_player['birthDate'],r"%Y-%m-%d")
-        except:
-            self.birth_dt = None
-
-        try:
-            self.death_dt = dt.datetime.strptime(_player['deathDate'],r"%Y-%m-%d")
-        except:
-            self.death_dt = None
-        
-
-        # Stats Data
-        hitting =  _player["hitting"]
-        pitching = _player["pitching"]
-        fielding = _player["fielding"]
-
-        self.__hitting_recent = hitting["recentSeason"]
-        self.__hitting_yby = hitting["yby"]
-        self.__hitting_yby_adv = hitting["ybyAdv"]
-        self.__hitting_career_reg = hitting["careerReg"]
-        self.__hitting_career_reg_adv = hitting["careerAdvReg"]
-        self.__hitting_career_post = hitting["careerPost"]
-        self.__hitting_career_post_adv = hitting["careerAdvPost"]
-
-        self.__pitching_recent = pitching["recentSeason"]
-        self.__pitching_yby = pitching["yby"]
-        self.__pitching_yby_adv = pitching["ybyAdv"]
-        self.__pitching_career_reg = pitching["careerReg"]
-        self.__pitching_career_reg_adv = pitching["careerAdvReg"]
-        self.__pitching_career_post = pitching["careerPost"]
-        self.__pitching_career_post_adv = pitching["careerAdvPost"]
-
-        self.__fielding_recent = fielding["recentSeason"]
-        self.__fielding_career_reg = fielding["careerReg"]
-        self.__fielding_career_post = fielding["careerPost"]
-        self.__fielding_yby = fielding["yby"]
-
-    def __repr__(self) -> str:
-        if self.isActive:
-            status = "active"
-        else:
-            status = "inactive"
-        return f"""<SimpleStats Player - '{self.fullName}' | mlbam ID: '{self.mlbam}' | baseball-reference ID: '{self.bbrefID}' | status: '{status}'>"""
-
-    def __getitem__(self,item):
-        return getattr(self,item)
+    season : int or str
+        Retrieve data for a specific season. Default value is None -- retrieves data for the most recent season
     
-    def __setitem__(self,key,value):
-        setattr(self,key,value)
+    """
+    
+    def __init__(
+        self,mlbam:int | None = None,
+        season=None,
+        **kwargs):
+        if mlbam is not None:
+            _manual_data = False
+        else:
+            _manual_data = True
 
-    def career_stats(self,group,advanced=False):
-        """Career Stats
+        self.__today = dt.datetime.today().date()
+        if _manual_data == False:
+            if season is None:
+                season = default_season()
+
+            self.__mlbam = int(mlbam)
+            self.__season = int(season)
+            
+            data = team_data(self.__mlbam,self.__season)
+            self.__data = data
+            
+            ti = data['team_info']
+
+            self.__full_name = ti['full_name']
+            self.__name = mlb_wrapper(
+                full=self.__full_name,
+                location=ti['location_name'],
+                franchise=ti['franchise_name'],
+                mascot=ti['team_name'],
+                club=ti['club_name'],
+                short=ti['short_name']
+                )
+            self.__league = mlb_data_wrapper(
+                mlbam=ti['league_mlbam'],
+                name=ti['league_name'],
+                short=ti['league_short'],
+                abbrv=ti['league_abbrv']
+            )
+            self.__division = mlb_data_wrapper(
+                mlbam=ti['div_mlbam'],
+                name=ti['div_name'],
+                short=ti['div_short'],
+                abbrv=ti['div_abbrv']
+            )
+            self.__venue = mlb_data_wrapper(
+                name=ti['venue_name'],
+                mlbam=ti['venue_mlbam']
+            )
+            self.__schedule     = data['schedule']
+            self.__drafts       = data['drafts']
+            self.__transactions = data['transactions']
+
+            self.__stats = mlb_data_wrapper(
+                hitting=mlb_data_wrapper(
+                    reg=data['hitting_reg'],
+                    adv=data['hitting_adv'],
+                    regular=data['hitting_reg'],
+                    advanced=data['hitting_adv'],
+                ),
+                pitching=mlb_data_wrapper(
+                    reg=data['pitching_reg'],
+                    adv=data['pitching_adv'],
+                    regular=data['pitching_reg'],
+                    advanced=data['pitching_adv'],
+                ),
+                fielding=mlb_data_wrapper(
+                    reg=data['fielding_reg'],
+                    regular=data['fielding_reg'],
+                ),
+                totals=mlb_data_wrapper(
+                    hitting=mlb_data_wrapper(
+                        reg=data['total_hitting_reg'],
+                        adv=data['total_hitting_adv'],
+                        regular=data['total_hitting_reg'],
+                        advanced=data['total_hitting_adv'],
+                        ),
+                    pitching=mlb_data_wrapper(
+                        reg=data['total_pitching_reg'],
+                        adv=data['total_pitching_adv'],
+                        regular=data['total_pitching_reg'],
+                        advanced=data['total_pitching_adv'],
+                    ),
+                    fielding=mlb_data_wrapper(
+                        reg=data['total_fielding_reg'],
+                        regular=data['total_fielding_reg']
+                    )
+                )
+            )
+        else:
+            self.__mlbam = int(kwargs.get('_mlbam'))
+            self.__season = int(kwargs.get('_season',default_season()))
+            
+            # data = team_data(self.__mlbam,self.__season)
+            self.__data = data
+            
+            ti = {'mlbam': self.__mlbam, 'full_name': None, 'location_name': None, 'franchise_name': None, 'team_name': None, 'club_name': None, 'short_name': None, 'venue_mlbam': None, 'venue_name': None, 'first_year': None, 'league_mlbam': None, 'league_name': None, 'league_short': None, 'league_abbrv': None, 'div_mlbam': None, 'div_name': None, 'div_short': None, 'div_abbrv': None, 'season': self.__season}
+
+            self.__full_name = ti['full_name']
+            self.__name = mlb_wrapper(
+                full=self.__full_name,
+                location=ti['location_name'],
+                franchise=ti['franchise_name'],
+                mascot=ti['team_name'],
+                club=ti['club_name'],
+                short=ti['short_name']
+                )
+            self.__league = mlb_data_wrapper(
+                mlbam=ti['league_mlbam'],
+                name=ti['league_name'],
+                short=ti['league_short'],
+                abbrv=ti['league_abbrv']
+            )
+            self.__division = mlb_data_wrapper(
+                mlbam=ti['div_mlbam'],
+                name=ti['div_name'],
+                short=ti['div_short'],
+                abbrv=ti['div_abbrv']
+            )
+            self.__venue = mlb_data_wrapper(
+                name=ti['venue_name'],
+                mlbam=ti['venue_mlbam']
+            )
+            self.__schedule     = data['schedule']
+            self.__drafts       = data['drafts']
+            self.__transactions = data['transactions']
+
+            self.__stats = mlb_data_wrapper(
+                hitting=mlb_data_wrapper(
+                    reg=data['hitting_reg'],
+                    adv=data['hitting_adv'],
+                    regular=data['hitting_reg'],
+                    advanced=data['hitting_adv'],
+                ),
+                pitching=mlb_data_wrapper(
+                    reg=data['pitching_reg'],
+                    adv=data['pitching_adv'],
+                    regular=data['pitching_reg'],
+                    advanced=data['pitching_adv'],
+                ),
+                fielding=mlb_data_wrapper(
+                    reg=data['fielding_reg'],
+                    regular=data['fielding_reg'],
+                ),
+                totals=mlb_data_wrapper(
+                    hitting=mlb_data_wrapper(
+                        reg=data['total_hitting_reg'],
+                        adv=data['total_hitting_adv'],
+                        regular=data['total_hitting_reg'],
+                        advanced=data['total_hitting_adv'],
+                        ),
+                    pitching=mlb_data_wrapper(
+                        reg=data['total_pitching_reg'],
+                        adv=data['total_pitching_adv'],
+                        regular=data['total_pitching_reg'],
+                        advanced=data['total_pitching_adv'],
+                    ),
+                    fielding=mlb_data_wrapper(
+                        reg=data['total_fielding_reg'],
+                        regular=data['total_fielding_reg']
+                    )
+                )
+            )
+
+
+    
+    def __str__(self):
+        return self.__full_name
+
+    def __repr__(self):
+        return self.__full_name
+    
+    def __call__(self,_team_key:str):
+        """Get raw data by key value
         
-        Returns `pandas.Dataframe` of player's CAREER stats:
+        Keys :
+            - 'team_info'
+            - 'hitting_reg'
+            - 'pitching_reg'
+            - 'fielding_reg'
+            - 'hitting_adv' 
+            - 'pitching_adv'
+            - 'p_splits_reg'
+            - 'p_splits_adv'
+            - 'total_hitting'
+            - 'total_pitching'
+            - 'total_fielding'
+            - 'coaches'
+            - 'drafts'
+            - 'transactions' 
+            - 'schedule'
 
-        - Valid values for `group` parameter are "hitting", "pitching", or "fielding"
-        - If `advanced` is `True`, class method will return a dataframe of player's advanced stats
-        
         """
-        if group == "hitting":
-            if advanced is True:
-                return self.__hitting_career_reg_adv
-            return self.__hitting_career_reg
-        elif group == "pitching":
-            if advanced is True:
-                return self.__pitching_career_reg_adv
-            return self.__pitching_career_reg
-        elif group == "fielding":
-            return self.__fielding_career_reg
+        return self.raw_data[_team_key]
 
-    def yby_stats(self,group,advanced=False):
-        """
-        # Year-by-Year Stats
-        Returns `pandas.Dataframe` of player's YEAR-BY-YEAR stats:
-        - Valid values for `group` parameter are "hitting", "pitching", or "fielding"
-        - If `advanced` is `True`, class method will return a dataframe of player's advanced stats
-        """
-        if group == "hitting":
-            if advanced is True:
-                df = self.__hitting_yby_adv
-            else: 
-                df = self.__hitting_yby
-            if df is not False:
-                return df.sort_values(by="season",ascending=False)
-            else:
-                return None
-        elif group == "pitching":
-            if advanced is True:
-                df = self.__pitching_yby_adv
-            else: 
-                df = self.__pitching_yby
-            if df is not False:
-                return df.sort_values(by="season",ascending=False)
-            else:
-                return None
-        elif group == "fielding":
-            df = self.__fielding_yby
-            if df is not False:
-                return df.sort_values(by="season",ascending=False)
-            else:
-                return None
-
-    def summary_stats(self,group):
-        """
-        # Recent Season Stats
-        Returns `pandas.Dataframe` of player's most RECENT SEASON stats:
-        - Valid values for `group` parameter are "hitting", "pitching", or "fielding"
-        - If `advanced` is `True`, class method will return a dataframe of player's advanced stats
-        """
-
-        if group == "hitting":
-            try:
-                recentYear = self.__hitting_yby.sort_values(by="Year",ascending=False)
-                recentYear = recentYear.iloc[[0]]
-                year_value = recentYear["Year"].item()
-                combined = pd.concat([self.__hitting_career_reg,recentYear]).drop(columns=["Year","Team"])
-                combined.insert(0,"",["Career",year_value])
-                return combined
-            except:
-                return None
-        elif group == "pitching":
-            try:
-                recentYear = self.__pitching_yby.sort_values(by="Year",ascending=False)
-                recentYear = recentYear.iloc[[0]]
-                year_value = recentYear["Year"].item()
-                combined = pd.concat([self.__pitching_career_reg,recentYear]).drop(columns=["Year","Team"])
-                combined.insert(0,"",["Career",year_value])
-                return combined
-            except:
-                return None
-        elif group == "fielding":
-            try:
-                recentYear = self.__fielding_yby.sort_values(by="Year",ascending=False)
-                year_value = recentYear.iloc[0]["Year"]
-                recentYear = recentYear[(recentYear["Year"]==year_value) & (recentYear["Pos"]!="DH")]
-                recentYear.insert(0,"",year_value)
-                recentYear.sort_values(by="G",ascending=False,inplace=True)
-
-                career = self.__fielding_career_reg
-                career = career[career["Pos"]!="DH"]
-                career.insert(0,"","Career")
-
-                combined = pd.concat([career,recentYear]).drop(columns=["Year","Team"]).fillna("--")
-                return combined
-            except:
-                return None
-
-    def game_logs(self,group,year=None):
-        """
-        Returns `pandas.Dataframe` of player's stats for each game in a given season:
-        """
-        if year is None: year = curr_year
-        if group == "hitting":
-            log = player.hittingLog(self.bbrefID,year)
-        elif group == "pitching":
-            log = player.pitchingLog(self.bbrefID,year)
-        elif group == "fielding":
-            log = player.fieldingLog(self.bbrefID,year)
-        return log
-
-    def metricLog(self):
-        """NOT YET CONFIGURED"""
+    def get_splits(self):
         pass
 
-    def hitting_splits(self,year=curr_year):
-        bat_splits = player.bbrefSplits(self.bbrefID,year,"b")
-        return bat_splits
+    @property
+    def raw_data(self) -> dict | None:
+        return self.__data
 
-    def pitching_splits(self,year=curr_year):
-        _pitch_splits = player.bbrefSplits(self.bbrefID,year,"p")
-        return _pitch_splits
+    @property
+    def today(self) -> dt.date | None:
+        return self.__today
+    
+    @property
+    def schedule(self) -> pd.DataFrame | None:
+        return self.__schedule
 
-    def roster_entries(self):
-        return self.__roster_entries
+    @property
+    def mlbam(self) -> int | None:
+        return self.__mlbam
+    
+    @property
+    def name(self) -> mlb_data_wrapper | None:
+        return self.__name
 
-    def arsenal(self):
-        pass
+    @property
+    def stats(self) -> mlb_data_wrapper | None:
+        return self.__stats
+    
+    @property
+    def season(self) -> int | None:
+        return self.__season
 
-    def draft(self):
-        return self.__drafts
+    @property
+    def venue(self) -> int | None:
+        return self.__venue
 
-    def awards(self):
-        return self.__awards
-
-    def transactions(self):
+    @property
+    def league(self) -> mlb_data_wrapper | None:
+        return self.__league
+    
+    @property
+    def division(self) -> mlb_data_wrapper | None:
+        return self.__division
+    
+    @property
+    def transactions(self) -> pd.DataFrame | None:
         return self.__transactions
 
+    @property
+    def trx(self) -> pd.DataFrame | None:
+        return self.__transactions
 
-class Team:
-    """# Team
+    @property
+    def drafts(self) -> pd.DataFrame | None:
+        return self.__drafts
 
-    teamID : str | int
-        Team's official MLB ID
-    season : str | int
-        specific season to retrieve data for
-    """
-    def __init__(self,teamID,season=None) -> None:
+    @property
+    def draft(self) -> pd.DataFrame | None:
+        return self.__drafts
+
+    # Create team instance from raw api data
+
+    @classmethod
+    def build(cls,
+        TeamData : dict,
+        season : int | None = None,
+        **kwargs
+        ):
+        """Create a 'team' instance from raw api data and/or keyword arguments
+
+        """
         if season is None:
-            season = default_season()
-
-        self.__info             = utils_team.team(teamID,season)
-        self.__year             = season
-        self.__team_df          = self.__info["team_df"]
-        self.__franchise_df     = self.__info["franchise_df"]
-        self.__mlbam            = self.__info["mlbam"]
-        self.__bbrefID          = self.__info["bbrefID"]
-        self.__franchID         = self.__info["franchID"]
-        self.__retroID          = self.__info["retroID"]
-        self.__mlbID            = self.__info["mlbID"]
-        self.__fullName         = self.__info["fullName"]
-        self.__lgAbbrv          = self.__info["lgAbbrv"]
-        self.__locationName     = self.__info["locationName"]
-        self.__clubName         = self.__info["clubName"]
-        self.__venueName        = self.__info["venueName"]
-        self.__venue_mlbam      = self.__info["venue_mlbam"]
-        self.__firstYear        = self.__info["firstYear"]
-
-        async_response = get_team_responses(self.__mlbam,season)
-        self.__roster_stats        = async_response["roster_stats"]
-        self.__game_log          = async_response["game_log"]
-        self.__game_stats        = async_response["game_stats"]
-        self.__team_stats        = async_response["team_stats"]
-        self.__leaders_hitting   = async_response["leaders_hitting"]
-        self.__leaders_pitching  = async_response["leaders_pitching"]
-        self.__leaders_fielding  = async_response["leaders_fielding"]
-        self.__transactions      = async_response["transactions"]
-        self.__draft             = async_response["draft"]
-
-        self.__hitting = self.__team_stats["hitting"]
-        self.__hittingAdv = self.__team_stats["hittingAdvanced"]
-        self.__pitching = self.__team_stats["pitching"]
-        self.__pitchingAdv = self.__team_stats["pitchingAdvanced"]
-        self.__fielding = self.__team_stats["fielding"]
-
-        ybyRecords = get_yby_records()
-        self.__yby_records = ybyRecords[(ybyRecords["season"]==season) & (ybyRecords["tm_mlbam"]==self.__mlbam)]
-
-        self.__div_mlbam = self.__yby_records.div_mlbam.item()
-        self.__div_standings = ybyRecords[(ybyRecords["season"]==season) & (ybyRecords["div_mlbam"]==self.__div_mlbam)]
-
-        self.__wins      = self.__yby_records.W.item()
-        self.__losses    = self.__yby_records.L.item()
-
-        # self.__records_dict = self.__team_stats["records_dict"]
-
-        # stats = team.stats(self.__mlbam)
-        # self.__hitting = stats["hitting"]
-        # self.__hittingAdv = stats["hittingAdvanced"]
-        # self.__pitching = stats["pitching"]
-        # self.__pitchingAdv = stats["pitchingAdvanced"]
-        # self.__fielding = stats["fielding"]
-        # self.__records_dict = stats["records_dict"]
-
-        # self.__roster_stats = team.roster_stats(self.__mlbam,season=self.__year)
-        # self.game_log = team.game_log(self.__mlbam,season=self.__year)
-
-        self.__set_team_attrs()        
-
-    def __repr__(self) -> str:
-        return f"""< SimpleStats Team - '{self.__fullName}' | mlbam ID: '{self.__mlbam}' | baseball-reference ID: '{self.__bbrefID}' >"""
-
-    def __getitem__(self,item):
-        return self.__attrs[item]
-
-    def __set_team_attrs(self):
-        self.__attrs = {
-            "mlbam":        self.__mlbam,
-            "bbrefID":      self.__bbrefID,
-            "franchID":     self.__franchID,
-            "fullName":     self.__fullName,
-            "wins":         self.__wins,
-            "losses":       self.__losses
-        }
-
-
-    def full_name(self):
-        """Return the team's full name"""
-        return self.__fullName
-    
-    def club_name(self):
-        """Returns the team's club name"""
-        return self.__clubName 
-
-    def loc_name(self):
-        """Return CITY that team is named after"""
-        return self.__locationName
-
-    def season_record(self):
-        return f"{self.__wins}-{self.__losses}"
-
-    def standings_division(self):
-        cols = ["tm_mlbam","tm_name","G","W","L","R","RA","RunDiff"]
-        df = self.__div_standings[cols]
-        return df
-
-    def franchise_df(self):
-        return self.__franchise_df
-
-    def leaders(self,group,return_type="dict"):
-        """
-        Returns a dictionary (or df -- COMING SOON) of top players in different categories
-        
-        Required:
-        --------
-        - group:    'hitting', 'pitching', 'fielding' ('h', 'p', 'f' for shorthand)
-        
-        - return_type:  'dict' or 'df'
-        """
-        if group == "hitting" or group == "h":
-            categories = {}
-            rows = []
-            leaders = self.__leaders_hitting
-            for cat,leaders in leaders.items():
-                rows = []
-                for leader in leaders:
-                    row = []
-                    for val in leader.values():
-                        row.append(val)
-                    rows.append(row)
-                df = pd.DataFrame(data=rows,columns=list(leaders[0].keys()))
-                categories[cat] = df
-            return categories
-
-
-        elif group == "pitching" or group == "p":
-            return self.__leaders_pitching
-        elif group == "fielding" or group == "f":
-            return self.__leaders_fielding
-
-    def season_records(self):
-        return self.__yby_records
-
-    def venue(self):
-        return self.__venueName
-
-    def hitting(self,*args):
-        totals = False
-        if len(args) == 1 and args[0] == 'totals':
-            totals = True
-        if totals is False:
-            df = self.__roster_stats["hitting"]
-            all_p = df[df["primaryPosition"]=="P"]
-            all_non_p = df[df["primaryPosition"]!="P"]
-            df = pd.concat([all_non_p,all_p])
+            kwargs['_season'] = 0
         else:
-            df = self.__hitting
+            kwargs['_season'] = int(season)
 
-        return df
+        return cls(TeamData=TeamData,**kwargs)
 
-    def hitting_advanced(self,*args):
-        totals = False
-        if len(args) == 1 and args[0] == 'totals':
-            totals = True
-        if totals is False:
-            df = self.__roster_stats["hittingAdvanced"]
-            all_p = df[df["primaryPosition"]=="P"]
-            all_non_p = df[df["primaryPosition"]!="P"]
-            df = pd.concat([all_non_p,all_p])
-        else:
-            df = self.__hittingAdv
 
-        return df
 
-    def pitching(self,*args):
-        totals = False
-        if len(args) == 1 and args[0] == 'totals':
-            totals = True
-        if totals is False:
-            df = self.__roster_stats["pitching"]
-            all_p = df[df["primaryPosition"]=="P"]
-            all_non_p = df[df["primaryPosition"]!="P"]
-            df = pd.concat([all_p,all_non_p])
-        else:
-            df = self.__pitching
-
-        return df
-
-    def pitching_advanced(self,*args):
-        totals = False
-        if len(args) == 1 and args[0] == 'totals':
-            totals = True
-        if totals is False:
-            df = self.__roster_stats["pitchingAdvanced"]
-            all_p = df[df["primaryPosition"]=="P"]
-            all_non_p = df[df["primaryPosition"]!="P"]
-            df = pd.concat([all_p,all_non_p])
-        else:
-            df = self.__pitchingAdv
-
-        return df
-
-    def fielding(self,*args):
-        totals = False
-        if len(args) == 1 and args[0] == 'totals':
-            totals = True
-        if totals is False:
-            df = self.__roster_stats["fielding"]
-        else:
-            df = self.__fielding
-
-        return df
-
-    def game_stats(self,group=None):
-        """
-        Get hitting, pitching, and fielding stats for each game for the given year
-
-        (Not fully developed yet)
-        ADD FUNCTIONALITY TO GROUP BY OPPOSING TEAM
-        """
-        stats = self.__game_stats
-        hitting = stats["hitting"].drop(columns=["G#"]) # column may be misleading to users but is helpful to ensure correct order of games when it comes to double headers
-        pitching = stats["pitching"].drop(columns=["G#"])
-        fielding = stats["fielding"].drop(columns=["G#"])
-        if group is None:
-            return {"hitting":hitting,"pitching":pitching,"fielding":fielding}
-        else:
-            return stats[group].drop(columns=["G#"])
-
-    def game_log(self):
-        stats = self.__game_log
-        return stats
-
-    def team_splits(self,season=None,s_type="b"):
-        if season is None:
-            season = self.__year
-        return utils_team.bbrefSplits(self.__bbrefID,season=season,s_type=s_type)
-
-    def transactions(self):
-        df = self.__transactions
-        df.sort_values(by=["date"],ascending=False,inplace=True)
-        colmap = {
-            "player":"Player",
-            "f_team":"From Team",
-            "t_team":"To Team",
-            "date":"Date",
-            "eff_date":"Effective Date",
-            "trx_code":"Code",
-            "trx_type":"Transaction",
-            "description":"Description"
-        }
-        df = df[["player","f_team","t_team","date","eff_date","trx_code","trx_type","description"]]
-        return df.rename(columns=colmap)
-
-    def draft_picks(self):
-        d = self.__draft.to_dict("records")
-        return self.__draft
-
-
-    def team_hitting(self):
-        """
-        Get ALL team hitting stat totals/avgs
-        """
-        reg = self.__hitting
-        adv = self.__hittingAdv
-        df = reg.merge(adv)
-
-        return df
-
-    def team_hitting_reg(self):
-        """
-        Get REGULAR team hitting stat totals/avgs
-        """
-        df = self.__hitting
-
-        return df
-
-    def team_hitting_adv(self):
-        """
-        Get ADVANCED team hitting stat totals/avgs
-        """
-        df = self.__hittingAdv
-        return df
-
-    def team_pitching(self):
-        """
-        Get ALL team pitching stat totals/avgs
-        """
-        reg = self.__pitching
-        adv = self.__pitchingAdv
-        df = reg.merge(adv)
-        return df
-
-    def team_pitching_reg(self):
-        """
-        Get REGULAR team pitching stat totals/avgs
-        """
-        cols = ['GP','GS','GF','W','L','W%','AB','ERA','H','R','ER','2B','3B','HR','SO','BB','IBB','WHIP','IP','P','TB','K','K%','BF','HBP','CG','ShO','SV', 'SVO','BS','HLD']
-        df = self.__pitching.merge(self.__pitchingAdv)
-        return df[cols]
-
-    def team_pitching_adv(self):
-        """
-        Get REGULAR team pitching stat totals/avgs
-        """
-        cols = ['AVG','OBP','SLG','OPS','CS','SB','SB%','O','GO','AO', 'GO/AO','GIDP','BK','WP','PK','sB','sF','P/Inn','SO:BB','SO/9','BB/9','H/9','R/9','HR/9','CI','IR','IRS','BABIP','QS','GIDPO','TS','Whiffs','BIP','RS','P/PA','BB/PA','SO/PA','HR/PA','BB/SO','ISO','FO','PO','LO','GH','FH','PH','LH']
-        df = self.__pitching.merge(self.__pitchingAdv)
-        return df[cols]
-
-    def team_fielding(self):
-        """Get team fielding stat totals/avgs"""
-        df = self.__fielding
-        return df
-
-    def player_hitting(self):
-        """
-        Get hitting stats for all players on team
-        """
-        reg = self.__roster_stats["hitting"]
-        adv = self.__roster_stats["hittingAdvanced"]
-        df = reg.merge(adv)
-        allPs = df[df["primaryPosition"]=="P"]
-        nonPs = df[df["primaryPosition"]!="P"]
-        df = pd.concat([nonPs,allPs])
-        return df
-
-    def player_hitting_reg(self):
-        """
-        Get REGULAR hitting stats for all players on team
-        """
-
-        df = self.__roster_stats["hitting"]
-        return df
-
-    def player_hitting_adv(self):
-        """
-        Get ADVANCED hitting stats for all players on team
-        """
-        df = self.__roster_stats["hittingAdvanced"]
-        return df
-
-    def player_pitching(self):
-        """
-        Get pitchings stats for all pitchers on team
-        """
-        reg = self.__roster_stats["pitching"]
-        adv = self.__roster_stats["pitchingAdvanced"]
-        df = reg.merge(adv)
-        return df
-
-    def player_pitching_reg(self):
-        """
-        Get REGULAR pitching stats for all pitchers on team
-        """
-        df = self.__roster_stats["pitching"]
-        return df
-
-    def player_pitching_adv(self):
-        """
-        Get ADVANCED pitching stats for all pitchers on team
-        """
-        df = self.__roster_stats["pitchingAdvanced"]
-        return df
-
-    def player_fielding(self):
-        """
-        Get fielding stats for all players on team
-        """
-        df = self.__roster_stats["fielding"]
-        active = df[df["status"]=="Active"]
-        non_active = df[df["status"]!="Active"]
-        df = pd.concat([active,non_active])
-        return df
-
-
-class League:
-    """Represents an instance of MLB for given season (default is the current year)
-    
-    Params
-    ------
-    season : str or int
-        season (year) to retrieve league stats/data for
-    
-    Methods
-    -------
-    team_hitting() - get league hitting stats by team
-    
-    team_pitching() - get league pitching stats by team
-    
-    team_fielding() - get league fielding stats by team
-    
-    player_hitting() - get league hitting stats by player
-    
-    player_pitching() - get league pitching stats by player
-    
-    player_fielding() - get league fielding stats by player
-        
-    leaders() - not configured
-    
-    team_splits() - not configured
-    
-
-    """
-    def __init__(self,season=None):
-        if season is None:
-            self.season = curr_year
-        else:
-            self.season = int(season)
-
-        with requests.Session() as sesh:
-            self._teamstats = league.team_stats(self.season,sesh=sesh)
-            self._playerstats = league.player_stats(self.season,sesh=sesh)
-            # self._standings = league.standings(self.season,sesh=sesh)
-        
-        self._teamHitting = self._teamstats['hitting']
-        self._teamPitching = self._teamstats['pitching']
-        self._teamFielding = self._teamstats['fielding']
-        self._teamHittingAdvanced = self._teamstats['hittingAdvanced']
-        self._teamPitchingAdvanced = self._teamstats['pitchingAdvanced']
-
-        self._playerHitting = self._playerstats['hitting']
-        self._playerPitching = self._playerstats['pitching']
-        self._playerFielding = self._playerstats['fielding']
-        self._playerHittingAdvanced = self._playerstats['hittingAdvanced']
-        self._playerPitchingAdvanced = self._playerstats['pitchingAdvanced']
-
-        yby_records = get_yby_records()
-        self._mlb_standings = yby_records[yby_records["season"]==self.season]
-        
-    def standings(self,*args):
-        """Get Standings for a given season
-        
-        Return specified league or division standings by specifying `kwargs`
-        
-        Accepted args:
-        -----------
-        league: specify by league abbrv or league name
-
-        leagueID: specify by leagueID (mlbam)
-
-        division: specify by division abbrv or division name
-                NOTE: must be specific, like `division="AL West"` (NOT `division = "West"`)
-
-        divisionID: specify by divisionID
-
-        """
-        df = self._mlb_standings
-        if len(args) == 0:
-            return df
-
-        lg_mlbams = []
-        div_mlbams = []
-        for arg in args:
-            if type(arg) is int:
-                if arg in [103,104]:
-                    lg_mlbams.append(str(arg))
-                if arg in [200,201,202,203,204,205]:
-                    div_mlbams.append(str(arg))
-            elif type(arg) is str:
-                if arg.lower() in ["al","american","american league"]:
-                    lg_mlbams.append('103')
-                elif arg.lower() in ["nl","national","national league"]:
-                    lg_mlbams.append('104')
-                elif arg.lower() in ["alw","al w","alwest","al west"]:
-                    div_mlbams.append('200')
-                elif arg.lower() in ["ale","al e","aleast","al east"]:
-                    div_mlbams.append('201')
-                elif arg.lower() in ["alc","al c","alcentral","al central","alcent","al cent"]:
-                    div_mlbams.append('202')
-                elif arg.lower() in ["nlw","nl w","nlwest","nl west"]:
-                    div_mlbams.append('203')
-                elif arg.lower() in ["nle","nl e","nleast","nl east"]:
-                    div_mlbams.append('204')
-                elif arg.lower() in ["nlc","nl c","nlcentral","nl central","nlcent","nl cent"]:
-                    div_mlbams.append('205')
-
-        if lg_mlbams != []:
-            df = df[df["lg_mlbam"].isin(lg_mlbams)]
-        if div_mlbams != []:
-            df = df[df["div_mlbam"].isin(div_mlbams)]
-
-        return df.sort_values(by="W%",ascending=False)
-
-    def team_hitting(self,league='all',division='all'):
-        if type(division) is int:
-            reg = self._teamHitting
-            adv = self._teamHittingAdvanced
-            df = reg.merge(adv)
-            df = df[df['div_mlbam']==division]
-            return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-
-        elif division == 'all':
-            if league.lower() == 'all':
-                reg = self._teamHitting
-                adv = self._teamHittingAdvanced
-                df = reg.merge(adv)
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                reg = self._teamHitting
-                adv = self._teamHittingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Lg']=='AL']
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                reg = self._teamHitting
-                adv = self._teamHittingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Lg']=='NL']
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-
-        elif 'west' in division.lower():
-            if league.lower() == 'all':
-                reg = self._teamHitting
-                adv = self._teamHittingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Div']=='West']
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                reg = self._teamHitting
-                adv = self._teamHittingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='AL') & (df['Div']=='West')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                reg = self._teamHitting
-                adv = self._teamHittingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='NL') & (df['Div']=='West')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-
-        elif 'east' in division.lower():
-            if league.lower() == 'all':
-                reg = self._teamHitting
-                adv = self._teamHittingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Div']=='East']
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                reg = self._teamHitting
-                adv = self._teamHittingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='AL') & (df['Div']=='East')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                reg = self._teamHitting
-                adv = self._teamHittingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='NL') & (df['Div']=='East')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-
-        elif 'central' in division.lower():
-            if league.lower() == 'all':
-                reg = self._teamHitting
-                adv = self._teamHittingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Div']=='Central']
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                reg = self._teamHitting
-                adv = self._teamHittingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='AL') & (df['Div']=='Central')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                reg = self._teamHitting
-                adv = self._teamHittingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='NL') & (df['Div']=='Central')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-
-    def team_pitching(self,league='all',division='all'):
-        if type(division) is int:
-            reg = self._teamPitching
-            adv = self._teamPitchingAdvanced
-            df = reg.merge(adv)
-            df = df[df['div_mlbam']==division]
-            return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-
-        elif division == 'all':
-            if league.lower() == 'all':
-                reg = self._teamPitching
-                adv = self._teamPitchingAdvanced
-                df = reg.merge(adv)
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                reg = self._teamPitching
-                adv = self._teamPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Lg']=='AL']
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                reg = self._teamPitching
-                adv = self._teamPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Lg']=='NL']
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-
-        elif 'west' in division.lower():
-            if league.lower() == 'all':
-                reg = self._teamPitching
-                adv = self._teamPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Div']=='West']
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                reg = self._teamPitching
-                adv = self._teamPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='AL') & (df['Div']=='West')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                reg = self._teamPitching
-                adv = self._teamPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='NL') & (df['Div']=='West')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-
-        elif 'east' in division.lower():
-            if league.lower() == 'all':
-                reg = self._teamPitching
-                adv = self._teamPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Div']=='East']
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                reg = self._teamPitching
-                adv = self._teamPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='AL') & (df['Div']=='East')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                reg = self._teamPitching
-                adv = self._teamPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='NL') & (df['Div']=='East')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-
-        elif 'central' in division.lower():
-            if league.lower() == 'all':
-                reg = self._teamPitching
-                adv = self._teamPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Div']=='Central']
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                reg = self._teamPitching
-                adv = self._teamPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='AL') & (df['Div']=='Central')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                reg = self._teamPitching
-                adv = self._teamPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='NL') & (df['Div']=='Central')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-
-    def team_fielding(self,league='all',division='all'):
-
-        if type(division) is int:
-            df = self._teamFielding
-            df = df[df['div_mlbam']==division]
-            return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-
-        elif division == 'all':
-            if league.lower() == 'all':
-                df = self._teamFielding
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                df = self._teamFielding
-                df = df[df['Lg']=='AL']
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                df = self._teamFielding
-                df = df[df['Lg']=='NL']
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-
-        elif 'west' in division.lower():
-            if league.lower() == 'all':
-                df = self._teamFielding
-                df = df[df['Div']=='West']
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                df = self._teamFielding
-                df = df[(df['Lg']=='AL') & (df['Div']=='West')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                df = self._teamFielding
-                df = df[(df['Lg']=='NL') & (df['Div']=='West')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-
-        elif 'east' in division.lower():
-            if league.lower() == 'all':
-                df = self._teamFielding
-                df = df[df['Div']=='East']
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                df = self._teamFielding
-                df = df[(df['Lg']=='AL') & (df['Div']=='East')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                df = self._teamFielding
-                df = df[(df['Lg']=='NL') & (df['Div']=='East')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-
-        elif 'central' in division.lower():
-            if league.lower() == 'all':
-                df = self._teamFielding
-                df = df[df['Div']=='Central']
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                df = self._teamFielding
-                df = df[(df['Lg']=='AL') & (df['Div']=='Central')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                df = self._teamFielding
-                df = df[(df['Lg']=='NL') & (df['Div']=='Central')]
-                return df.sort_values(by='Team',ascending=True).reset_index(drop=True)
-
-    def player_hitting(self,league='all',division='all'):
-        if type(division) is int:
-            reg = self._playerHitting
-            adv = self._playerHittingAdvanced
-            df = reg.merge(adv)
-            df = df[df['div_mlbam']==division]
-            return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-
-        elif division == 'all':
-            if league.lower() == 'all':
-                reg = self._playerHitting
-                adv = self._playerHittingAdvanced
-                df = reg.merge(adv)
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                reg = self._playerHitting
-                adv = self._playerHittingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Lg']=='AL']
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                reg = self._playerHitting
-                adv = self._playerHittingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Lg']=='NL']
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-
-        elif 'west' in division.lower():
-            if league.lower() == 'all':
-                reg = self._playerHitting
-                adv = self._playerHittingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Div']=='West']
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                reg = self._playerHitting
-                adv = self._playerHittingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='AL') & (df['Div']=='West')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                reg = self._playerHitting
-                adv = self._playerHittingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='NL') & (df['Div']=='West')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-
-        elif 'east' in division.lower():
-            if league.lower() == 'all':
-                reg = self._playerHitting
-                adv = self._playerHittingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Div']=='East']
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                reg = self._playerHitting
-                adv = self._playerHittingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='AL') & (df['Div']=='East')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                reg = self._playerHitting
-                adv = self._playerHittingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='NL') & (df['Div']=='East')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-
-        elif 'central' in division.lower():
-            if league.lower() == 'all':
-                reg = self._playerHitting
-                adv = self._playerHittingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Div']=='Central']
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                reg = self._playerHitting
-                adv = self._playerHittingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='AL') & (df['Div']=='Central')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                reg = self._playerHitting
-                adv = self._playerHittingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='NL') & (df['Div']=='Central')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-
-    def player_pitching(self,league='all',division='all'):
-        if type(division) is int:
-            reg = self._playerPitching
-            adv = self._playerPitchingAdvanced
-            df = reg.merge(adv)
-            df = df[df['div_mlbam']==division]
-            return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-
-        elif division == 'all':
-            if league.lower() == 'all':
-                reg = self._playerPitching
-                adv = self._playerPitchingAdvanced
-                df = reg.merge(adv)
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                reg = self._playerPitching
-                adv = self._playerPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Lg']=='AL']
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                reg = self._playerPitching
-                adv = self._playerPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Lg']=='NL']
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-
-        elif 'west' in division.lower():
-            if league.lower() == 'all':
-                reg = self._playerPitching
-                adv = self._playerPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Div']=='West']
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                reg = self._playerPitching
-                adv = self._playerPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='AL') & (df['Div']=='West')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                reg = self._playerPitching
-                adv = self._playerPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='NL') & (df['Div']=='West')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-
-        elif 'east' in division.lower():
-            if league.lower() == 'all':
-                reg = self._playerPitching
-                adv = self._playerPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Div']=='East']
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                reg = self._playerPitching
-                adv = self._playerPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='AL') & (df['Div']=='East')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                reg = self._playerPitching
-                adv = self._playerPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='NL') & (df['Div']=='East')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-
-        elif 'central' in division.lower():
-            if league.lower() == 'all':
-                reg = self._playerPitching
-                adv = self._playerPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[df['Div']=='Central']
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                reg = self._playerPitching
-                adv = self._playerPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='AL') & (df['Div']=='Central')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                reg = self._playerPitching
-                adv = self._playerPitchingAdvanced
-                df = reg.merge(adv)
-                df = df[(df['Lg']=='NL') & (df['Div']=='Central')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-
-    def player_fielding(self,league='all',division='all'):
-
-        if type(division) is int:
-            df = self._playerFielding
-            df = df[df['div_mlbam']==division]
-            return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-
-        elif division == 'all':
-            if league.lower() == 'all':
-                df = self._playerFielding
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                df = self._playerFielding
-                df = df[df['Lg']=='AL']
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                df = self._playerFielding
-                df = df[df['Lg']=='NL']
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-
-        elif 'west' in division.lower():
-            if league.lower() == 'all':
-                df = self._playerFielding
-                df = df[df['Div']=='West']
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                df = self._playerFielding
-                df = df[(df['Lg']=='AL') & (df['Div']=='West')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                df = self._playerFielding
-                df = df[(df['Lg']=='NL') & (df['Div']=='West')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-
-        elif 'east' in division.lower():
-            if league.lower() == 'all':
-                df = self._playerFielding
-                df = df[df['Div']=='East']
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                df = self._playerFielding
-                df = df[(df['Lg']=='AL') & (df['Div']=='East')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                df = self._playerFielding
-                df = df[(df['Lg']=='NL') & (df['Div']=='East')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-
-        elif 'central' in division.lower():
-            if league.lower() == 'all':
-                df = self._playerFielding
-                df = df[df['Div']=='Central']
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'al':
-                df = self._playerFielding
-                df = df[(df['Lg']=='AL') & (df['Div']=='Central')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-            elif league.lower() == 'nl':
-                df = self._playerFielding
-                df = df[(df['Lg']=='NL') & (df['Div']=='Central')]
-                return df.sort_values(by='Player',ascending=True).reset_index(drop=True)
-
-    def leaders(self):
-        pass
-
-    def team_splits(self):
-        pass
 
 
 class Game:

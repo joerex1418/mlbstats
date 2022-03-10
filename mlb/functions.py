@@ -28,6 +28,7 @@ from .mlbdata import get_teams_df
 from .mlbdata import get_yby_records
 from .mlbdata import get_standings_df
 from .mlbdata import get_leages_df
+from .mlbdata import get_seasons_df
 
 from .utils import curr_year
 from .utils import curr_date
@@ -111,7 +112,8 @@ async def _fetch_player_data(urls,_get_bio=None,_mlbam=None):
     return retrieved_responses
 
 
-async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.DataFrame,_mlbam):
+async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.DataFrame,_mlbam,**kwargs):
+    start = time.time()
     if f"/teams/{_mlbam}?season=" in _url:
         team_info_parsed = {}
         teams : dict = data["teams"][0]
@@ -311,20 +313,23 @@ async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.Dat
                 'recap_avail',
                 ])
 
+        if kwargs.get('_logtime') is True:
+            print(f"\n{unquote(_url).replace(BASE,'')}")
+            print(f'--- {time.time() - start} seconds ---\n')
         return sched_df
-
-    elif "/roster/fullSeason?season=" in _url:
+    
+    elif "statSplits" in _url and "/roster/fullSeason?season=" in _url:
         stat_data = []
 
         roster : list[dict] = data['roster']
-        df_list = []
 
-        for personObj in roster:
-            p = personObj.get('person',{})
+        for roster_entry in roster:
+            # p = roster_entry.get('person',{})
+            p = roster_entry['person']
             mlbam           = p.get('id',0)
             name            = p.get('fullName','-')
-            jersey_number   = personObj.get('jerseyNumber','-')
-            position : str  = personObj.get('position',{}).get('abbreviation','-')
+            jersey_number   = roster_entry.get('jerseyNumber','-')
+            position : str  = roster_entry.get('position',{}).get('abbreviation','-')
             slug     : str  = p.get('nameSlug',str(mlbam))
             status   : str  = p.get('status',{}).get('description','-')
 
@@ -332,12 +337,74 @@ async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.Dat
             if pstats is None:
                 continue
 
-            for statType_statGroup in pstats:
-                splits = statType_statGroup.get("splits",[{}])
+            for stat_item in pstats:
+                splits = stat_item.get("splits",[{}])
 
                 for s in splits:
                     stat = s.get("stat",{})
-                    team        = s.get("team",{})
+                    try:
+                        team = s['team']
+                    except:
+                        team = {}
+                    tm_mlbam    = team.get("id","")
+                    tm_name     = team.get("name","")
+
+                    stat['season']      = s.get('season','-')
+                    stat['mlbam']       = mlbam
+                    stat['name']        = name
+                    stat['slug']        = slug
+                    stat['tm_mlbam']    = tm_mlbam
+                    stat['tm_name']     = tm_name
+
+                    stat['jersey_number'] = jersey_number
+                    stat['position']      = position
+                    stat['game_type']     = s.get('gameType')
+                    stat['ptype']         = s.get('split',{}).get('code','P').upper()
+
+                    stat_data.append(pd.Series(stat))
+        added_cols = ['season','mlbam','name','slug','jersey_number','ptype','pos','game_type','tm_mlbam','tm_name']
+
+        if 'Advanced' in _url:
+            reordered_cols  = added_cols + COLS_PIT_ADV
+        else:
+            reordered_cols  = added_cols + COLS_PIT
+
+        combined_df = pd.DataFrame(stat_data).rename(columns=STATDICT).reindex(columns=reordered_cols)
+
+        if kwargs.get('_logtime') is True:
+            print(f"\n{unquote(_url).replace(BASE,'')}")
+            print(f'--- {time.time() - start} seconds ---\n')
+
+        return combined_df
+
+    elif "/roster/fullSeason?season=" in _url:
+        stat_data = []
+
+        roster : list[dict] = data['roster']
+
+        for roster_entry in roster:
+            # p = roster_entry.get('person',{})
+            p = roster_entry['person']
+            mlbam           = p.get('id',0)
+            name            = p.get('fullName','-')
+            jersey_number   = roster_entry.get('jerseyNumber','-')
+            position : str  = roster_entry.get('position',{}).get('abbreviation','-')
+            slug     : str  = p.get('nameSlug',str(mlbam))
+            status   : str  = p.get('status',{}).get('description','-')
+
+            pstats = p.get('stats')
+            if pstats is None:
+                continue
+
+            for stat_item in pstats:
+                splits = stat_item.get("splits",[{}])
+
+                for s in splits:
+                    stat = s.get("stat",{})
+                    try:
+                        team = s['team']
+                    except:
+                        team = {}
                     tm_mlbam    = team.get("id","")
                     tm_name     = team.get("name","")
 
@@ -354,14 +421,199 @@ async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.Dat
 
                     stat_data.append(pd.Series(stat))
 
-        combined_df = pd.DataFrame(stat_data).rename(columns=STATDICT)
+        pre_cols = ['season','mlbam','name','slug','jersey_number','pos','game_type','tm_mlbam','tm_name']
+        if 'hitting' in _url:
+            if 'Advanced' in _url:
+                reordered_cols = pre_cols + COLS_HIT_ADV
+            else:
+                reordered_cols = pre_cols + COLS_HIT
+        elif 'pitching' in _url:
+            if 'Advanced' in _url:
+                reordered_cols = pre_cols + COLS_PIT_ADV
+            else:
+                reordered_cols = pre_cols + COLS_PIT
+        elif 'fielding' in _url:
+            reordered_cols = pre_cols + COLS_FLD
 
+        combined_df = pd.DataFrame(stat_data).rename(columns=STATDICT).reindex(columns=reordered_cols)
+
+        if kwargs.get('_logtime') is True:
+            print(f"\n{unquote(_url).replace(BASE,'')}")
+            print(f'--- {time.time() - start} seconds ---\n')
         return combined_df
+
+    elif f"/teams/{_mlbam}/stats?stats=season,seasonAdvanced" in _url:
+        stat_dict = {'regular':None,'advanced':None}
+        # print(unquote(_url))
+        for stat_item in data['stats']:
+            stat_data = []
+            # sg = stat_item.get('group',{}).get('displayName')
+            st = stat_item.get('type',{}).get('displayName')
+            splits = stat_item.get('splits',[{}])
+            
+            for s in splits:
+                stat = s.get('stat',{})
+                stat_data.append(pd.Series(stat))
+
+                if st == 'seasonAdvanced':
+                    add_to = 'advanced'
+                    if 'hitting' in _url:
+                        reordered_cols = COLS_HIT_ADV
+                    elif 'pitching' in _url:
+                        reordered_cols = COLS_PIT_ADV
+
+                else:
+                    add_to = 'regular'
+                    if 'hitting' in _url:
+                        reordered_cols = COLS_HIT
+                    elif 'pitching' in _url:
+                        reordered_cols = COLS_PIT
+                    elif 'fielding' in _url:
+                        reordered_cols = COLS_FLD
+
+            df = pd.DataFrame(data=stat_data).rename(columns=STATDICT).reindex(columns=reordered_cols)
+
+            stat_dict[add_to] = df
+        
+        if kwargs.get('_logtime') is True:
+            print(f"\n{unquote(_url).replace(BASE,'')}")
+            print(f'--- {time.time() - start} seconds ---\n')
+
+        return stat_dict
+
+    elif "/roster/coach?season=" in _url:
+        coach_data = []
+        roster : list[dict] = data.get('roster',[{}])
+        for roster_entry in roster:
+            job                 = roster_entry.get('job','-')
+            job_title           = roster_entry.get('title','-')
+            job_id              = roster_entry.get('jobId','-')
+            jersey_number_coach = roster_entry.get('jerseyNumber','-')
+
+            p = roster_entry.get('person',{})
+            
+            coach_data.append([
+                job,
+                job_title,
+                job_id,
+                jersey_number_coach,
+                p.get('primaryNumber','-'),
+                p.get('fullName'),
+                p.get('birthDate','-'),
+                p.get('currentAge'),
+                p.get('primaryPosition',{}).get('abbreviation'),
+                p.get('mlbDebutDate','-'),
+                p.get('lastPlayedDate','-'),
+            ])
+        df = pd.DataFrame(data=coach_data,columns=['job','job_title','job_id','jersey_number_coach','jersey_number_primary','name','birth_date','age','pos','mlb_debut','last_played'])
+
+        if kwargs.get('_logtime') is True:
+            print(f"\n{unquote(_url).replace(BASE,'')}")
+            print(f'--- {time.time() - start} seconds ---\n')
+
+        return df
+
+    elif "/draft" in _url:
+        draft_data = []
+        drafts = data.get('drafts',{})
+        rounds = drafts.get('rounds',[{}])
+
+        for r in rounds:
+            picks       = r.get('picks',[{}])
+            for pick in picks:
+                home    = pick.get('home',{})
+                school  = pick.get('school',{})
+                team    = pick.get('team',{})
+                p       = pick.get('person',{})
+
+                draft_type = pick.get('draftType',{})
+
+                draft_data.append([
+                    pick.get('year'),
+                    pick.get('bisPlayerId',0),
+                    p.get('id'),
+                    p.get('fullName'),
+                    p.get('birthDate'),
+                    p.get('birthCity'),
+                    p.get('birthStateProvince'),
+                    p.get('birthCountry'),
+                    p.get('height','-'),
+                    p.get('weight',0),
+                    p.get('primaryPosition',{}).get('abbreviation','-'),
+                    p.get('batSide',{}).get('code','-'),
+                    p.get('pitchHand',{}).get('code','-'),
+                    pick.get('rank',0),
+                    pick.get('pickRound','-'),
+                    pick.get('pickNumber',0),
+                    pick.get('roundPickNumber',0),
+                    pick.get('pickValue','-'),
+                    pick.get('signingBonus','-'),
+                    home.get('city'),
+                    home.get('state'),
+                    home.get('country'),
+                    school.get('name'),
+                    school.get('schoolClass'),
+                    school.get('state'),
+                    school.get('country'),
+                    pick.get('scoutingReport','-'),
+                    pick.get('headshotLink'),
+                    pick.get('blurb'),
+                    pick.get('isDrafted',False),
+                    pick.get('isPass',False),
+                    draft_type.get('code','-'),
+                    draft_type.get('description','-')
+                ])
+
+        df = pd.DataFrame(data=draft_data,columns=['season','bisID','mlbam','name','birth_date','birth_city','birth_state','birth_country','height','weight','pos','bats','throws','rank','round','pick_number','round_pick_number','value','signing_bonus','home_city','home_state','home_country','school_name','school_class','school_state','school_country','scouting_report','headshot_url','blurb','is_drafted','is_pass','draft_code','draft_description'])
+        return df
+
+    elif "/transactions" in _url:
+        transactions = data.get('transactions',[{}])
+        try:
+            trx_columns = ("name","mlbam","tr_type","tr","description","date","e_date","r_date","fr","fr_mlbam","to","to_mlbam")
+            trx_data = []
+            for t in transactions:
+                person  = t.get("person",{})
+                p_name  = person.get("fullName","")
+                p_mlbam = person.get("id","")
+                typeCode = t.get("typeCode","")
+                typeTr   = t.get("typeDesc")
+                desc     = t.get("description")
+
+                fr = t.get("fromTeam",{})
+                fromTeam        = fr.get("name","-")
+                fromTeam_mlbam  = fr.get("id","-")
+
+                to = t.get("toTeam",{})
+                toTeam          = to.get("name","-")
+                toTeam_mlbam    = to.get("id","-")
+
+                date = t.get("date","--")
+                eDate = t.get("effectiveDate","--")
+                rDate = t.get("resolutionDate","--")
+
+                row = [p_name,p_mlbam,typeCode,typeTr,desc,date,eDate,rDate,fromTeam,fromTeam_mlbam,toTeam,toTeam_mlbam]
+                
+                trx_data.append(row)
+
+            df = pd.DataFrame(data=trx_data,columns=trx_columns)
+        except:
+            df = pd.DataFrame()
+
+
+        if kwargs.get('_logtime') is True:
+            print(f"\n{unquote(_url).replace(BASE,'')}")
+            print(f'--- {time.time() - start} seconds ---\n')
+
+        return df
+
+    if kwargs.get('_logtime') is True:
+        print(f"\n{unquote(_url).replace(BASE,'')}")
+        print(f'--- {time.time() - start} seconds ---\n')
 
     return data
 
-
-async def _fetch_team_data(urls:list,lgs_df:pd.DataFrame,_mlbam):
+async def _fetch_team_data(urls:list,lgs_df:pd.DataFrame,_mlbam,_logtime=None):
     retrieved_responses = []
     async with aiohttp.ClientSession() as session:
         tasks = []
@@ -373,7 +625,7 @@ async def _fetch_team_data(urls:list,lgs_df:pd.DataFrame,_mlbam):
         for response in responses:
             resp = await response.json()
             
-            parsed_data = await _parse_team_data(data=resp,session=session,_url=str(response.url),lgs_df=lgs_df,_mlbam=_mlbam)
+            parsed_data = await _parse_team_data(data=resp,session=session,_url=str(response.url),lgs_df=lgs_df,_mlbam=_mlbam,_logtime=_logtime)
 
             retrieved_responses.append(parsed_data)
         
@@ -386,9 +638,18 @@ async def _fetch_team_data(urls:list,lgs_df:pd.DataFrame,_mlbam):
 # ===============================================================
 
 def team_data(_mlbam,_season,**kwargs) -> dict | list:
+    start = time.time()
     lgs_df = get_leages_df().set_index('mlbam')
     tms_df = get_teams_df()
+    ssn_df = get_seasons_df().set_index('season')
+    ssn_row = ssn_df.loc[int(_season)]
+
     tms_df = tms_df[tms_df['yearID']==int(_season)]
+
+    ssn_start : pd.Timestamp = ssn_row['seasonStartDate']
+    ssn_end   : pd.Timestamp = ssn_row['seasonEndDate']
+    ssn_start = ssn_start.strftime(r"%Y-%m-%d")
+    ssn_end   = ssn_end.strftime(r"%Y-%m-%d")
 
     url_list = [
         f"{BASE}/teams/{_mlbam}?season={_season}&hydrate=standings",
@@ -397,13 +658,17 @@ def team_data(_mlbam,_season,**kwargs) -> dict | list:
         f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[season],group=[fielding],season={_season}))",
         f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[hitting],season={_season}))",
         f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[pitching],season={_season}))",
+
+        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[statSplits],group=[pitching],sitCodes=[sp,rp],season={_season}))",
+        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[statSplitsAdvanced],group=[pitching],sitCodes=[sp,rp],season={_season}))",
+
         f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&season={_season}",
         f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&season={_season}",
         f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&season={_season}",
-        f"{BASE}/teams/{_mlbam}/roster/coach?season={_season}?hydrate=person",
-        f"{BASE}/draft/{_season}?sportId=1&teamId={_mlbam}"
+        f"{BASE}/teams/{_mlbam}/roster/coach?season={_season}&hydrate=person",
+        f"{BASE}/draft/{_season}?sportId=1&teamId={_mlbam}",
+        f"{BASE}/transactions?teamId={_mlbam}&startDate={ssn_start}&endDate={ssn_end}",
     ]
-
 
     sched_hydrations = "game(content(media(epg))),team"
     for m in range(12):
@@ -421,22 +686,39 @@ def team_data(_mlbam,_season,**kwargs) -> dict | list:
         url_to_add = f"{BASE}/schedule?sportId=1&teamId={_mlbam}&season={_season}&{date_range_query}&gameType={GAME_TYPES_ALL}&hydrate={sched_hydrations}"
 
         url_list.append(url_to_add)
-
+    _logtime = kwargs.get('_logtime')
     loop = _determine_loop()
-    team_data = loop.run_until_complete(_fetch_team_data(urls=url_list,lgs_df=lgs_df,_mlbam=_mlbam))
+    team_data_dict = loop.run_until_complete(_fetch_team_data(urls=url_list,lgs_df=lgs_df,_mlbam=_mlbam,_logtime=_logtime))
 
-    monthly_schedules_combined_df = pd.concat(team_data[-12:])
+    # monthly_schedules_combined_df = pd.concat(team_data_dict[-12:])
 
+    total_hitting = team_data_dict[8]
+    total_pitching = team_data_dict[9]
+    total_fielding = team_data_dict[10]
     fetched_data = {
-        'team_info'   : team_data[0],
-        'hitting_reg' : team_data[1],
-        'pitching_reg': team_data[2],
-        'fielding_reg': team_data[3],
-        'hitting_adv' : team_data[4],
-        'pitching_adv': team_data[5],
+        'team_info'    : team_data_dict[0],
+        'hitting_reg'  : team_data_dict[1],
+        'pitching_reg' : team_data_dict[2],
+        'fielding_reg' : team_data_dict[3],
+        'hitting_adv'  : team_data_dict[4],
+        'pitching_adv' : team_data_dict[5],
+        'p_splits_reg' : team_data_dict[6],
+        'p_splits_adv' : team_data_dict[7],
+        'total_hitting_reg' : total_hitting['regular'],
+        'total_pitching_reg': total_pitching['regular'],
+        'total_fielding_reg': total_fielding['regular'],
+        'total_hitting_adv' : total_hitting['advanced'],
+        'total_pitching_adv': total_pitching['advanced'],
+        'coaches'           : team_data_dict[11],
+        'drafts'            : team_data_dict[12],
+        'transactions'      : team_data_dict[13],
 
-        'schedule'    : monthly_schedules_combined_df,
+        'schedule'     : pd.concat(team_data_dict[-12:]),
     }
+
+    if kwargs.get('_logtime') is True:
+        print("\n\nTOTAL:")
+        print(f"--- {time.time() - start} seconds ---")
 
     return fetched_data
 
@@ -942,6 +1224,8 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
 
     except:
         _player_awards = pd.DataFrame()
+    
+    # Parsing 'transactions'
     
     try:
         trx_columns = ("name","mlbam","tr_type","tr","description","date","e_date","r_date","fr","fr_mlbam","to","to_mlbam")

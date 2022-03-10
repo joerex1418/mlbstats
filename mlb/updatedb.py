@@ -184,21 +184,13 @@ def update_hof(return_df=False,replace_existing=True):
 
     if replace_existing is False:
         return df
-    # engine = create_engine(f"sqlite:///{os.path.abspath('simplestats/baseball.db')}")
     try:
-        # conn = engine.connect()
-        # df.to_sql("hof",con=conn,if_exists="replace")
         df.to_csv(HALL_OF_FAME_CSV,index=False)
-        # conn.close()
-        # engine.dispose()
         if return_df is True:
             return df
     except Exception as e:
         try:
             print(e)
-            # print("'df.to_sql' FAILED - closing connection")
-            # conn.close()
-            # engine.dispose()
         except:
             pass
         if return_df is True:
@@ -223,10 +215,8 @@ def update_seasons(return_df=False,replace_existing=True):
     if replace_existing is False:
         return df
 
-
     try:
         df.to_csv(SEASONS_CSV,index=False)
-
         if return_df is True:
             return df
     except Exception as e:

@@ -26,7 +26,7 @@ class api:
 
     class person:
         """Person Rest Object (statsapi.mlb.com)"""
-        def __init__(self,PersonRestObject:dict = None,obj=None,mlbam:int = None):
+        def __init__(self,PersonRestObject:dict | list = None,obj=None,mlbam:int = None):
             if obj is not None:
                 PersonRestObject = obj
             data = PersonRestObject

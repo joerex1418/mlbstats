@@ -42,6 +42,18 @@ iso_format_ms = r"%Y-%m-%dT%H:%M:%S.%fZ"
 curr_year = today_date.year
 curr_date = today_date
 
+def make_dt_obj(_dt_str:str,_date_only=False):
+    if _date_only is False:
+        try:
+            return dt.datetime.strptime(_dt_str,r"%Y-%m-%d")
+        except:
+            return dt.datetime.strptime(_dt_str,r"%m/%d/%Y")
+    else:
+        try:
+            return dt.datetime.strptime(_dt_str,r"%Y-%m-%d").date()
+        except:
+            return dt.datetime.strptime(_dt_str,r"%m/%d/%Y").date()
+
 def default_season():
     season_info = get_season_info()
     if season_info['in_progress'] is None:

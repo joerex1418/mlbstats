@@ -1290,70 +1290,6 @@ YBY_FIELD_FIELDS = [
     "triplePlays",
     "fielding"]
   
-ybyPerformance_fields = [
-    "gamesPlayed",
-    "wins",
-    "losses",
-    "winningPercentage",
-    "runsScored",
-    "runsAllowed",
-    "runDifferential",
-    "leagueRank",
-    "divisionRank"]
-
-staff_dict = {
-    'Assistant Catching Coach': 'Coaches',
-    'Assistant Catching Coordinator': 'Coordinators',
-    'Assistant Coach': 'Coaches',
-    'Assistant Hitting Coach': 'Hitting Staff',
-    'Assistant Hitting Coordinator': 'Coordinators',
-    'Assistant Manager': 'Managers',
-    'Assistant Pitching Coach': 'Pitching Staff',
-    'Assistant Pitching Coordinator': 'Coordinators',
-    'Associate Manager': 'Managers',
-    'Batting Coach': 'Hitting Staff',
-    'Bench Coach': 'Coaches',
-    'Bullpen Assistant': 'Pitching Staff',
-    'Bullpen Catcher': 'Pitching Staff',
-    'Bullpen Coach': 'Pitching Staff',
-    'Bullpen Coordinator': 'Coordinators',
-    'Catching Coach': 'Coaches',
-    'Catching Coordinator':'Coordinators',
-    'Defensive Coach': 'Coaches',
-    'First Base Coach': 'First Base Coaches',
-    'Fundamentals Coach': 'Coaches',
-    'Head Coach': 'Coaches',
-    'Hitting Coach': 'Hitting Staff',
-    'Hitting Consultant': 'Hitting Staff',
-    'Hitting Coordinator': 'Coordinators',
-    'Infield Coach': 'Coaches',
-    'Interim Bullpen Coach': 'Pitching Staff',
-    'Interim Hitting Coach': 'Hitting Staff',
-    'Interim Manager': 'Managers',
-    'Interim Pitching Coach': 'Pitching Staff',
-    'Manager': 'Managers',
-    'Pitching Coach': 'Pitching Staff',
-    'Pitching Consultant': 'Pitching Staff',
-    'Pitching Coordinator': 'Coordinators',
-    'Quality Control Coach': 'Coaches',
-    'Third Base Coach': 'Third Base Coaches',
-    'Analytics Coordinator':'Miscellaneous',
-    'Quality Control Coach':'Miscellaneous',
-    'First Base':'First Base Coaches',
-    'Third Base':'Third Base Coaches',
-    'Game Planning Coordinator':'Miscellaneous'
-    }
-ybyPerf_invites = (
-    'records,teams,id,season,teamName,league,name,division,record,divisionRank,leagueRank,wildCardRank,sportRank,gamesPlayed,gamesBack,wildCardGamesBack,leagueGamesBack,sportGamesBack,divisionGamesBack,conferenceGamesBack,records,splitRecords,wins,losses,type,pct,divisionRecords,overallRecords,leagueRecords,runsAllowed,runsScored,runDifferential,winningPercentage,venue')
-
-divIDs = {
-    200:"AL West",
-    201:"AL East",
-    202:"AL Central",
-    203:"NL West",
-    204:"NL East",
-    205:"NL Central"
-}
 
 LEAGUE_IDS_SHORT = {
     200:"West",
@@ -1395,8 +1331,6 @@ leagueIDs = {
 
 LEAGUE_IDS = leagueIDs
 
-teamIDs_all = (
-    "108,109,110,111,112,113,114,115,116,117,118,119,120,121,123,124,125,126,127,128,129,130,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,150,151,152,153,155,156,157,158,161,163,165,166,167,168,169,172,173,174,175,176,177,178,180,181,184,185,186,187,188,189,191,192,193,195,196,197,198,199,200,201,202,204,205,206,208,209,210,211,212,213,219,220,221,222,223,224,297,298,299")
 
 bbref_hit_log_fields = (
     "career_game_num",
@@ -1605,7 +1539,4 @@ bat_leader_stats = {
     "HBP":"HBP"
     }
 
-NETWORKS = {
-    
-}
 
