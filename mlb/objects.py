@@ -183,7 +183,7 @@ class properties:
       #  stats = '',
     )
 
-   
+
 class person:
     """Person instance
     
