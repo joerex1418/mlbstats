@@ -1,4 +1,5 @@
-import datetime as dt
+from .utils import dt
+from .utils import pd
 
 class _mlb_date:
     """datetime.date wrapper for mlb date representations
@@ -168,13 +169,44 @@ class _person_name_data(_mlb_data_wrapper):
         """Pronunciation of person's LAST name"""
         return self._pronunciation
 
-class stats_data:
+class stats:
     def __init__(
         self,
-        hit_ssn_reg=None,
-        hit_ssn_adv=None,
-        pit_ssn_reg=None,
-        pit_ssn_adv=None,
+        hit_ssn_reg : pd.DataFrame | None = None,
+        hit_ssn_adv : pd.DataFrame | None = None,
+        pit_ssn_reg : pd.DataFrame | None = None,
+        pit_ssn_adv : pd.DataFrame | None = None,
+        fld_ssn_reg : pd.DataFrame | None = None,
+        hit_yby_reg : pd.DataFrame | None = None,
+        hit_yby_adv : pd.DataFrame | None = None,
+        pit_yby_reg : pd.DataFrame | None = None,
+        pit_yby_adv : pd.DataFrame | None = None,
+        fld_yby_reg : pd.DataFrame | None = None,
+        **kwargs
+        ):
+        self.__dict__.update(locals())
         
-        **kwargs):
+    def __getitem__(self, __name: str):
+        return getattr(self,__name)
+    
+    def __call__(self):
+        pass
+
+class player_stats(stats):
+    def __init__(self,
+        hit_ssn_reg : pd.DataFrame | None = None,
+        hit_ssn_adv : pd.DataFrame | None = None,
+        pit_ssn_reg : pd.DataFrame | None = None,
+        pit_ssn_adv : pd.DataFrame | None = None,
+        fld_ssn_reg : pd.DataFrame | None = None,
+        hit_yby_reg : pd.DataFrame | None = None,
+        hit_yby_adv : pd.DataFrame | None = None,
+        pit_yby_reg : pd.DataFrame | None = None,
+        pit_yby_adv : pd.DataFrame | None = None,
+        fld_yby_reg : pd.DataFrame | None = None,
+        **kwargs
+        ):
+        super().__init__(hit_ssn_reg, hit_ssn_adv, pit_ssn_reg, pit_ssn_adv, fld_ssn_reg, hit_yby_reg, hit_yby_adv, pit_yby_reg, pit_yby_adv, fld_yby_reg, **kwargs)
+    
+    def __call__(self):
         pass
