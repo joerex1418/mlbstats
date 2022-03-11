@@ -19,16 +19,17 @@ from .async_mlb import (
     get_leaders,
     _determine_loop
 )
-
-from .mlbdata import get_people_df
-from .mlbdata import get_season_info
-from .mlbdata import get_venues_df
-from .mlbdata import get_bios_df
-from .mlbdata import get_teams_df
-from .mlbdata import get_yby_records
-from .mlbdata import get_standings_df
-from .mlbdata import get_leages_df
-from .mlbdata import get_seasons_df
+from .mlbdata import (
+    get_people_df,
+    get_season_info,
+    get_venues_df,
+    get_bios_df,
+    get_teams_df,
+    get_yby_records,
+    get_standings_df,
+    get_leagues_df,
+    get_seasons_df
+)
 
 from .utils import curr_year
 from .utils import curr_date
@@ -87,7 +88,6 @@ async def _parse_player_data(data,session:aiohttp.ClientSession,_url,_mlbam=None
 
         return all_ps
 
-
 async def _fetch_player_data(urls,_get_bio=None,_mlbam=None):
     retrieved_responses = []
     async with aiohttp.ClientSession() as session:
@@ -110,7 +110,6 @@ async def _fetch_player_data(urls,_get_bio=None,_mlbam=None):
         await session.close()
     
     return retrieved_responses
-
 
 async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.DataFrame,_mlbam,**kwargs):
     start = time.time()
@@ -639,7 +638,7 @@ async def _fetch_team_data(urls:list,lgs_df:pd.DataFrame,_mlbam,_logtime=None):
 
 def team_data(_mlbam,_season,**kwargs) -> dict | list:
     start = time.time()
-    lgs_df = get_leages_df().set_index('mlbam')
+    lgs_df = get_leagues_df().set_index('mlbam')
     tms_df = get_teams_df()
     ssn_df = get_seasons_df().set_index('season')
     ssn_row = ssn_df.loc[int(_season)]
@@ -737,11 +736,8 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
     
     """
     
-    pdf = get_people_df().set_index("mlbam")
-    pdf = pdf.loc[_mlbam]
-
+    pdf = get_people_df().set_index("mlbam").loc[_mlbam]
     tdf = get_teams_df()
-    
 
     url_list = []
 
@@ -757,8 +753,6 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
     url_list.append(BASE + f"/transactions?playerId={_mlbam}")                                              # player_transactions
     url_list.append(BASE + f"/people/{_mlbam}?hydrate=currentTeam,rosterEntries,education,draft")           # player_info
     
-    
-    # loop = asyncio.get_event_loop()
     loop = _determine_loop()
     responses = loop.run_until_complete(_fetch_player_data(url_list,_get_bio=kwargs.get("_get_bio"),_mlbam=_mlbam))
     if kwargs.get("_get_bio") is True:
@@ -774,7 +768,6 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
     roster_entries      = player_info.get("rosterEntries",[{}])
     draft               = player_info.get("drafts",[{}])
     currentTeam         = player_info.get("currentTeam",{})
-
 
     # Parsing 'player_stats'
     hitting = {
@@ -1153,14 +1146,14 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
     
     education = pd.DataFrame(data=_edu_data,columns=["type","school","city","state"])
     
-
     # Parsing 'player_info'
-    first_game = player_info.get("mlbDebutDate")
-    last_game = player_info.get("lastPlayedDate")
+    first_game = player_info.get("mlbDebutDate",'-')
+    last_game = player_info.get("lastPlayedDate",'-')
+    
     _player_info = {
-        "mlbam":                _mlbam,
+        "mlbam":                int(_mlbam),
         "bbrefID":              pdf["bbrefID"],
-        "primary_position":     player_info["primaryPosition"]["abbreviation"],
+        "primary_position":     player_info.get("primaryPosition",{}),
         "givenName":            player_info["fullFMLName"],
         "fullName":             player_info["fullName"],
         "firstName":            player_info["firstName"],
@@ -1195,14 +1188,14 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
         "debut_data":           player_info.get("debut_data").get("stats",[])
     }
 
-    if type(first_game) is str and "-" in first_game:
+    if first_game != '-':
         _player_info["first_year"] = first_game[:4]
     else:
-        _player_info["first_year"] = None
-    if type(last_game) is str and "-" in last_game:
+        _player_info["first_year"] = '-'
+    if last_game != '-':
         _player_info["last_year"] = last_game[:4]
     else:
-        _player_info["last_year"] = None
+        _player_info["last_year"] = '-'
 
     # Parsing 'player_awards'
 

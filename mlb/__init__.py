@@ -5,18 +5,18 @@ Author: Joe Rechenmacher
 
 """
 
-from .classes import person
-from .classes import player
-from .classes import franchise
-from .classes import team
-from .classes import Game
+from .objects import person
+from .objects import player
+from .objects import franchise
+from .objects import team
+from .objects import Game
 
-# from .classes import Player
-# from .classes import Team
-# from .classes import League
+# from .objects import Player
+# from .objects import Team
+# from .objects import League
 
 # Parser objects
-from .classes import parser
+from .objects import parser
 
 from .functions import play_search
 from .functions import pitch_search
@@ -67,15 +67,6 @@ team_batting = team_hitting
 from .functions import game_highlights
 from .functions import get_video_link
 
-from .constants import (
-    STATDICT,
-    COLS_HIT,
-    COLS_HIT_ADV,
-    COLS_PIT,
-    COLS_PIT_ADV,
-    COLS_FLD
-)
-
 
 from .utils import keys
 from .utils import timeutils
@@ -110,7 +101,7 @@ from .mlbdata import get_bios_df as bios
 from .mlbdata import get_teams_df as teams
 from .mlbdata import get_people_df as people
 from .mlbdata import get_venues_df as venues
-from .mlbdata import get_leages_df as leagues
+from .mlbdata import get_leagues_df as leagues
 from .mlbdata import get_seasons_df as seasons
 from .mlbdata import get_standings_df as standings
 from .mlbdata import get_yby_records as yby_records
@@ -141,20 +132,3 @@ from .utils_team import team_leaders
 from .async_mlb import fetch
 from .async_mlb import fetch_text
 
-from .api import api
-
-
-
-
-def demo():
-    urls = []
-    years = range(1901,2022)
-    for year in years:
-        urls.append(f"https://statsapi.mlb.com/api/v1/teams/145?hydrate=standings&season={year}")
-    return fetch(urls)
-
-
-sit_codes = "h,a,d,n,g,t,3,4,5,6,7,8,9,10,11,l,r,vl,vr,sah,sbh,sti,twn,tls,taw,tal,b1,b2,b3,b4,b5,b6,b7,b8,b9,lo,i01,i02,i03,i04,i05,i06,i07,i08,i09,ix,e,r0,r1,r2,r3,r12,r23,r123,ron,ron2,risp,risp2,o0,o1,o2,fp,ac,bc,ec,2s,fc,c00,c01,c02,c10,c11,c12,c20,c21,c22,c30,c31,c32"
-urls = [
-    ""
-]

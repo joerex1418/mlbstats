@@ -191,7 +191,7 @@ def get_bbref_pitching_war_df() -> pd.DataFrame:
     df = pd.read_csv(BBREF_PITCHING_DATA_CSV)
     return df
 
-def get_leages_df() -> pd.DataFrame:
+def get_leagues_df() -> pd.DataFrame:
     try:
         df = pd.read_csv(LEAGUES_CSV,index_col=False)
 

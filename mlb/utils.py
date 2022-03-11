@@ -2,19 +2,19 @@ import requests
 import pandas as pd
 import datetime as dt
 from dateutil import tz
-from tabulate import tabulate
+# from tabulate import tabulate
 
 from .constants import ZONE_TOP_STANDARD
 from .constants import ZONE_BOTTOM_STANDARD
 
 from .constants import (
     BAT_FIELDS,
-    BAT_FIELDS_ADV,
-    PITCH_FIELDS,
-    PITCH_FIELDS_ADV,
-    FIELD_FIELDS,
+    # BAT_FIELDS_ADV,
+    # PITCH_FIELDS,
+    # PITCH_FIELDS_ADV,
+    # FIELD_FIELDS,
     STATDICT,
-    LEAGUE_IDS,
+    # LEAGUE_IDS,
     COLS_HIT,
     COLS_HIT_ADV,
     COLS_PIT,
@@ -406,14 +406,6 @@ def prepare_game_data(gm,**params):
    # #########################################################################################################
 
     return data_dict
-
-def maketable(df,fmt="simple"):
-    """Given a Pandas DataFrame obj, outputs a tabulated table df for easy viewing in consoles"""
-    return tabulate(df,headers="keys",showindex=False,tablefmt=fmt)
-
-def showtable(df,fmt="simple"):
-    """Given a Pandas DataFrame obj, outputs a tabulated table df for easy viewing in consoles"""
-    print(tabulate(df,headers="keys",showindex=False,tablefmt=fmt))
 
 def game_str_display(game_obj):
     to_print = []
