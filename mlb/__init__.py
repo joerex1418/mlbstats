@@ -5,7 +5,8 @@ Author: Joe Rechenmacher
 
 """
 
-from .objects import person
+from .objects import Person
+person = Person
 from .objects import player
 from .objects import franchise
 from .objects import team
@@ -72,6 +73,8 @@ from .utils import keys
 from .utils import timeutils
 from .utils import default_season
 from .utils import metadata
+
+from .utils import COLS_HIT
 # from .utils import utc_zone
 # from .utils import et_zone
 # from .utils import ct_zone
@@ -131,4 +134,23 @@ from .utils_team import team_leaders
 
 from .async_mlb import fetch
 from .async_mlb import fetch_text
+
+from .constants import (
+    BASE,
+    GAME_TYPES_ALL,
+    BAT_FIELDS,
+    BAT_FIELDS_ADV,
+    PITCH_FIELDS,
+    PITCH_FIELDS_ADV,
+    FIELD_FIELDS,
+    STATDICT,
+    LEAGUE_IDS,
+    COLS_HIT,
+    COLS_HIT_ADV,
+    COLS_PIT,
+    COLS_PIT_ADV,
+    COLS_FLD,
+    W_SEASON,
+    WO_SEASON
+)
 

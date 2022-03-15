@@ -19,6 +19,9 @@ from .classes import _venue_data
 from .classes import _league_data
 from .classes import _person_name_data
 
+from .classes import player_stats
+
+
 from .constants import BASE
 from .constants import POSITION_DICT
 
@@ -184,7 +187,7 @@ class properties:
     )
 
 
-class person:
+class Person:
     """Person instance
     
     """
@@ -239,10 +242,10 @@ class person:
         }
         
         # debut game info
-        _d : list = _info['debut_data']
+        _deb : list = _info['debut_data']
         
-        if len(_d) > 0:
-            gm_data = _d[0]['splits'][0]
+        if len(_deb) > 0:
+            gm_data = _deb[0]['splits'][0]
             team = gm_data.get("team",{})
             opponent = gm_data.get("opponent",{})
             
@@ -281,23 +284,11 @@ class person:
         }
         
         # education info (highschools/colleges) ----------------------------
-
-        # for old_key,new_key in properties.person.items():
-        #     # print('')
-        #     # print(f"ORIGINAL KEY:\t{old_key}")
-        #     # print(f"NEW KEY:\t\t{old_key}")
-
-        #     if 'name_' in new_key:
-        #         _name_data[new_key[5:]] = data[old_key]
-
-        #     elif new_key == "last_game_date":
-        #         self.last_game = md(data.get(old_key,'-'))
-
-        #     else:
-        #         setattr(self,new_key,data.get(old_key))
+        
         
         self.mlbam      = _info['mlbam']
         
+        self._bio       = _bio
         self.name       = _person_name_data(**_name_data)
         self.position   = mlb_wrapper(**_position_data)
         self.birth      = mlb_wrapper(**_birth_data)
@@ -310,14 +301,32 @@ class person:
         self.awards = _awards
 
         self.current_team = data.get('team',{})
+        
+        
+        # stats info
+        self._stats = player_stats(
+            hit_car_reg=_stats['hitting']['career'],hit_car_adv=_stats['hitting']['career_advanced'],
+            pit_car_reg=_stats['pitching']['career'],pit_car_adv=_stats['pitching']['career_advanced'],
+            fld_car_reg=_stats['fielding']['career'],
+            
+            hit_yby_reg=_stats['hitting']['yby'],hit_yby_adv=_stats['hitting']['yby_advanced'],
+            pit_yby_reg=_stats['pitching']['yby'],pit_yby_adv=_stats['pitching']['yby_advanced'],
+            fld_yby_reg=_stats['fielding']['yby'],
+        )
 
     def stats(self,**kwargs):
         pass
+    
+    @property
+    def bio(self):
+        return self._bio
+    
+    @property
+    def stats(self):
+        return self._stats
         
 class player:
     """# player
-    
-    Get player data in bulk through a bunch of API calls (uses `async` and `aiohttp` libraries)
     
     Parameters
     ----------
@@ -617,7 +626,7 @@ class player:
     @property
     def position(self) -> str:
         """Primary position"""
-        return self.__primary_position
+        return self.__primary_position['abbreviation']
 
     @property
     def age(self) -> int:
@@ -1110,7 +1119,7 @@ class team:
     ----------
 
     mlbam : int
-        Player's official MLB ID
+        Team's official MLB ID
 
     season : int or str
         Retrieve data for a specific season. Default value is None -- retrieves data for the most recent season
