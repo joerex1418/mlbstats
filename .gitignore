@@ -153,3 +153,5 @@ cython_debug/
 *.ipynb
 *.ipynb
 sandbox.py
+
+*.db
