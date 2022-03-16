@@ -17,6 +17,8 @@ class mlb_date:
     - 'month_name_short'
     - 'obj'
     - 'string'
+    - 'full'
+    - 'short'
     """
     def __init__(self,_date_string:str):
         if _date_string != "-":
@@ -31,6 +33,7 @@ class mlb_date:
             self.__month       = d.strftime(r"%m")
             self.__year        = d.strftime(r"%Y")
             self.__full_date = f'{self.__month_name} {self.__day}, {self.__year}'
+            self.__short_date = f'{self.__month_name_short} {self.__day}, {self.__year}'
             
         else:
             self.__date_obj = None
@@ -43,6 +46,7 @@ class mlb_date:
             self.__day         = 0
             self.__year        = 0
             self.__full_date   = '-'
+            self.__short_date  = '-'
             
     def __repr__(self):
         return self.__date_str
@@ -117,6 +121,10 @@ class mlb_date:
         """Returns full date string (Example: "February 3, 2021")"""
         return self.__full_date
 
+    @property
+    def short(self) -> str:
+        """Returns short date string (Example: "Feb 3, 2021")"""
+        return self.__short_date
 
 class mlb_data_wrapper:
     """### Data wrapper
@@ -322,7 +330,6 @@ class team_data_wrapper_slim(mlb_data_wrapper):
         """Info for team's venue"""
         return self._venue
     
-from IPython.display import display
 class person_name_data(mlb_data_wrapper):
     """A wrapper containing data on a variations of a PERSON's name"""
     def __init__(self, **kwargs):
@@ -369,6 +376,14 @@ class person_name_data(mlb_data_wrapper):
         """Pronunciation of person's LAST name"""
         return self._pronunciation
 
+# class _stat_df:
+#     def __init__(self,df:pd.DataFrame):
+#         self.__df = df
+        
+#     def __call__(self, filter_col, filter_val:str|None=None):
+#         df = self.__df
+#         if filter_col == 'game_type':
+#             return df[df[filter_col]==filter_val]
     
 class stat_collection(mlb_data_wrapper):
     def __init__(
@@ -387,13 +402,16 @@ class stat_collection(mlb_data_wrapper):
         elif stat_group == 'fielding':
             self.__cols_reg = keys.field
             self.__cols_adv = keys.field
+        
+        else:
+            self.__cols_reg = {'hitting':keys.hit,'pitching':keys.pitch,'fielding':keys.field}
+            self.__cols_adv = {'hitting':keys.hit_adv,'pitching':keys.pitch_adv,'fielding':keys.field}
             
         self.__regular = mlb_data_wrapper(
             career=career_regular,
             season=season_regular,
             yby=yby_regular
         )
-        
         self.__advanced = mlb_data_wrapper(
             career=career_advanced,
             season=season_advanced,
@@ -477,6 +495,21 @@ class player_stats(mlb_data_wrapper):
                             'fld_yby_reg':fld_yby_reg,
                             })
         
+        self.__all_stats_dict = {'hitting':{'career':[hit_car_reg,hit_car_adv],
+                                            'yby':[hit_yby_reg,hit_yby_adv],
+                                            'season':[hit_ssn_reg,hit_ssn_adv]
+                                            },
+                                 'pitching':{'career':[pit_car_reg,pit_car_adv],
+                                            'yby':[pit_yby_reg,pit_yby_adv],
+                                            'season':[pit_ssn_reg,pit_ssn_adv]
+                                            },
+                                 'fielding':{'career':[fld_car_reg,fld_car_reg],
+                                            'yby':[fld_yby_reg,fld_yby_reg],
+                                            'season':[fld_ssn_reg,fld_ssn_reg]
+                                            },
+                                 }
+    
+        
         self.__hitting = stat_collection('hitting',
             career_regular  = hit_car_reg,career_advanced = hit_car_adv,
             season_regular  = hit_ssn_reg,season_advanced = hit_ssn_adv,
@@ -492,6 +525,78 @@ class player_stats(mlb_data_wrapper):
             season_regular  = fld_ssn_reg,
             yby_regular     = fld_yby_reg,
         )
+        
+    def __call__(self,stat_group:str,stat_type:str,filter_by:str|None=None,filter_val:str|None=None,advanced:bool|str=False,**kwargs):
+        """Get stats data through class call
+        
+        Parameters:
+        -----------
+        stat_group : str (required)
+            specify a stat group ('hitting','pitching' or 'fielding')
+        
+        stat_type : str (required)
+            specify a stat type ('career', 'yby', 'season')
+        
+        advanced : bool (required, Default is False)
+        
+        filter_by : str | None
+        
+        """
+        try:
+            group_dict = self.__all_stats_dict[stat_group]
+            stat_selection = group_dict[stat_type]
+            idx = 0
+            if kwargs.get('adv') is not None:
+                advanced = kwargs['adv']
+            if (advanced is True) or ('adv' in str(advanced)):
+                idx = 1
+            df = stat_selection[idx]
+            
+            if filter_by is not None:
+                df = df[df[filter_by]==filter_val]
+            
+            return df
+        except:
+            if kwargs.get('exception_val') is not None:
+                return kwargs['exception_val']
+            else:
+                return None
+    
+    def get(self,stat_group:str,stat_type:str,filter_by:str|None=None,filter_val:str|None=None,advanced:bool|str=False,**kwargs):
+        """Get stats data through class call
+        
+        Parameters:
+        -----------
+        stat_group : str (required)
+            specify a stat group ('hitting','pitching' or 'fielding')
+        
+        stat_type : str (required)
+            specify a stat type ('career', 'yby', 'season')
+        
+        advanced : bool (required, Default is False)
+        
+        filter_by : str | None
+        
+        """
+        try:
+            group_dict = self.__all_stats_dict[stat_group]
+            stat_selection = group_dict[stat_type]
+            idx = 0
+            if kwargs.get('adv') is not None:
+                advanced = kwargs['adv']
+            if (advanced is True) or ('adv' in str(advanced)):
+                idx = 1
+            df = stat_selection[idx]
+            
+            if filter_by is not None:
+                df = df[df[filter_by]==filter_val]
+            
+            return df
+        except:
+            if kwargs.get('exception_val') is not None:
+                return kwargs['exception_val']
+            else:
+                return None
     
     @property
     def hitting(self):

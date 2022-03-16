@@ -2,15 +2,31 @@
 # SimpleStatsMLB
 
 Author: Joe Rechenmacher
+ 
+https://github.com/joerex1418/simplestats-mlb
+
+
+Wiki: https://github.com/joerex1418/simplestats-mlb/wiki
+
+Issues: https://github.com/joerex1418/simplestats-mlb/issues
+
+License: https://raw.githubusercontent.com/joerex1418/simplestats-mlb/master/LICENSE
+
 
 """
+
+import mlb
 
 from .objects import Person
 person = Person
 from .objects import player
 from .objects import franchise
+Franchise = franchise
 from .objects import team
+Team = team
 from .objects import Game
+game = Game
+
 
 # from .objects import Player
 # from .objects import Team
