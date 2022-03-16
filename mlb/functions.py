@@ -636,7 +636,7 @@ async def _fetch_team_data(urls:list,lgs_df:pd.DataFrame,_mlbam,_logtime=None):
 # Bulk Retrieval
 # ===============================================================
 
-def team_data(_mlbam,_season,**kwargs) -> dict | list:
+def _team_data(_mlbam,_season,**kwargs) -> dict | list:
     start = time.time()
     lgs_df = get_leagues_df().set_index('mlbam')
     tms_df = get_teams_df()
@@ -721,7 +721,7 @@ def team_data(_mlbam,_season,**kwargs) -> dict | list:
 
     return fetched_data
 
-def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
+def _player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
     """Fetch a variety of player information/stats in one API call
 
     Parameters
@@ -738,6 +738,7 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
     
     pdf = get_people_df().set_index("mlbam").loc[_mlbam]
     tdf = get_teams_df()
+    lg_df = get_leagues_df().set_index("mlbam")
 
     url_list = []
 
@@ -745,13 +746,14 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
     seasonQuery = ""
 
     statGroup = "hitting,pitching,fielding"
+    hydrations = "currentTeam,rosterEntries(team),education,draft"
     if kwargs.get("_get_bio") is True:
-        url_list.append(       f"https://www.baseball-reference.com/redirect.fcgi?player=1&mlb_ID={_mlbam}")    # player_bio
+        url_list.append(f"https://www.baseball-reference.com/redirect.fcgi?player=1&mlb_ID={_mlbam}")       # player_bio
     query = f"stats={statType}&gameType=R,P&group={statGroup}{seasonQuery}"
     url_list.append(BASE + f"/people/{_mlbam}/stats?{query}")                                               # player_stats
     url_list.append(BASE + f"/people/{_mlbam}/awards")                                                      # player_awards
     url_list.append(BASE + f"/transactions?playerId={_mlbam}")                                              # player_transactions
-    url_list.append(BASE + f"/people/{_mlbam}?hydrate=currentTeam,rosterEntries,education,draft")           # player_info
+    url_list.append(BASE + f"/people/{_mlbam}?&appContext=majorLeague&hydrate={hydrations}")                # player_info
     
     loop = _determine_loop()
     responses = loop.run_until_complete(_fetch_player_data(url_list,_get_bio=kwargs.get("_get_bio"),_mlbam=_mlbam))
@@ -1102,23 +1104,53 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
     }
 
     # Parsing 'roster_entries'
+    #   - Also creating a seperate dataframe of previous teams' data
+    past_teams_cols = ['mlbam','full','season','location','franchise','mascot','club','short','lg_mlbam','lg_name_full','lg_name_short','lg_abbrv','div_mlbam','div_name_full','div_name_short','div_abbrv','venue_mlbam','venue_name']
+    past_teams_data = []
     roster_cols = ["jersey","position","status","team","tm_mlbam","from_date","to_date","status_date","forty_man","active"]
     roster_data = []
     for entry in roster_entries:
-        row = [
+        tm = entry.get("team",{})
+        lg_mlbam  = tm.get('league',{}).get('id',0)
+        lg_row    = lg_df.loc[lg_mlbam]
+        div_mlbam  = tm.get('league',{}).get('id',0)
+        div_row    = lg_df.loc[div_mlbam]
+        venue      = tm.get('venue',{})
+        roster_data.append([
             entry.get("jerseyNumber","-"),
             entry.get("position",{}).get("abbreviation",""),
             entry.get("status",{}).get("description",{}),
-            entry.get("team",{}).get("name",""),
-            entry.get("team",{}).get("id",""),
+            tm.get("name","-"),
+            tm.get("id","-"),
             entry.get("startDate","-"),
             entry.get("endDate","-"),
             entry.get("statusDate","-"),
             entry.get("isActiveFortyMan",False),
             entry.get("isActive",False)
-        ]
-        roster_data.append(row)
+            ])
+        past_teams_data.append([
+            tm.get('id'),
+            tm.get('name'),
+            tm.get('season'),
+            tm.get('locationName'),
+            tm.get('franchiseName'),
+            tm.get('teamName'),
+            tm.get('clubName'),
+            tm.get('shortName'),
+            lg_mlbam,
+            lg_row['name_full'],
+            lg_row['name_short'],
+            lg_row['abbreviation'],
+            div_mlbam,
+            div_row['name_full'],
+            div_row['name_short'],
+            div_row['abbreviation'],
+            venue.get('id',0),
+            venue.get('name','-')
+
+        ])
     _player_roster_entries = pd.DataFrame(data=roster_data,columns=roster_cols)
+    _player_past_teams     = pd.DataFrame(data=past_teams_data,columns=past_teams_cols)
 
     # Parsing 'education'
     _edu_data = []
@@ -1162,15 +1194,15 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
         "nickName":             player_info.get("nickName","--"),
         "pronunciation":        player_info.get("pronunciation",""),
         "primary_number":       player_info["primaryNumber"],
-        "birthDate":            player_info["birthDate"],
+        "birthDate":            player_info.get("birthDate","-"),
         "currentAge":           player_info["currentAge"],
-        "birthCity":            player_info.get("birthCity",""),
-        "birthState":           player_info.get("birthStateProvince",""),
-        "birthCountry":         player_info.get("birthCountry",""),
-        "deathDate":            player_info.get("deathDate",""),
-        "deathCity":            player_info.get("deathCity",""),
-        "deathState":           player_info.get("deathStateProvince",""),
-        "deathCountry":         player_info.get("deathCountry",""),
+        "birthCity":            player_info.get("birthCity","-"),
+        "birthState":           player_info.get("birthStateProvince","-"),
+        "birthCountry":         player_info.get("birthCountry","-"),
+        "deathDate":            player_info.get("deathDate","-"),
+        "deathCity":            player_info.get("deathCity","-"),
+        "deathState":           player_info.get("deathStateProvince","-"),
+        "deathCountry":         player_info.get("deathCountry","-"),
         "weight":               player_info["weight"],
         "height":               player_info["height"],
         "bats":                 player_info["batSide"]["code"],
@@ -1198,7 +1230,6 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
         _player_info["last_year"] = '-'
 
     # Parsing 'player_awards'
-
     award_data = []
     try:
         for a in player_awards:
@@ -1214,12 +1245,10 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
             award_data.append(row)
 
         _player_awards = pd.DataFrame(data=award_data,columns=("award_id","award","date","season","tm_mlbam","tm_name"))
-
     except:
         _player_awards = pd.DataFrame()
     
     # Parsing 'transactions'
-    
     try:
         trx_columns = ("name","mlbam","tr_type","tr","description","date","e_date","r_date","fr","fr_mlbam","to","to_mlbam")
         trx_data = []
@@ -1259,6 +1288,8 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
     except:
         _player_transactions = pd.DataFrame()
 
+
+    # on teams (mainly used for the web app)
     if _player_info['primary_position'] == "P":
         _df = _player_stats['pitching']['yby']
     else:
@@ -1267,13 +1298,16 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
     _teams = {}
     all_tm_mlbams = list(set(_df['tm_mlbam']))
     for tm_id in all_tm_mlbams:
-        tm = tdf[tdf['mlbam']==int(tm_id)].iloc[0]
-        _teams[str(tm_id)] = {
-            "full":tm['fullName'],
-            "location":tm["locationName"],
-            "club":tm["clubName"],
-            "slug":f'{tm["clubName"].lower().replace(" ","-")}-{tm["mlbam"]}'
-        }
+        try:
+            tm = tdf[tdf['mlbam']==int(tm_id)].iloc[0]
+            _teams[str(tm_id)] = {
+                "full":tm['fullName'],
+                "location":tm["locationName"],
+                "club":tm["clubName"],
+                "slug":f'{tm["clubName"].lower().replace(" ","-")}-{tm["mlbam"]}',
+            }
+        except:
+            pass
 
     fetched_data = {
         "bio":_player_bio,
@@ -1282,11 +1316,12 @@ def player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
         "awards":_player_awards,
         "transactions":_player_transactions,
         "teams":_teams,
+        "past_teams":_player_past_teams
     }
 
     return fetched_data
 
-def franchise_data(mlbam,**kwargs) -> dict:
+def _franchise_data(mlbam,**kwargs) -> dict:
     """Fetch various team season data & information for a team in one API call
 
     Parameters

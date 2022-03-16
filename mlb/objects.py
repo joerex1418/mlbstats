@@ -6,19 +6,21 @@ import datetime as dt
 from types import SimpleNamespace as ns
 
 
-from .functions import team_data
-from .functions import franchise_data
-from .functions import player_data
+from .functions import _team_data
+from .functions import _franchise_data
+from .functions import _player_data
+from .functions import find_player
 
 # from .mlbdata import get_yby_records
 # from .mlbdata import get_people_df
 
-from .classes import _mlb_date as md
-from .classes import _mlb_data_wrapper as mlb_wrapper
-from .classes import _venue_data
-from .classes import _league_data
-from .classes import _person_name_data
-
+from .classes import mlb_date as md
+from .classes import mlb_data_wrapper as mlb_wrapper
+from .classes import venue_name_wrapper
+from .classes import league_name_wrapper
+from .classes import team_name_data
+from .classes import person_name_data
+from .classes import team_data_wrapper_slim
 from .classes import player_stats
 
 
@@ -32,168 +34,62 @@ from .utils import prettify_time
 from .utils import default_season
 
 
-class parser:
-    class person:
-        def __init__(self,PersonData:dict):
-            data = PersonData
-            __name_data = {}
-
-            # position info
-            pos = data.get('primaryPosition',{})
-            __position_data = {
-                'code':pos.get('code','-'),
-                'name':pos.get('name','-'),
-                'type':pos.get('type','-'),
-                'abbrv':pos.get('abbreviation','-'),
-                'abbreviation':pos.get('abbreviation','-'),
-            }
-            
-            # birth info
-            __birth_data = {
-                'date':  md(data.get('birthDate','-')),
-                'city':  data.get('birthCity','-'),
-                'state': data.get('birthStateProvince','-'),
-                'province':data.get('birthStateProvince','-'),
-                'country' :data.get('birthCountry','-'),
-            }
-
-            # death info
-            __death_data = {
-                'date':  md(data.get('deathDate','-')),
-                'city':  data.get('deathCity','-'),
-                'state': data.get('deathStateProvince','-'),
-                'province':data.get('deathStateProvince','-'),
-                'country' :data.get('deathCountry','-'),
-            }
-
-            for old_key,new_key in properties.person.items():
-                # print('')
-                # print(f"ORIGINAL KEY:\t{old_key}")
-                # print(f"NEW KEY:\t\t{old_key}")
-
-                if 'name_' in new_key:
-                    __name_data[new_key[5:]] = data[old_key]
-
-                elif new_key == "last_game_date":
-                    self.last_game = md(data.get(old_key,'-'))
-
-                else:
-                    setattr(self,new_key,data.get(old_key))
-            __debut_data = {
-                'date':md(data.get('mlbDebutDate','-')),
-                }
-            __last_game_data = {
-                'date':md(data.get('lastPlayedDate','-')),
-            }
-
-            self.name       = mlb_wrapper(**__name_data)
-            self.position   = mlb_wrapper(**__position_data)
-            self.birth      = mlb_wrapper(**__birth_data)
-            self.death      = mlb_wrapper(**__death_data)
-            self.debut      = mlb_wrapper(**__debut_data)
-            self.last_game  = mlb_wrapper(**__last_game_data)
-
-            self.current_team = data.get('team',{})
-
-        def stats(**kwargs):
-            pass
-            
-    
-class _stats:
-    """instance for collection of stat types/groups
-    
-    """
-    def __init__(self,**stats_types):
-        self.__reg = stats_types.get("reg")
-        self.__adv = stats_types.get("adv")
-
-    
-    def __call__(self):
-        df = self.__reg
-        if self.__adv is not None:
-            if type(df) is pd.DataFrame:
-                df = df.merge(self.__adv)
-        return df
-
-    @property
-    def reg(self) -> pd.DataFrame:
-        """Regular stats"""
-        return self.__reg
-    
-    @property
-    def adv(self) -> pd.DataFrame:
-        """Advanced stats"""
-        return self.__adv
-
-    @property
-    def regular(self) -> pd.DataFrame:
-        """Regular stats"""
-        return self.__reg
-
-    @property
-    def advanced(self) -> pd.DataFrame:
-        """Advanced stats"""
-        return self.__adv
-
-class properties:
-    person = dict(
-        id             = 'mlbam',
-        gender         = 'gender',
-        height         = 'height',
-        weight         = 'weight',
-        active         = 'is_active',
-        # birthDate      = 'birth_date',
-        # birthCity      = 'birth_city',
-        # birthStateProvince = 'birth_state',
-        # birthCountry   = 'birth_country',
-        # deathDate      = 'death_date',
-        # deathCity      = 'death_city',
-        # deathStateProvince = 'death_state',
-        # deathCountry   = 'death_country',
-        captain        = 'captain',
-        currentAge     = 'age',
-        currentTeam    = 'current_team',
-        draft          = 'draft',
-        draftYear      = 'draft_year',
-        education      = 'education',
-        firstName      = 'name_first',
-        middleName     = 'name_middle',
-        lastName       = 'name_last',
-        nameMatrilineal= 'name_matrilineal',
-        fullName       = 'name_full',
-        boxscoreName   = 'name_boxscore',
-        useName        = 'name_use',
-        nickName       = 'name_nick',
-        nameSlug       = 'name_slug',
-        firstLastName  = 'name_fl',
-        lastFirstName  = 'name_lf',
-        fullFMLName    = 'name_fml',
-        fullLFMName    = 'name_lfm',
-        pronunciation  = 'name_pronunciation',
-        isPlayer       = 'is_player',
-        isVerified     = 'is_verified',
-        # lastPlayedDate = 'last_game_date',
-        # mlbDebutDate   = 'debut_date',
-        link           = 'url',
-        nationality    = 'nationality',
-        primaryNumber  = 'jersey',
-        strikeZoneTop    = 'zone_top',
-        strikeZoneBottom = 'zone_bottom',
-      #  primaryPosition  = 'position',
-      #  jobEntries      = 'job_entries',
-      #  rosterEntries = '',
-      #  social = '',
-      #  stats = '',
-    )
-
-
 class Person:
-    """Person instance
+    """## Person
+    
+        The "mlb.Person" class is a comprehensive wrapper for many different types of data for a single person.
+    All of the data (with the exception of content in the "bio" attribute/property) is pulled from the Official MLB 
+    Stats API - https://statsapi.mlb.com/api/v1 . The attributes intended for end-user retrieval have been made into
+    read-only property attributes.
+    
+        Data can be accessed by using standard dot-notation (e.g. `person.name`) or by treating the class as a
+    subscriptable python dictionary (e.g. `person["name"]`).
+    
+        Many of the properties are subscriptable wrappers for different types of data (See examples below).
+    For convenience and where it is applicable, if the wrapper is not accessing a child attribute, a string representation
+    of the object is returned. Additionally, some wrappers (like 'mlb_date') are callable and will return a non-string
+    object. For example, `person.birth.date` returns a date string ('YYYY-mm-dd') while `person.birth.date()` returns a datetime.date object
+    
+    Examples
+    --------
+    ```
+    import mlb
+    
+    >>> abreu = mlb.Person(547989)
+    
+    # Player's given name
+    >>> abreu.name.given
+    'Jose Dariel Abreu'
+    
+    # Player's birth date as a datetime object
+    >>> abreu.birth.date.obj
+    datetime.date(1987, 1, 29)
+    
+    # ...or as a date string (long format)
+    >>> abreu.birth.date.full
+    'January 29, 1987'
+    
+    # Obtaining birthdate by subscripting
+    >>> abreu['birth']['date']['full']
+    'January 29, 1987'
+    
+    ```
     
     """
-    def __init__(self,_player_mlbam:int,**kwargs):
+    
+    @classmethod
+    def from_search(cls,query:str):
+        try:
+            mlbam = int(find_player(query).iloc[0]['mlbam'])
+            return cls(mlbam)
+        except:
+            print(Exception(cls,'Player not found'))
+            return None
+    
+    def __new__(cls,_player_mlbam:int,**kwargs):
+        self = object.__new__(cls)
         _pd_df = pd.DataFrame
-        data = player_data(_player_mlbam)
+        data = _player_data(_player_mlbam)
         
         _bio  : list|None  = data['bio']
         _info : dict       = data['info']
@@ -201,6 +97,7 @@ class Person:
         _stats  : dict     = data['stats']
         _teams  : dict     = data['teams']
         _awards : _pd_df   = data['awards']
+        _past_teams : pd.DataFrame = data['past_teams']
         
         # name info
         _name_data = {
@@ -225,20 +122,20 @@ class Person:
         
         # birth info
         _birth_data = {
-            'date':  md(data.get('birthDate','-')),
-            'city':  data.get('birthCity','-'),
-            'state': data.get('birthStateProvince','-'),
-            'province':data.get('birthStateProvince','-'),
-            'country' :data.get('birthCountry','-'),
+            'date':  md(_info['birthDate']),
+            'city':  _info['birthCity'],
+            'state': _info['birthState'],
+            'province':_info['birthState'],
+            'country' :_info['birthCountry']
         }
 
         # death info
         _death_data = {
-            'date':  md(data.get('deathDate','-')),
-            'city':  data.get('deathCity','-'),
-            'state': data.get('deathStateProvince','-'),
-            'province':data.get('deathStateProvince','-'),
-            'country' :data.get('deathCountry','-'),
+            'date':  md(_info['deathDate']),
+            'city':  _info['deathCity'],
+            'state': _info['deathState'],
+            'province':_info['deathState'],
+            'country' :_info['deathCountry']
         }
         
         # debut game info
@@ -248,31 +145,34 @@ class Person:
             gm_data = _deb[0]['splits'][0]
             team = gm_data.get("team",{})
             opponent = gm_data.get("opponent",{})
-            
+            gamepk = gm_data['game']['gamePk']
             _debut_data = {
                 'date': md(_info['first_game']),
-                'gamepk':gm_data['game']['gamePk'],
-                'team': mlb_wrapper(
-                    full=team.get("name"),
-                    mlbam=team.get("id"),
-                    team=team.get("teamName"),
-                    short=team.get("shortName"),
-                    club=team.get("clubName"),
-                    location=team.get("locationName"),
-                    franchise=team.get("franchiseName"),
-                    season=team.get("season"),
-                    slug=f"{team.get('clubName').lower().replace(' ','-')}-{team.get('id')}",
+                'gamepk':gamepk,
+                'game_id':gamepk,
+                'game_pk':gamepk,
+                'gamePk':gamepk,
+                'team': team_name_data(
+                    _full=team.get("name"),
+                    _mlbam=team.get("id"),
+                    # _team=team.get("teamName"),
+                    _short=team.get("shortName"),
+                    _club=team.get("clubName"),
+                    _location=team.get("locationName"),
+                    _franchise=team.get("franchiseName"),
+                    _season=team.get("season"),
+                    _slug=f"{team.get('clubName').lower().replace(' ','-')}-{team.get('id')}",
                     ),
-                'opponent': mlb_wrapper(
-                    full=opponent.get("name"),
-                    mlbam=opponent.get("id"),
-                    team=opponent.get("teamName"),
-                    short=opponent.get("shortName"),
-                    club=opponent.get("clubName"),
-                    location=opponent.get("locationName"),
-                    franchise=opponent.get("franchiseName"),
-                    season=opponent.get("season"),
-                    slug=f"{opponent.get('clubName').lower().replace(' ','-')}-{opponent.get('id')}",
+                'opponent': team_name_data(
+                    _full=opponent.get("name"),
+                    _mlbam=opponent.get("id"),
+                    # _team=opponent.get("teamName"),
+                    _short=opponent.get("shortName"),
+                    _club=opponent.get("clubName"),
+                    _location=opponent.get("locationName"),
+                    _franchise=opponent.get("franchiseName"),
+                    _season=opponent.get("season"),
+                    _slug=f"{opponent.get('clubName').lower().replace(' ','-')}-{opponent.get('id')}",
                     ),
                 }
         else:
@@ -286,22 +186,36 @@ class Person:
         # education info (highschools/colleges) ----------------------------
         
         
-        self.mlbam      = _info['mlbam']
+        self._mlbam      = _info['mlbam']
         
         self._bio       = _bio
-        self.name       = _person_name_data(**_name_data)
-        self.position   = mlb_wrapper(**_position_data)
-        self.birth      = mlb_wrapper(**_birth_data)
-        self.death      = mlb_wrapper(**_death_data)
-        self.debut      = mlb_wrapper(**_debut_data)
-        self.last_game  = mlb_wrapper(**_last_game_data)
+        self._name      = person_name_data(**_name_data)
+        self._position   = mlb_wrapper(**_position_data)
+        self._birth      = mlb_wrapper(**_birth_data)
+        self._death      = mlb_wrapper(**_death_data)
+        self._debut      = mlb_wrapper(**_debut_data)
+        self._last_game  = mlb_wrapper(**_last_game_data)
         
-        self.transactions = _trx
-        self.trx    = _trx
-        self.awards = _awards
+        self._zone_top    = _info['zoneTop']
+        self._zone_bottom = _info['zoneBot']
+        
+        # transaction df
+        self._trx = _trx
+        
+        # awards df
+        self._awards = _awards
 
-        self.current_team = data.get('team',{})
-        
+        # self.current_team = data.get('team',{})
+        _all_teams_data = []
+        for _tm_mlbam, _tm_data in _teams.items():
+            _all_teams_data.append([
+                int(_tm_mlbam),
+                _tm_data['full'],
+                _tm_data['location'],
+                _tm_data['club'],
+                _tm_data['slug'],
+            ])
+        self._teams = pd.DataFrame(data=_all_teams_data,columns=['tm_mlbam','tm_full_name','tm_location','tm_club','tm_slug'])
         
         # stats info
         self._stats = player_stats(
@@ -313,502 +227,664 @@ class Person:
             pit_yby_reg=_stats['pitching']['yby'],pit_yby_adv=_stats['pitching']['yby_advanced'],
             fld_yby_reg=_stats['fielding']['yby'],
         )
+        
+        # roster entries
+        self._roster_entries = _info['roster_entries']
+        
+        # past teams (full data)
+        self._past_teams = _past_teams
+        
+        # self._past_teams = {}
+        _past_teams_list = []
+        for idx in range(len(_past_teams)):
+            t = _past_teams.iloc[idx]
+            _past_teams_list.append(
+                team_data_wrapper_slim(
+                    mlbam=t['mlbam'],
+                    full=t['full'],
+                    season=t['season'],
+                    location=t['location'],
+                    franchise=t['franchise'],
+                    mascot=t['mascot'],
+                    club=t['club'],
+                    short=t['short'],
+                    lg_mlbam = t['lg_mlbam'],
+                    lg_name_full = t['lg_name_full'],
+                    lg_name_short = t['lg_name_short'],
+                    lg_abbrv = t['lg_abbrv'],
+                    div_mlbam = t['div_mlbam'],
+                    div_name_full = t['div_name_full'],
+                    div_name_short = t['div_name_short'],
+                    div_abbrv = t['div_abbrv'],
+                    venue_mlbam = t['venue_mlbam'],
+                    venue_name = t['venue_name']
+                )
+                )
+        
+        self._past_teams_list = _past_teams_list
+        
+        
+        
+        return self
+    
+    def __str__(self):
+        return self._name.full
+    
+    def __repr__(self):
+        return f'({self._name.full}, {self._mlbam})'
+    
+    def __len__(self) -> int:
+        max_ = 0
+        for grp in (self.stats.hitting,self.stats.pitching,self.stats.fielding):
+            try:
+                ct = len(set(grp.yby.regular['season']))
+                if ct > max_:
+                    max_ = ct
+            except:
+                pass
+        return max_
+    
+    def __getitem__(self, _name: str):
+        return self.__dict__[f'_{_name}']
 
-    def stats(self,**kwargs):
-        pass
+    @property
+    def mlbam(self) -> int:
+        """Player's official MLB ID"""
+        return int(self._mlbam)
     
     @property
+    def name(self) -> person_name_data:
+        """Name variations for player"""
+        return self._name
+    @property
     def bio(self):
+        """Player bio from player Bullpen Page by 'Baseball-Reference'"""
         return self._bio
     
     @property
-    def stats(self):
-        return self._stats
+    def birth(self) -> md:
+        """Details of player's birth
         
-class player:
-    """# player
-    
-    Parameters
-    ----------
-
-    mlbam : int or str
-        Player's official MLB ID
-
-    """
-
-    def __init__(self,mlbam):
-        
-        
-        pdata = player_data(mlbam)
-        pbio    = pdata["bio"]
-        pinfo   = pdata["info"]
-        pstats  = pdata["stats"]
-        pawards = pdata["awards"]
-        ptrx    = pdata["transactions"]
-        teams   = pdata["teams"]
-
-        # pinfo contains ('currentTeam','rosterEntries','education','draft')
-        self.__bio                  = pbio
-        self.__mlbam                = pinfo["mlbam"]
-        self.__bbrefID              = pinfo["bbrefID"]
-        self.__primary_position     = pinfo["primary_position"]
-        self.__givenName            = pinfo["givenName"]
-        self.__fullName             = pinfo["fullName"]
-        self.__firstName            = pinfo["firstName"]
-        self.__middleName           = pinfo["middleName"]
-        self.__lastName             = pinfo["lastName"]
-        self.__nickName             = pinfo["nickName"]
-        self.__pronunciation        = pinfo["pronunciation"]
-        self.__primaryNumber        = pinfo["primary_number"]
-        self.__current_age          = pinfo["currentAge"]
-        self.__birthDate            = pinfo["birthDate"]
-        self.__birthCity            = pinfo["birthCity"]
-        self.__birthState           = pinfo["birthState"]
-        self.__birthCountry         = pinfo["birthCountry"]
-        self.__deathDate            = pinfo["deathDate"]
-        self.__deathCity            = pinfo["deathCity"]
-        self.__deathState           = pinfo["deathState"]
-        self.__deathCountry         = pinfo["deathCountry"]
-        self.__weight               = pinfo["weight"]
-        self.__height               = pinfo["height"]
-        self.__bats                 = pinfo["bats"]
-        self.__throws               = pinfo["throws"]
-        self.__zoneBot              = pinfo["zoneBot"]
-        self.__zoneTop              = pinfo["zoneTop"]
-        self.__is_active            = pinfo["is_active"]
-        self.__first_year           = pinfo["first_year"]
-        self.__first_game           = pinfo["first_game"]
-        self.__last_year            = pinfo["last_year"]
-        self.__last_game            = pinfo["last_game"]
-        self.__roster_entries       = pinfo["roster_entries"]
-        self.__draft                = pinfo["draft"]
-        debut_data                  = pinfo["debut_data"]
-
-        self.teams                  = teams
-
-        edu = pinfo["education"]
-
-        if self.__last_year is None:
-            self.__last_year = default_season()
-
-        self.__awards               = pawards
-        self.__transactions         = ptrx
-
-        self.__current_team = ns(
-            name=pinfo["team_name"],
-            mlbam=pinfo["team_mlbam"]
-        )
-
-        self.__name = ns(
-            given=self.__givenName,
-            full=self.__fullName,
-            first=self.__firstName,
-            middle=self.__middleName,
-            last=self.__lastName,
-            nick=self.__nickName,
-            pronunciation=self.__pronunciation
-        )
-
-        bd = self.__birthDate
-        if bd != "":
-            bd  = dt.datetime.strptime(bd,r"%Y-%m-%d")
-            bdy = bd.year
-            bdm = bd.strftime(r"%B")
-            bdd = str(int(bd.day))
-            bdl = f"{bdm} {bdd}, {bdy}"
-        else:
-            bd  = None
-            bdy = None
-            bdm = None
-            bdd = None
-            bdl = "-"
-        self.__birth = ns(
-            date=self.__birthDate,
-            date_long=bdl,
-            year=bdy,
-            month=bdm,
-            day=bdd,
-            city=self.__birthCity,
-            state=self.__birthState,
-            country=self.__birthCountry
-        )
-        
-        dd = self.__deathDate
-        if dd != "":
-            dd  = dt.datetime.strptime(dd,r"%Y-%m-%d")
-            ddy = dd.year
-            ddm = dd.strftime(r"%B")
-            ddd = str(int(dd.day))
-            ddl = f"{ddm} {ddd}, {ddy}"
-        else:
-            dd  = None
-            ddy = None
-            ddm = None
-            ddd = None
-            ddl = "-"
-        self.__death = ns(
-            date=self.__deathDate,
-            date_long=ddl,
-            year=ddy,
-            month=ddm,
-            day=ddd,
-            city=self.__deathCity,
-            state=self.__deathState,
-            country=self.__deathCountry
-        )
-
-        # STATS
-        self.__stats = _stat_collection(
-            career=ns(
-                hitting=_stats(
-                    reg=_stat_data(pstats["hitting"]["career"]),
-                    adv=_stat_data(pstats["hitting"]["career_advanced"])),
-                pitching=_stats(
-                    reg=_stat_data(pstats["pitching"]["career"]),
-                    adv=_stat_data(pstats["pitching"]["career_advanced"])),
-                fielding=_stats(
-                    reg=_stat_data(pstats["fielding"]["career"]))
-                ),
-            yby=ns(
-                hitting=_stats(
-                    reg=_stat_data(pstats["hitting"]["yby"]),
-                    adv=_stat_data(pstats["hitting"]["yby_advanced"])),
-                pitching=_stats(
-                    reg=_stat_data(pstats["pitching"]["yby"]),
-                    adv=_stat_data(pstats["pitching"]["yby_advanced"])),
-                fielding=_stats(
-                    reg=_stat_data(pstats["fielding"]["yby"]))
-                ),
-        )
-
-        _hs_df = edu[edu["type"]=="highschool"]
-        _co_df = edu[edu["type"]=="college"]
-        if len(_hs_df) > 0:
-            self.__highschool = ns(
-                name=_hs_df.iloc[0]["school"],
-                city=_hs_df.iloc[0]["city"],
-                state=_hs_df.iloc[0]["state"]
-            )
-        else:
-            self.__highschool = "-"
-        if len(_co_df) > 0:
-            self.__college = ns(
-                name=_co_df.iloc[0]["school"],
-                city=_co_df.iloc[0]["city"],
-                state=_co_df.iloc[0]["state"]
-            )
-        else:
-            self.__college = "-"
-
-        self.__education = ns(
-            schools=edu,
-            highschool=self.__highschool,
-            college=self.__college
-        )
-
-        jersey_numbers = []
-        for j in self.__roster_entries["jersey"]:
-            if j != "-":
-                jersey_numbers.append(j)
-        jersey_numbers = list(set(jersey_numbers))
-
-        self.__jerseys = ns(
-            primary=self.__primaryNumber,
-            all=jersey_numbers
-        )
-
-        if len(debut_data) > 0:
-            debut_data = debut_data[0]["splits"][0]
-            team = debut_data.get("team",{})
-            opponent = debut_data.get("opponent",{})
-            date_obj = dt.datetime.strptime(self.__first_game,r"%Y-%m-%d")
-            self.__debut = ns(
-                date=self.__first_game,
-                date_long=date_obj.strftime(r"%B %d, %Y"),
-                date_short=date_obj.strftime(r"%b %d, %Y"),
-                gamepk=debut_data["game"]["gamePk"],
-                team=mlb_wrapper(
-                    full=team.get("name"),
-                    mlbam=team.get("id"),
-                    team=team.get("teamName"),
-                    short=team.get("shortName"),
-                    club=team.get("clubName"),
-                    location=team.get("locationName"),
-                    franchise=team.get("franchiseName"),
-                    season=team.get("season"),
-                    slug=f"{team.get('clubName').lower().replace(' ','-')}-{team.get('id')}",
-                ),
-                opponent=mlb_wrapper(
-                    full=opponent.get("name"),
-                    mlbam=opponent.get("id"),
-                    team=opponent.get("teamName"),
-                    short=opponent.get("shortName"),
-                    club=opponent.get("clubName"),
-                    location=opponent.get("locationName"),
-                    franchise=opponent.get("franchiseName"),
-                    season=opponent.get("season"),
-                    slug=f"{opponent.get('clubName').lower().replace(' ','-')}-{team.get('id')}",
-                )
-            )
-        else:
-            debut_data = {}
-    
-    def __str__(self):
-        return self.__fullName
-
-    def __repr__(self):
-        return self.__fullName
-
-    @property
-    def bio(self) -> list[str]:
-        """Player bio (from Baseball-Reference Bullpen Page)"""
-        return self.__bio
-
-    @property
-    def name(self):
-        """Player's names (first, middle, last, etc.)
-        
-        Keys:
-        - name.full
-        - name.first
-        - name.middle
-        - name.last
-        - name.nick (*Nickname)
-        - name.pronunciation
+        Keys/Attributes:
+        -----
+        - 'date' : mlb_date
+        - 'city' : str
+        - 'state' (or 'province') : str
+        - 'country' : str
 
         """
-
-        return self.__name
-
-    @property
-    def birth(self):
-        """Information on player's birth:
-        
-        Keys:
-        - birth.date
-        - birth.city
-        - birth.state
-        - birth.country
-
-
-        """
-        return self.__birth
-
+        return self._birth
+    
     @property
     def death(self):
-        """Information on player's passing:
+        """Details of player's death (if applicable)
         
-        Keys:
-        - death.date
-        - death.city
-        - death.state
-        - death.country
-
-
+        Keys/Attributes:
+        -----
+        - 'date' : mlb_date
+        - 'city' : str
+        - 'state' (or 'province') : str
+        - 'country' : str
         """
-        return self.__death
+        return self._death
     
     @property
-    def mlbam(self) -> int:
-        """Official MLB ID"""
-        return int(self.__mlbam)
-    
-    @property
-    def bbrefID(self) -> str:
-        """Baseball-Reference ID"""
-        return self.__bbrefID
-
-    @property
-    def jersey(self):
-        """Primary jersey number"""
-        return self.__jerseys
-
-    @property
-    def position(self) -> str:
-        """Primary position"""
-        return self.__primary_position['abbreviation']
-
-    @property
-    def age(self) -> int:
-        """Player's age"""
-        return int(self.__current_age)
-
-    @property
-    def weight(self) -> int:
-        """Weight (lbs)"""
-        return int(self.__weight)
-
-    @property
-    def height(self) -> str:
-        """Height (ft' in")"""
-        return self.__height
-
-    @property
-    def bats(self) -> str:
-        """Player's batting side"""
-        return str(self.__bats)
-
-    @property
-    def throws(self) -> str:
-        """Player's throwing arm"""
-        return str(self.__throws)
-
-    @property
-    def zone_top(self):
-        """Top of player's at-bat strikezone"""
-        return self.__zoneTop
-
-    @property
-    def zone_bottom(self):
-        """Bottom of player's at-bat strikezone"""
-        return self.__zoneBot
-    
-    @property
-    def is_active(self) -> bool:
-        """Player's active status"""
-        return self.__is_active
-    
-    @property
-    def debut(self):
-        """Data for player's MLB Debut Game"""
-        return self.__debut
-
-    @property
-    def first_year(self) -> int:
-        """First year active"""
-        return int(self.__first_year)
-
-    @property
-    def first_game(self) -> str:
-        """MLB Debut Date (YYYY-mm-dd)"""
-        return self.__first_game
-
-    @property
-    def last_year(self) -> int:
-        """Last year active"""
-        return int(self.__last_year)
-
-    @property
-    def last_game(self) -> str:
-        """Last MLB Game Date (YYYY-mm-dd)"""
-        return self.__last_game
-
-    @property
-    def team(self):
-        """Current (or last) team
-
-        Keys:
-        - team.name
-        - team.mlbam
-        """
-        return self.__current_team
-    
-    @property
-    def education(self):
-        """Player's education information
+    def position(self):
+        """Wrapper for player's primary position
         
-        Keys:
-        - edu.schools
-        - edu.highschool
-        - edu.college
-
+        Keys/Attributes:
+        -----
+        - 'code' : int (3)
+        - 'name' : str ('First Base')
+        - 'type' (or 'province') : str ('Infielder')
+        - 'abbreviation' : str ('1B')
         """
-        return self.__education
-
+        return self._position
+    
     @property
-    def edu(self):
-        """Player's education information (alias for `education`)
+    def stats(self) -> player_stats:
+        """Player stats
         
-        Keys:
-        - edu.highschool
-        - edu.college
-
-        """
-        return self.__education
-
-    @property
-    def awards(self) -> pd.DataFrame:
-        """Awards won"""
-        return self.__awards
-
-    @property
-    def draft(self) -> pd.DataFrame:
-        """Draft details"""
-        return self.__draft
-
-    @property
-    def stats(self) -> _stats:
-        """Stats data
-
-        Keys:
-        - stats.career.<STAT_GROUP>
-            - reg (regular)
-            - adv (advanced)
-        - stats.yby.<STAT_GROUP>    (year-by-year)
-            - reg (regular)
-            - adv (advanced)
-        
-        Stat groups:
+        Stats Groups
+        ------------
         - hitting
         - pitching
         - fielding
         
-        Examples:
+        Stats Categories
+        ----------------
+        - yby.regular
+        - yby.advanced
+        - career.regular
+        - career.advanced
         
-        - Advanced career hitting stats
-            - `stats.career.hitting.adv`
-
-        - Regular year-by-year fielding stats
-            - `stats.yby.fielding.reg`
-
-        - "_stats" object can also be called (w/o paramaters) to combine regular and advanced statistics into one dataframe
-            - `stats.yby.pitching()`
-
+        Note:
+        -----
+            The official API differentiates two subtypes of each stat type. For example, the 'career' stat type retrieves *standard* statistics of a player's entire MLB career. 'careerAdvanced' retrieves more advanced statistics of the same stat type (some stat keys may overlap).
+            
+            For this reason, a "subtype" must be specified when retrieving a dataframe of statistics using '.regular' or '.advanced' ('reg' | 'adv' for short hand). See example below.
+            
+            Please Note that the "fielding" stat group does not have "advanced" stat data. `fielding.yby.advanced` returns standard stat data.
+        
+        Examples
+        ---------
+        ```
+        import mlb
+        
+        >>> abreu = mlb.Person(547989)
+        # Get player's regular/standard career stats
+        >>> abreu.stats.hitting.yby.regular
+        # OR
+        >>> abreu.stats.hitting.yby.reg
+        
+        # Get player's advanced career stats
+        >>> abreu.stats.hitting.yby.advanced
+        # OR
+        >>> abreu.stats.hitting.yby.adv
+        
+        ```
+        
         """
-        return self.__stats
+        return self._stats
+    
+    @property
+    def transactions(self) -> pd.DataFrame | None:
+        """Dataframe of transactions involving person, i.e. trades, status changes, etc."""
+        return self._trx
+    
+    @property
+    def trx(self) -> pd.DataFrame | None:
+        """Dataframe of transactions involving person, i.e. trades, status changes, etc.
+        
+        ALIAS for 'transactions'
+        """
+        return self._trx
 
+    @property
+    def teams(self) -> pd.DataFrame | None:
+        """Dataframe of teams that person has played for"""
+        return self._teams
+    
     @property
     def roster_entries(self):
-        """Player's roster entries"""
-        return self.__roster_entries
-
-    @property
-    def entries(self):
-        """Player's roster entries (alias for `roster_entries`)"""
-        return self.__roster_entries
-
-    @property
-    def transactions(self):
-        """Transactions involved in"""
-        return self.__transactions
-
-    @property
-    def trx(self):
-        """Transactions involved in (alias for `transactions`)"""
-        return self.__transactions
-
-
-class _stat_collection:
-    """stat type collection instance"""
-    def __init__(self,**kwargs):
-        self.__dict__.update(kwargs)
+        """Data for player's recorded roster entries"""
+        return self._roster_entries
     
-    def __getitem__(self,_item):
-        return getattr(_item)
+    @property
+    def awards(self):
+        """Awards received by person"""
+        return self._awards
 
-class _stat_data:
-    """stat data instance"""
-    def __init__(self,_df):
-        self.__df = _df
+    @property
+    def past_teams_list(self) -> list[team_data_wrapper_slim]:
+        """List of person's teams as "wrapper" objects"""
+        return self._past_teams_list
     
-    def __call__(self,_col=None,_val=None):
-        df = self.__df
-        if len(df) == 0:
-            return None
-        elif _col is None or _val is None:
-            return df
-        else:
-            return df[df[_col]==_val]
+    @property
+    def debut_game(self):
+        return self._debut
+    
+    @property
+    def last_game(self):
+        return self._last_game
+    
+    @property
+    def zone_top(self):
+        return self._zone_top
+    
+    @property
+    def zone_bottom(self):
+        return self._zone_bottom
+    
+
+# class player:
+#     """# player
+    
+#     Parameters
+#     ----------
+
+#     mlbam : int or str
+#         Player's official MLB ID
+
+#     """
+
+#     def __init__(self,mlbam):
+        
+        
+#         pdata = _player_data(mlbam)
+#         pbio    = pdata["bio"]
+#         pinfo   = pdata["info"]
+#         pstats  = pdata["stats"]
+#         pawards = pdata["awards"]
+#         ptrx    = pdata["transactions"]
+#         teams   = pdata["teams"]
+
+#         # pinfo contains ('currentTeam','rosterEntries','education','draft')
+#         self.__bio                  = pbio
+#         self.__mlbam                = pinfo["mlbam"]
+#         self.__bbrefID              = pinfo["bbrefID"]
+#         self.__primary_position     = pinfo["primary_position"]
+#         self.__givenName            = pinfo["givenName"]
+#         self.__fullName             = pinfo["fullName"]
+#         self.__firstName            = pinfo["firstName"]
+#         self.__middleName           = pinfo["middleName"]
+#         self.__lastName             = pinfo["lastName"]
+#         self.__nickName             = pinfo["nickName"]
+#         self.__pronunciation        = pinfo["pronunciation"]
+#         self.__primaryNumber        = pinfo["primary_number"]
+#         self.__current_age          = pinfo["currentAge"]
+#         self.__birthDate            = pinfo["birthDate"]
+#         self.__birthCity            = pinfo["birthCity"]
+#         self.__birthState           = pinfo["birthState"]
+#         self.__birthCountry         = pinfo["birthCountry"]
+#         self.__deathDate            = pinfo["deathDate"]
+#         self.__deathCity            = pinfo["deathCity"]
+#         self.__deathState           = pinfo["deathState"]
+#         self.__deathCountry         = pinfo["deathCountry"]
+#         self.__weight               = pinfo["weight"]
+#         self.__height               = pinfo["height"]
+#         self.__bats                 = pinfo["bats"]
+#         self.__throws               = pinfo["throws"]
+#         self.__zoneBot              = pinfo["zoneBot"]
+#         self.__zoneTop              = pinfo["zoneTop"]
+#         self.__is_active            = pinfo["is_active"]
+#         self.__first_year           = pinfo["first_year"]
+#         self.__first_game           = pinfo["first_game"]
+#         self.__last_year            = pinfo["last_year"]
+#         self.__last_game            = pinfo["last_game"]
+#         self.__roster_entries       = pinfo["roster_entries"]
+#         self.__draft                = pinfo["draft"]
+#         debut_data                  = pinfo["debut_data"]
+
+#         self.teams                  = teams
+
+#         edu = pinfo["education"]
+
+#         if self.__last_year is None:
+#             self.__last_year = default_season()
+
+#         self.__awards               = pawards
+#         self.__transactions         = ptrx
+
+#         self.__current_team = ns(
+#             name=pinfo["team_name"],
+#             mlbam=pinfo["team_mlbam"]
+#         )
+
+#         self.__name = ns(
+#             given=self.__givenName,
+#             full=self.__fullName,
+#             first=self.__firstName,
+#             middle=self.__middleName,
+#             last=self.__lastName,
+#             nick=self.__nickName,
+#             pronunciation=self.__pronunciation
+#         )
+
+#         bd = self.__birthDate
+#         if bd != "":
+#             bd  = dt.datetime.strptime(bd,r"%Y-%m-%d")
+#             bdy = bd.year
+#             bdm = bd.strftime(r"%B")
+#             bdd = str(int(bd.day))
+#             bdl = f"{bdm} {bdd}, {bdy}"
+#         else:
+#             bd  = None
+#             bdy = None
+#             bdm = None
+#             bdd = None
+#             bdl = "-"
+#         self.__birth = ns(
+#             date=self.__birthDate,
+#             date_long=bdl,
+#             year=bdy,
+#             month=bdm,
+#             day=bdd,
+#             city=self.__birthCity,
+#             state=self.__birthState,
+#             country=self.__birthCountry
+#         )
+        
+#         dd = self.__deathDate
+#         if dd != "":
+#             dd  = dt.datetime.strptime(dd,r"%Y-%m-%d")
+#             ddy = dd.year
+#             ddm = dd.strftime(r"%B")
+#             ddd = str(int(dd.day))
+#             ddl = f"{ddm} {ddd}, {ddy}"
+#         else:
+#             dd  = None
+#             ddy = None
+#             ddm = None
+#             ddd = None
+#             ddl = "-"
+#         self.__death = ns(
+#             date=self.__deathDate,
+#             date_long=ddl,
+#             year=ddy,
+#             month=ddm,
+#             day=ddd,
+#             city=self.__deathCity,
+#             state=self.__deathState,
+#             country=self.__deathCountry
+#         )
+        
+        
+#         self._stats = player_stats(
+#             hit_car_reg=pstats["hitting"]["career"],hit_car_adv=pstats["hitting"]["career_advanced"],
+#             pit_car_reg=pstats["pitching"]["career"],pit_car_adv=pstats["pitching"]["career_advanced"],
+#             fld_car_reg=pstats["fielding"]["career"],
+            
+#             hit_yby_reg=pstats["hitting"]["yby"],hit_yby_adv=pstats["hitting"]["yby_advanced"],
+#             pit_yby_reg=pstats["pitching"]["yby"],pit_yby_adv=pstats["pitching"]["yby_advanced"],
+#             fld_yby_reg=pstats["fielding"]["yby"],
+#         )
+
+#         _hs_df = edu[edu["type"]=="highschool"]
+#         _co_df = edu[edu["type"]=="college"]
+#         if len(_hs_df) > 0:
+#             self.__highschool = ns(
+#                 name=_hs_df.iloc[0]["school"],
+#                 city=_hs_df.iloc[0]["city"],
+#                 state=_hs_df.iloc[0]["state"]
+#             )
+#         else:
+#             self.__highschool = "-"
+#         if len(_co_df) > 0:
+#             self.__college = ns(
+#                 name=_co_df.iloc[0]["school"],
+#                 city=_co_df.iloc[0]["city"],
+#                 state=_co_df.iloc[0]["state"]
+#             )
+#         else:
+#             self.__college = "-"
+
+#         self.__education = ns(
+#             schools=edu,
+#             highschool=self.__highschool,
+#             college=self.__college
+#         )
+
+#         jersey_numbers = []
+#         for j in self.__roster_entries["jersey"]:
+#             if j != "-":
+#                 jersey_numbers.append(j)
+#         jersey_numbers = list(set(jersey_numbers))
+
+#         self.__jerseys = ns(
+#             primary=self.__primaryNumber,
+#             all=jersey_numbers
+#         )
+
+#         if len(debut_data) > 0:
+#             debut_data = debut_data[0]["splits"][0]
+#             team = debut_data.get("team",{})
+#             opponent = debut_data.get("opponent",{})
+#             date_obj = dt.datetime.strptime(self.__first_game,r"%Y-%m-%d")
+#             self.__debut = ns(
+#                 date=self.__first_game,
+#                 date_long=date_obj.strftime(r"%B %d, %Y"),
+#                 date_short=date_obj.strftime(r"%b %d, %Y"),
+#                 gamepk=debut_data["game"]["gamePk"],
+#                 team=mlb_wrapper(
+#                     full=team.get("name"),
+#                     mlbam=team.get("id"),
+#                     team=team.get("teamName"),
+#                     short=team.get("shortName"),
+#                     club=team.get("clubName"),
+#                     location=team.get("locationName"),
+#                     franchise=team.get("franchiseName"),
+#                     season=team.get("season"),
+#                     slug=f"{team.get('clubName').lower().replace(' ','-')}-{team.get('id')}",
+#                 ),
+#                 opponent=mlb_wrapper(
+#                     full=opponent.get("name"),
+#                     mlbam=opponent.get("id"),
+#                     team=opponent.get("teamName"),
+#                     short=opponent.get("shortName"),
+#                     club=opponent.get("clubName"),
+#                     location=opponent.get("locationName"),
+#                     franchise=opponent.get("franchiseName"),
+#                     season=opponent.get("season"),
+#                     slug=f"{opponent.get('clubName').lower().replace(' ','-')}-{team.get('id')}",
+#                 )
+#             )
+#         else:
+#             debut_data = {}
+    
+#     def __str__(self):
+#         return self.__fullName
+
+#     def __repr__(self):
+#         return self.__fullName
+
+#     @property
+#     def bio(self) -> list[str]:
+#         """Player bio (from Baseball-Reference Bullpen Page)"""
+#         return self.__bio
+
+#     @property
+#     def name(self):
+#         """Player's names (first, middle, last, etc.)
+        
+#         Keys:
+#         - name.full
+#         - name.first
+#         - name.middle
+#         - name.last
+#         - name.nick (*Nickname)
+#         - name.pronunciation
+
+#         """
+
+#         return self.__name
+
+#     @property
+#     def birth(self):
+#         """Information on player's birth:
+        
+#         Keys:
+#         - birth.date
+#         - birth.city
+#         - birth.state
+#         - birth.country
+
+
+#         """
+#         return self.__birth
+
+#     @property
+#     def death(self):
+#         """Information on player's passing:
+        
+#         Keys:
+#         - death.date
+#         - death.city
+#         - death.state
+#         - death.country
+
+
+#         """
+#         return self.__death
+    
+#     @property
+#     def mlbam(self) -> int:
+#         """Official MLB ID"""
+#         return int(self.__mlbam)
+    
+#     @property
+#     def bbrefID(self) -> str:
+#         """Baseball-Reference ID"""
+#         return self.__bbrefID
+
+#     @property
+#     def jersey(self):
+#         """Primary jersey number"""
+#         return self.__jerseys
+
+#     @property
+#     def position(self) -> str:
+#         """Primary position"""
+#         return self.__primary_position['abbreviation']
+
+#     @property
+#     def age(self) -> int:
+#         """Player's age"""
+#         return int(self.__current_age)
+
+#     @property
+#     def weight(self) -> int:
+#         """Weight (lbs)"""
+#         return int(self.__weight)
+
+#     @property
+#     def height(self) -> str:
+#         """Height (ft' in")"""
+#         return self.__height
+
+#     @property
+#     def bats(self) -> str:
+#         """Player's batting side"""
+#         return str(self.__bats)
+
+#     @property
+#     def throws(self) -> str:
+#         """Player's throwing arm"""
+#         return str(self.__throws)
+
+#     @property
+#     def zone_top(self):
+#         """Top of player's at-bat strikezone"""
+#         return self.__zoneTop
+
+#     @property
+#     def zone_bottom(self):
+#         """Bottom of player's at-bat strikezone"""
+#         return self.__zoneBot
+    
+#     @property
+#     def is_active(self) -> bool:
+#         """Player's active status"""
+#         return self.__is_active
+    
+#     @property
+#     def debut(self):
+#         """Data for player's MLB Debut Game"""
+#         return self.__debut
+
+#     @property
+#     def first_year(self) -> int:
+#         """First year active"""
+#         return int(self.__first_year)
+
+#     @property
+#     def first_game(self) -> str:
+#         """MLB Debut Date (YYYY-mm-dd)"""
+#         return self.__first_game
+
+#     @property
+#     def last_year(self) -> int:
+#         """Last year active"""
+#         return int(self.__last_year)
+
+#     @property
+#     def last_game(self) -> str:
+#         """Last MLB Game Date (YYYY-mm-dd)"""
+#         return self.__last_game
+
+#     @property
+#     def team(self):
+#         """Current (or last) team
+
+#         Keys:
+#         - team.name
+#         - team.mlbam
+#         """
+#         return self.__current_team
+    
+#     @property
+#     def education(self):
+#         """Player's education information
+        
+#         Keys:
+#         - edu.schools
+#         - edu.highschool
+#         - edu.college
+
+#         """
+#         return self.__education
+
+#     @property
+#     def edu(self):
+#         """Player's education information (alias for `education`)
+        
+#         Keys:
+#         - edu.highschool
+#         - edu.college
+
+#         """
+#         return self.__education
+
+#     @property
+#     def awards(self) -> pd.DataFrame:
+#         """Awards won"""
+#         return self.__awards
+
+#     @property
+#     def draft(self) -> pd.DataFrame:
+#         """Draft details"""
+#         return self.__draft
+
+#     @property
+#     def stats(self) -> player_stats:
+#         """Stats data
+
+#         Keys:
+#         - stats.career.<STAT_GROUP>
+#             - reg (regular)
+#             - adv (advanced)
+#         - stats.yby.<STAT_GROUP>    (year-by-year)
+#             - reg (regular)
+#             - adv (advanced)
+        
+#         Stat groups:
+#         - hitting
+#         - pitching
+#         - fielding
+        
+#         Examples:
+        
+#         - Advanced career hitting stats
+#             - `stats.career.hitting.adv`
+
+#         - Regular year-by-year fielding stats
+#             - `stats.yby.fielding.reg`
+
+#         - "_stats" object can also be called (w/o paramaters) to combine regular and advanced statistics into one dataframe
+#             - `stats.yby.pitching()`
+
+#         """
+#         return self.__stats
+
+#     @property
+#     def roster_entries(self):
+#         """Player's roster entries"""
+#         return self.__roster_entries
+
+#     @property
+#     def entries(self):
+#         """Player's roster entries (alias for `roster_entries`)"""
+#         return self.__roster_entries
+
+#     @property
+#     def transactions(self):
+#         """Transactions involved in"""
+#         return self.__transactions
+
+#     @property
+#     def trx(self):
+#         """Transactions involved in (alias for `transactions`)"""
+#         return self.__transactions
 
 
 class _standings:
@@ -958,7 +1034,7 @@ class franchise:
     
     """
     def __init__(self,mlbam):
-        data = franchise_data(mlbam)
+        data = _franchise_data(mlbam)
 
         records         = data["records"]
         record_splits   = data["record_splits"] # like standings splits
@@ -977,33 +1053,31 @@ class franchise:
         self.__mlbam = ti['mlbam']
         self.__franchise = ti['franchise_name']
         self.__name = mlb_wrapper(
-            full=ti['full_name'],
-            location=ti['location_name'],
-            franchise=self.__franchise,
-            mascot=ti['team_name'],
-            club=ti['club_name'],
-            short=ti['short_name']
+            _full=ti['full_name'],
+            _location=ti['location_name'],
+            _franchise=self.__franchise,
+            _mascot=ti['team_name'],
+            _club=ti['club_name'],
+            _short=ti['short_name']
             )
         
 
-        self.__league : _league_data = _league_data(
+        self.__league : league_name_wrapper = league_name_wrapper(
             _mlbam=ti['league_mlbam'],
             _name=ti['league_name'],
             _short=ti['league_short'],
             _abbrv=ti['league_abbrv']
         )
-        self.__division : _league_data = _league_data(
+        self.__division : league_name_wrapper = league_name_wrapper(
             _mlbam=ti['div_mlbam'],
             _name=ti['div_name'],
             _short=ti['div_short'],
             _abbrv=ti['div_abbrv']
         )
-        
-        self.__venue : _venue_data = _venue_data(
+        self.__venue : venue_name_wrapper = venue_name_wrapper(
             _name=ti['venue_name'],
             _mlbam=ti['venue_mlbam']
         )
-        
         self.__standings = _standings(
             records=records,
             splits=record_splits
@@ -1064,11 +1138,12 @@ class franchise:
     
     @property
     def venue(self):
+        """Information for team's venue"""
         return self.__venue
 
     @property
     def standings(self):
-        """standings (records, record splits)"""
+        """Standings (records, record splits)"""
         return self.__standings
 
     @property
@@ -1077,6 +1152,7 @@ class franchise:
 
     @property
     def stats(self):
+        """Team stats data"""
         return self.__stats
 
     @property
@@ -1095,10 +1171,12 @@ class franchise:
     
     @property
     def league(self) -> mlb_wrapper:
+        """Information for team's league"""
         return self.__league
     
     @property
     def division(self) -> mlb_wrapper:
+        """Information for team's division"""
         return self.__division
 
     @property
@@ -1135,7 +1213,7 @@ class team:
         cls.mlbam = int(mlbam)
         cls.season = int(season)
         
-        data : dict | None = team_data(cls.mlbam,cls.season)
+        data : dict | None = _team_data(cls.mlbam,cls.season)
         cls.raw_data = data
 
         ti : dict = data['team_info']

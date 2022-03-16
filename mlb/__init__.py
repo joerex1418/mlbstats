@@ -17,7 +17,7 @@ from .objects import Game
 # from .objects import League
 
 # Parser objects
-from .objects import parser
+# -- *work in progress
 
 from .functions import play_search
 from .functions import pitch_search
@@ -44,7 +44,6 @@ from .functions import player_date_range
 from .functions import player_date_range_advanced
 from .functions import player_splits
 from .functions import player_splits_advanced
-from .functions import player_data
 from .functions import team_hitting
 from .functions import team_pitching
 from .functions import team_fielding
@@ -52,8 +51,6 @@ from .functions import team_hitting_advanced
 from .functions import team_pitching_advanced
 from .functions import team_roster
 from .functions import team_game_logs
-from .functions import franchise_data
-from .functions import team_data
 from .functions import team_appearances
 from .functions import league_hitting
 from .functions import league_pitching
@@ -61,6 +58,10 @@ from .functions import league_fielding
 from .functions import league_hitting_advanced
 from .functions import league_pitching_advanced
 from .functions import league_leaders
+
+# from .functions import _player_data
+# from .functions import _franchise_data
+# from .functions import _team_data
 
 player_batting = player_hitting
 team_batting = team_hitting
