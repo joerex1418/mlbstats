@@ -2,6 +2,8 @@
 This is an UNOFFICIAL Python wrapper for the Official MLB StatsAPI (https://statsapi.mlb.com). I wrote this library with the intention of making baseball data retrieval as intuitive and robust as possible.
 
 ## Getting the library
+I haven't had the chance to make the library available on the Python Package Index just yet. So for now, you can just download from the Github Repo. 
+
 In the command line, copy and paste the following:
 ```python
 pip install git+https://github.com/joerex1418/simplestats-mlb.git
