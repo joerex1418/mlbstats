@@ -5,16 +5,16 @@ This is an UNOFFICIAL Python wrapper for the Official MLB StatsAPI (https://stat
 I haven't had the chance to make the library available on the Python Package Index just yet. So for now, you can just download from the Github Repo. 
 
 In the command line, copy and paste the following:
-```python
+```
 pip install git+https://github.com/joerex1418/simplestats-mlb.git
 ```
 Or you can clone the repo for the dev version
-```python
+```
 git clone https://github.com/joerex1418/simplestats-mlb.git
 ```
 <!-- ## Installing from PyPI
 In the command line, copy and paste the following:
-```python
+```
 pip install simplestats-mlb
 ``` -->
 
