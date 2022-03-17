@@ -156,3 +156,4 @@ sandbox.py
 
 *.db
 *.db
+.DS_Store
