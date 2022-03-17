@@ -54,7 +54,7 @@ def make_dt_obj(_dt_str:str,_date_only=False):
         except:
             return dt.datetime.strptime(_dt_str,r"%m/%d/%Y").date()
 
-def default_season():
+def default_season() -> int:
     season_info = get_season_info()
     if season_info['in_progress'] is None:
         season = season_info['last_completed']

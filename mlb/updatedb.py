@@ -1,5 +1,6 @@
 import requests
 import pandas as pd
+import datetime as dt
 
 from .constants import COLS_SEASON
 
@@ -12,9 +13,10 @@ from .paths import (
     BBREF_BATTING_DATA_CSV,
     BBREF_PITCHING_DATA_CSV,
     LEAGUES_CSV,
-    SEASONS_CSV
+    SEASONS_CSV,
+    API_TEAMS_CSV
 )
-
+from .async_mlb import fetch
 from .async_mlb import get_updated_records
 from .async_mlb import get_bios
 
@@ -396,3 +398,4 @@ def update_leagues(return_df=False,replace_existing=True):
         df.to_csv(LEAGUES_CSV,index=False)
     if return_df is True:
         return df
+    

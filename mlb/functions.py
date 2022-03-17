@@ -14,11 +14,7 @@ nest_asyncio.apply()
 from bs4 import BeautifulSoup as bs
 from bs4 import SoupStrainer
 
-from .async_mlb import (
-    fetch,
-    get_leaders,
-    _determine_loop
-)
+from .async_mlb import (fetch,get_leaders,_determine_loop)
 from .mlbdata import (
     get_people_df,
     get_season_info,
@@ -31,15 +27,10 @@ from .mlbdata import (
     get_seasons_df
 )
 
-from .utils import curr_year
-from .utils import curr_date
-from .utils import default_season
+from .utils import curr_year, curr_date, default_season
 
 # from .utils import utc_zone
-from .utils import et_zone
-from .utils import ct_zone
-from .utils import mt_zone
-from .utils import pt_zone
+from .utils import et_zone, ct_zone, mt_zone, pt_zone
 
 from .constants import (
     BASE,
@@ -1631,7 +1622,6 @@ def _franchise_data(mlbam,**kwargs) -> dict:
 
     return fetched_data
 
-
 # ===============================================================
 # PLAYER Functions
 # ===============================================================
@@ -2913,120 +2903,6 @@ def player_stats(mlbam,statGroup,statType,season=None,**kwargs) -> pd.DataFrame:
 
     return df
 
-def player_search(name,sportId=1,**kwargs):
-    """Search for a person using the API by name
-    
-    Paramaters
-    ----------
-    
-    name : str
-        person's name
-
-        names
-        required
-            
-        string
-
-        Insert name to search for players. Users can search by first name, middle name, last name, and nick name
-
-            Insert name: https://statsapi.mlb.com/api/v1/people/search?names=juansoto
-            Insert first name: https://statsapi.mlb.com/api/v1/people/search?names=babe
-            Insert last name: https://statsapi.mlb.com/api/v1/people/search?names=salmon
-            Insert nickname: https://statsapi.mlb.com/api/v1/people/search?names=bighurt
-            Insert letter: https://statsapi.mlb.com/api/v1/people/search?names=j
-
-        personIds
-        required
-            
-        string
-
-        Insert personId(s) to search and return biographical information for a specific player(s). Format '605151,592450'
-
-            One personId: https://statsapi.mlb.com/api/v1/people/search?personIds=605151
-            Multiple personIds: https://statsapi.mlb.com/api/v1/people/search?personIds=605151,592450
-
-        List of players by sport can be found in the Sports endpoint under the “view information on a players for a given sportId” subsection.
-        sportIds	
-        string
-
-        Insert sportId(s) to search and return biographical information for players in a specific sport(s).
-
-            One sportId: https://statsapi.mlb.com/api/v1/people/search?names=juan&sportIds=23
-            Multiple sportIds: https://statsapi.mlb.com/api/v1/people/search?names=juan&sportIds=23,1
-
-        List of players by sport can be found in the Sports endpoint under the “view information on a players for a given sportId” subsection.
-        leagueIds	
-        string
-
-        Insert leagueId(s) to search and return biographical information for players in a specific league(s).
-
-            One leagueId: https://statsapi.mlb.com/api/v1/people/search?names=juan&leagueIds=104
-            Multiple leagueIds: https://statsapi.mlb.com/api/v1/people/search?names=juan&leagueIds=104,103
-
-        teamIds	
-        string
-
-        Insert teamId(s) to search and return biographical information for players on a specific team(s).
-
-            One sportId: https://statsapi.mlb.com/api/v1/people/search?names=juan&teamIds=133
-            Multiple sportIds: https://statsapi.mlb.com/api/v1/people/search?names=juan&teamIds=133,147
-
-        active	
-        string
-
-        Insert active to search and return biographical information for players if they are active.
-
-            active: https://statsapi.mlb.com/api/v1/people/search?names=bigUnit&sportId=1&active=true
-
-        rookie	
-        string
-
-        Insert rookie to search and return biographical information for players if they are rookies.
-
-            rookie: https://statsapi.mlb.com/api/v1/people/search?names=a&sportId=1&rookie=true
-
-        limit	
-        string
-
-        Insert a limit to limit return {Limit 50}.
-
-            One Limit: https://statsapi.mlb.com/api/v1/people/search?names=juan&leagueIds=103&limit=25
-
-        limit	
-        string
-
-        Insert a limit to limit return {Limit 50}.
-
-            One Limit: https://statsapi.mlb.com/api/v1/people/search?names=juan&leagueIds=103&limit=25
-
-        hydrate	
-        string
-
-        Insert hydration(s) to return statistical or biographical data for a specific player(s).
-
-            One Hydration: https://statsapi.mlb.com/api/v1/people/search?names=trout&hydrate=currentTeam
-            Check For Available Hydrations: https://statsapi.mlb.com/api/v1/people/search?names=trout&hydrate=hydrations
-
-            
-        any
-
-        Comma delimited list of specific fields to be returned. Format: topLevelNode, childNode, attribute
-        fields	
-        Array of strings unique
-
-        Comma delimited list of specific fields to be returned. Format: topLevelNode, childNode, attribute
-
-        Example: http://statsapi.mlb.com/api/v1/people/592178/stats/game/current?fields=stats,splits,stat,type,group
-
-
-
-
-    """
-    url = f"https://statsapi.mlb.com/api/v1/people/search?names={name}"
-
-    resp = requests.get(url)
-
-    return resp.json()
 
 # ===============================================================
 # TEAM Functions
@@ -6108,8 +5984,6 @@ def last_game(teamID):
 
     resp = requests.get(url)
 
-    print(url)
-
     result = resp.json()["teams"][0]["previousGameSchedule"]["dates"][0]["games"][0]
     gamePk = result.get("gamePk","")
     gameType = result.get("gameType","")
@@ -6667,4 +6541,5 @@ def player_bio(mlbam):
         bio_p_tags = soup.find("span",id="Biographical_Information").findParent('h2').find_next_siblings('p')
 
         return bio_p_tags
+
 

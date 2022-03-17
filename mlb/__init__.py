@@ -15,16 +15,13 @@ License: https://raw.githubusercontent.com/joerex1418/simplestats-mlb/master/LIC
 
 """
 
-import mlb
-
-from .objects import Person
+from .classes import Person
+from .classes import Franchise
+from .classes import Team
+from .classes import Game
+franchise = Franchise
 person = Person
-from .objects import player
-from .objects import franchise
-Franchise = franchise
-from .objects import team
-Team = team
-from .objects import Game
+team = Team
 game = Game
 
 
@@ -33,7 +30,6 @@ game = Game
 # from .objects import League
 
 # Parser objects
-# -- *work in progress
 
 from .functions import play_search
 from .functions import pitch_search
@@ -171,3 +167,4 @@ from .constants import (
     WO_SEASON
 )
 
+from .classes import api
