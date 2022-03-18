@@ -1,18 +1,52 @@
 """
 # SimpleStatsMLB
 
-Author: Joe Rechenmacher
- 
-https://github.com/joerex1418/simplestats-mlb
+Python Wrapper for the MLB Stats API - https://statsapi.mlb.com
+
+- Author: Joe Rechenmacher
+- GitHub Profile: https://github.com/joerex1418
+
+### Copyright Notice
+This repository and its author are not affiliated with the MLB in any way. Use of MLB data is subject to the notice posted at http://gdx.mlb.com/components/copyright.txt.
+
+Overview
+--------
+SimpleStatsMLB is designed to make retrieving and visualizing MLB data as easy & intuitive as possible.
+    
+With a variety of data tables, 4 primary classes, and almost 40 functions, getting the baseball information you need should be a "can-o-corn".
+
+-------------------------------------------------------------------------------------------------------
+Highlights
+----------
+### 4 Primary Classes designed to quickly make hundreds of API calls at once
+    * `Person` - instances represent a specific person affiliated with the MLB
+        * Primary usage is for the retrieval of player bios and stats
+    * `Franchise` - instances represent an MLB franchise (i.e. the parent org for specific team)
+    * `Team` - instances represent a specific team for a specified season
+    * `Game` - instances represent LIVE data for a game
+        * Available data includes scores, game stats, lineups, pitch logs, play logs, weather, 
+        attendance, venue info, and more!
+        
+### Pitch & Play Finder!
+    * With the `pitch_search` and `play_search` functions, you'll be able to search for any 
+    plays/pitches over recent years with detailed information 
+
+### Schedule
+    * Need the entire 2021 schedule? Or just the 2005 schedule for the Chicago White Sox?
+    Either way, getting the dates that you need is easy with the `schedule` function
+    
+### Just need to know when your team is playing next? 
+    * Use the `next_game` function to get the 'when', 'who', and 'where' for your favorite team's next matchup
 
 
-Wiki: https://github.com/joerex1418/simplestats-mlb/wiki
-
-Issues: https://github.com/joerex1418/simplestats-mlb/issues
-
-License: https://raw.githubusercontent.com/joerex1418/simplestats-mlb/master/LICENSE
+### Find out more by clicking the links below!
+-------------------------------------------------------------------------------------------------------    
+- Source: https://github.com/joerex1418/simplestats-mlb
+- Issues: https://github.com/joerex1418/simplestats-mlb/issues
+- License: https://raw.githubusercontent.com/joerex1418/simplestats-mlb/master/LICENSE
 
 """
+
 
 from .classes import Person
 from .classes import Franchise
