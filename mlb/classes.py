@@ -1,19 +1,12 @@
-# import lxml
 import requests
 import pandas as pd
 import datetime as dt
-# from bs4 import BeautifulSoup as bs
-from types import SimpleNamespace as ns
 
 from .functions import _team_data
 from .functions import _franchise_data
 from .functions import _player_data
-from .functions import _determine_loop
 from .functions import fetch as _fetch
 from .functions import find_player
-
-# from .mlbdata import get_yby_records
-# from .mlbdata import get_people_df
 
 from .helpers import mlb_date as md
 from .helpers import mlb_wrapper
@@ -30,6 +23,7 @@ from .helpers import _teams_data_collection, _people_data_collection
 from .helpers import _parse_team,_parse_league,_parse_division,_parse_person,_parse_venue
 from .helpers import mlb_team, mlb_person
 
+
 from .constants import BASE
 from .constants import POSITION_DICT
 
@@ -38,6 +32,8 @@ from .utils import iso_format_ms
 from .utils import utc_zone
 from .utils import prettify_time
 from .utils import default_season
+
+from typing import Union, Optional, Dict, List
 
 
 class Person:
@@ -105,7 +101,7 @@ class Person:
         _pd_df = pd.DataFrame
         data = _player_data(mlbam)
         
-        _bio  : list|None  = data['bio']
+        _bio  : Union[list,None]  = data['bio']
         _info : dict       = data['info']
         _trx  : _pd_df     = data['transactions']
         _stats  : dict     = data['stats']
@@ -212,7 +208,6 @@ class Person:
         
         # transaction df
         self._trx = _trx
-        
         # awards df
         self._awards = _awards
 
@@ -396,12 +391,12 @@ class Person:
         return self._stats
     
     @property
-    def transactions(self) -> pd.DataFrame | None:
+    def transactions(self) -> Union[pd.DataFrame,None]:
         """Dataframe of transactions involving person, i.e. trades, status changes, etc."""
         return self._trx
     
     @property
-    def trx(self) -> pd.DataFrame | None:
+    def trx(self) -> transactions:
         """Dataframe of transactions involving person, i.e. trades, status changes, etc.
         
         ALIAS for 'transactions'
@@ -660,7 +655,7 @@ class Team:
     
     """
     
-    def __new__(cls,mlbam:int,season:int|None=None,**kwargs):
+    def __new__(cls,mlbam:int,season:Optional[int]=None,**kwargs):
         cls.today = md(dt.datetime.today().date().strftime(r"%Y-%m-%d"))
 
         if season is None:
@@ -669,7 +664,7 @@ class Team:
         cls.mlbam = int(mlbam)
         cls.season = int(season)
         
-        data : dict | None = _team_data(cls.mlbam,cls.season)
+        data : Union[dict,None] = _team_data(cls.mlbam,cls.season)
         cls.raw_data = data
 
         ti : dict = data['team_info']
@@ -2688,7 +2683,7 @@ class api:
             self._mlbam = _mlbam
         
         @classmethod
-        def search_by_name(cls,query:str,season:int|None=None,hydrate:str|None=None):
+        def search_by_name(cls,query:str,season:Optional[Union[int,None]]=None,hydrate:Optional[Union[str,None]]=None):
             if season is None:
                 season = default_season()
             if hydrate is not None:
@@ -2706,7 +2701,7 @@ class api:
                     return mlb_team(raw_data=t,**_parse_team(t))
                 
         @classmethod
-        def search_by_venue(cls,query:str,season:int|None=None):
+        def search_by_venue(cls,query:str,season:Optional[int]=None):
             if season is None:
                 season = default_season()
                 
@@ -2722,7 +2717,7 @@ class api:
             self._mlbam = _mlbam
     
     @classmethod
-    def player_search(cls,names:str|None=None,teamIds:str|list|None=None,**kwargs):
+    def player_search(cls,names:Optional[str]=None,teamIds:Optional[Union[str,list]]=None,**kwargs):
         """Search for a person using the API by name
         
         Paramaters
@@ -2782,7 +2777,7 @@ class api:
         return _people_data_collection(df.fillna('-'))
 
     
-    def get_teams(start_season:int|None=None,end_season:int|None=None,hydrate_league=False,hydrate_division=False):
+    def get_teams(start_season:Optional[int]=None,end_season:Optional[int]=None,hydrate_league=False,hydrate_division=False):
         urls = []
         if start_season is None:
             start_season = 1876
@@ -2821,7 +2816,7 @@ class api:
         # data gets parsed by '_parse_team' function from misc.py
         for d in fetched_data:
             # each 'd' value is a JSON response
-            list_of_team_dicts : list[dict] = d['teams']
+            list_of_team_dicts : List[dict] = d['teams']
             for tm_dict in list_of_team_dicts:
                 parsed_data.append(pd.Series(_parse_team(_obj=tm_dict)))
                 

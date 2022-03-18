@@ -1354,3 +1354,291 @@ class Player:
     def transactions(self):
         return self.__transactions
 
+def schedule_search(date:str,teamID="",oppID="",season="",startDate="",endDate=""):
+    query_str = []
+    if teamID != "":
+        query_str.append(f"teamId={teamID}")
+    if oppID != "":
+        query_str.append(f"opponentId={oppID}")
+    if season != "":
+        query_str.append(f"season={season}")
+    if startDate != "":
+        query_str.append(f"startDate={startDate}")
+    if endDate != "":
+        query_str.append(f"endDate={endDate}")
+    query_str = "&".join(query_str)
+    
+    gameType = "S,F,D,L,W,R,E"
+    hydrations = "linescore(matchup,person),team,previousPlay,probablePitcher,stats,broadcasts(all),person,lineups,decisions"
+    url = BASE + f"/schedule?sportId=1&date={date}&gameType={gameType}&{query_str}&hydrate={hydrations}"
+    # date=7/1/2021 &gamePk=633457 &timecode=20210701_172455
+    # print(url)
+    try:response = requests.get(url).json()["dates"]
+    except:return "no games found"
+    
+    schedule = []
+    for date in response:
+        game_list = date["games"]
+        for game in game_list:
+            game_info = {}
+            gamePk = game["gamePk"]
+            game_info["gamePk"] = gamePk
+            game_info["gameType"] = game["gameType"]
+            game_info["gameDesc"] = game.get("description","")
+            game_info["season"] = game.get("season","")
+            game_info["gameDate"] = game.get("officialDate","")
+            game_info["gameTime"] = game["gameDate"] # Needs to be converted to UTC (could do with JS)
+            game_info["gameState"] = game["status"]["detailedState"]
+            game_info["liveState"] = game["status"]["abstractGameState"]
+            game_info["reason"] = game["status"].get("reason","")
+            game_info["venueName"] = game.get("venue",{}).get("name","")
+            game_info["venue_mlbam"] = game.get("venue",{}).get("id","")
+
+            game_info["broadcastAwayTV"] = []
+            game_info["broadcastHomeTV"] = []
+            game_info["broadcastAwayRadio"] = []
+            game_info["broadcastHomeRadio"] = []
+            try:
+                for bc in game["broadcasts"]:
+                    if bc["language"] == "en":
+                        if bc["homeAway"] == "away" and bc["type"] == "TV":   # if AWAY TV broadcast
+                            broadcast = {
+                                "name":bc.get("name",""),
+                                "resolution":bc.get("videoResolution",{}).get("videoResolution","")}
+                            game_info["broadcastAwayTV"].append(broadcast)
+
+                        elif bc["homeAway"] == "home" and bc["type"] == "TV":   # if HOME TV broadcast
+                            broadcast = {
+                                "name":bc.get("name",""),
+                                "resolution":bc.get("videoResolution",{}).get("videoResolution","")}
+                            game_info["broadcastHomeTV"].append(broadcast)
+
+                        elif bc["homeAway"] == "away" and bc["type"] == "AM":   # if AWAY RADIO broadcast
+                            broadcast = {"name":bc.get("name","")}
+                            game_info["broadcastAwayRadio"].append(broadcast)
+
+                        elif bc["homeAway"] == "home" and bc["type"] == "AM":   # if HOME RADIO broadcast
+                            broadcast = {"name":bc.get("name","")}
+                            game_info["broadcastHomeRadio"].append(broadcast)
+
+                    else:
+                        pass
+
+            except:
+                pass
+
+            teams = game["teams"]
+            game_info["teamAway"] = teams["away"]["team"]["name"]
+            game_info["teamHome"] = teams["home"]["team"]["name"]
+            lineups = game.get("lineups",{})
+            game_info["lineupAway"] = lineups.get("awayPlayers",{})
+            game_info["lineupHome"] = lineups.get("homePlayers",{})
+            game_info["teamAway_clubName"] = teams["away"]["team"]["clubName"]
+            game_info["teamHome_clubName"] = teams["home"]["team"]["clubName"]
+            game_info["teamAway_mlbam"] = teams["away"]["team"]["id"]
+            game_info["teamHome_mlbam"] = teams["home"]["team"]["id"]
+            game_info["scoreAway"] = teams["away"].get("score","-")
+            game_info["scoreHome"] = teams["home"].get("score","-")
+            game_info["isWinnerAway"] = teams["away"].get("isWinner",False)
+            game_info["isWinnerHome"] = teams["home"].get("isWinner",False)
+            awayRecWins = teams["away"].get("leagueRecord",{}).get("wins")
+            awayRecLosses = teams["away"].get("leagueRecord",{}).get("losses")
+            homeRecWins = teams["home"].get("leagueRecord",{}).get("wins")
+            homeRecLosses = teams["home"].get("leagueRecord",{}).get("losses")
+            game_info["recordAway"] = f"{awayRecWins}-{awayRecLosses}"
+            game_info["recordHome"] = f"{homeRecWins}-{homeRecLosses}"
+            probPitcherAway = teams["away"].get("probablePitcher",{})
+            probPitcherHome = teams["home"].get("probablePitcher",{})
+            game_info["probPitcherAway"] = {"mlbam":probPitcherAway.get("id",""),"name":probPitcherAway.get("fullName",""),"nameShort":probPitcherAway.get("initLastName",""),"era":"","wins":"","losses":""}
+            game_info["probPitcherHome"] = {"mlbam":probPitcherHome.get("id",""),"name":probPitcherHome.get("fullName",""),"nameShort":probPitcherHome.get("initLastName",""),"era":"","wins":"","losses":""}
+            game_info["pitcherWin"] = game.get("decisions",{}).get("winner",{})
+            game_info["pitcherLoss"] = game.get("decisions",{}).get("loser",{})
+            game_info["pitcherSave"] = game.get("decisions",{}).get("save",{})
+
+            try:
+                for t in probPitcherAway["stats"]:
+                    if t["type"]["displayName"] == "statsSingleSeason" and t["group"]["displayName"] == "pitching":
+                        game_info["probPitcherAway"]["era"] = t["stats"]["era"]
+                        game_info["probPitcherAway"]["wins"] = t["stats"]["wins"]
+                        game_info["probPitcherAway"]["losses"] = t["stats"]["losses"]
+                        game_info["probPitcherAway"]["saves"] = t["stats"].get("saves","-")
+                        break
+            except:
+                pass
+            try:
+                for t in probPitcherHome["stats"]:
+                    if t["type"]["displayName"] == "statsSingleSeason" and t["group"]["displayName"] == "pitching":
+                        game_info["probPitcherHome"]["era"] = t["stats"]["era"]
+                        game_info["probPitcherHome"]["wins"] = t["stats"]["wins"]
+                        game_info["probPitcherHome"]["losses"] = t["stats"]["losses"]
+                        game_info["probPitcherHome"]["saves"] = t["stats"].get("saves","-")
+                        break
+            except:
+                pass
+            
+            game_info["isDoubleHeader"] = True if game.get("doubleHeader","") != "N" else False
+            game_info["gameNumberDay"] = game.get("gameNumber",1)
+            game_info["gameNumberSeries"] = game.get("seriesGameNumber",1)
+            game_info["gamesInSeries"] = game.get("gamesInSeries","-")
+
+            linescore = game.get("linescore",{})
+            innScores = linescore.get("innings",{})
+            offense = linescore.get("offense",{})
+            defense = linescore.get("defense",{})
+
+            game_info["scoreboard"] = linescore   # might not be necessary but could be another way to access data if it's easier
+            game_info["innScores"] = innScores
+            currentInning = linescore.get("currentInning","")
+            currentInningOrdinal = linescore.get("currentInningOrdinal")
+            inningHalf = linescore.get("inningHalf","").lower() # CHANGE TO 'inningState' at some point
+            inningState = linescore.get("inningState","").lower()
+            game_info["inning"] = currentInning
+            game_info["inningOrdinal"] = currentInningOrdinal
+            game_info["inningHalf"] = inningHalf
+            game_info["inningState"] = inningState
+            recentPlay_dict = game.get("previousPlay",{})
+            game_info["recentPlay"] = recentPlay_dict.get("result",{}).get("description","")
+            game_info["balls"] = linescore.get("balls","")
+            game_info["strikes"] = linescore.get("strikes","")
+            game_info["outs"] = linescore.get("outs","")
+            runnerOnFirst = True if "first" in offense.keys() else False
+            runenrOnSecond = True if "second" in offense.keys() else False
+            runnerOnThird = True if "third" in offense.keys() else False
+            game_info["runnersOn"] = {"first":runnerOnFirst,"second":runenrOnSecond,"third":runnerOnThird}
+
+            # Matchup, pitcher/hitter stats, bat order & situation info
+
+            game_info["teamBatting"] = offense.get("team",{}).get("id","")
+            game_info["teamFielding"]= defense.get("team",{}).get("id","")
+
+            # pitcher on mount & upcoming batters for current team batting
+            onMound = defense.get("pitcher",{})
+            qBatter = defense.get("batter",{})
+            qOnDeck = defense.get("onDeck",{})
+            qInHole = defense.get("inHole",{})
+            
+            # current batter/queue for team batting & pitcher for the team batting
+            offMound = offense.get("pitcher",{})
+            batter = offense.get("batter",{})
+            onDeck = offense.get("onDeck",{})
+            inHole = offense.get("inHole",{})
+
+
+            game_info["orderBatting"] = offense.get("battingOrder","")
+            game_info["orderFielding"] = defense.get("battingOrder","")
+
+            game_info["onMound"] = {"mlbam":onMound.get("id",""),"name":onMound.get("fullName",""),"nameShort":onMound.get("initLastName",""),"era":"","wins":"","losses":""}
+            game_info["offMound"] = {"mlbam":offMound.get("id",""),"name":offMound.get("fullName",""),"nameShort":offMound.get("initLastName",""),"era":"","wins":"","losses":""}
+
+            # get stats for current pitcher on mound
+            try:
+                for t in onMound["stats"]:
+                    if t["type"]["displayName"] == "statsSingleSeason" and t["group"]["displayName"] == "pitching":
+                        game_info["onMound"]["era"] = t["stats"]["era"]
+                        game_info["onMound"]["wins"] = t["stats"]["wins"]
+                        game_info["onMound"]["losses"] = t["stats"]["losses"]
+                        game_info["onMound"]["saves"] = t["stats"].get("saves","-")
+                        break
+            except:
+                pass
+
+            # get stats for pitcher on batting team
+            try:
+                for t in offMound["stats"]:
+                    if t["type"]["displayName"] == "statsSingleSeason" and t["group"]["displayName"] == "pitching":
+                        game_info["offMound"]["era"] = t["stats"]["era"]
+                        game_info["offMound"]["wins"] = t["stats"]["wins"]
+                        game_info["offMound"]["losses"] = t["stats"]["losses"]
+                        game_info["offMound"]["saves"] = t["stats"].get("saves","-")
+                        break
+            except:
+                pass
+
+
+            
+            game_info["batters"] = {
+                "batter":{"mlbam":batter.get("id",""),"name":batter.get("fullName",""),"nameShort":batter.get("initLastName",""),"avg":"","hits":"","ab":"","pa":""},
+                "onDeck":{"mlbam":onDeck.get("id",""),"name":onDeck.get("fullName",""),"nameShort":onDeck.get("initLastName",""),"avg":"","hits":"","ab":"","pa":""},
+                "inHole":{"mlbam":inHole.get("id",""),"name":inHole.get("fullName",""),"nameShort":inHole.get("initLastName",""),"avg":"","hits":"","ab":"","pa":""}
+                }
+            game_info["defBatters"] = {
+                "batter":{"mlbam":qBatter.get("id",""),"name":qBatter.get("fullName",""),"nameShort":qBatter.get("initLastName",""),"avg":"","hits":"","ab":"","pa":""},
+                "onDeck":{"mlbam":qOnDeck.get("id",""),"name":qOnDeck.get("fullName",""),"nameShort":qOnDeck.get("initLastName",""),"avg":"","hits":"","ab":"","pa":""},
+                "inHole":{"mlbam":qInHole.get("id",""),"name":qInHole.get("fullName",""),"nameShort":qInHole.get("initLastName",""),"avg":"","hits":"","ab":"","pa":""}
+                }
+            
+            # stats for current batting team order
+            for idx,b in enumerate([batter,onDeck,inHole]):
+                try:
+                    for t in b["stats"]:
+                        if t["type"]["displayName"] == "gameLog" and t["group"]["displayName"] == "hitting":
+                            if idx == 0:
+                                game_info["batters"]["batter"]["hits"] = t["stats"]["hits"]
+                                game_info["batters"]["batter"]["ab"] = t["stats"]["atBats"]
+                                game_info["batters"]["batter"]["pa"] = t["stats"]["plateAppearances"]
+                            elif idx == 1:
+                                game_info["batters"]["onDeck"]["hits"] = t["stats"]["hits"]
+                                game_info["batters"]["onDeck"]["ab"] = t["stats"]["atBats"]
+                                game_info["batters"]["onDeck"]["pa"] = t["stats"]["plateAppearances"]
+                            elif idx == 2:
+                                game_info["batters"]["inHole"]["hits"] = t["stats"]["hits"]
+                                game_info["batters"]["inHole"]["ab"] = t["stats"]["atBats"]
+                                game_info["batters"]["inHole"]["pa"] = t["stats"]["plateAppearances"]
+
+                        elif t["type"]["displayName"] == "statsSingleSeason" and t["group"]["displayName"] == "hitting":
+                            if idx == 0:
+                                game_info["batters"]["batter"]["avg"] = t["stats"]["avg"]
+                            elif idx == 1:
+                                game_info["batters"]["onDeck"]["avg"] = t["stats"]["avg"]
+                            elif idx == 2:
+                                game_info["batters"]["inHole"]["avg"] = t["stats"]["avg"]
+                except:
+                    pass
+            #
+
+            # stats for upcoming batters on fielding team
+            for idx,b in enumerate([qBatter,qOnDeck,qInHole]):
+                try:
+                    for t in b["stats"]:
+                        if t["type"]["displayName"] == "gameLog" and t["group"]["displayName"] == "hitting":
+                            if idx == 0:
+                                game_info["defBatters"]["batter"]["hits"] = t["stats"]["hits"]
+                                game_info["defBatters"]["batter"]["ab"] = t["stats"]["atBats"]
+                                game_info["defBatters"]["batter"]["pa"] = t["stats"]["plateAppearances"]
+                            elif idx == 1:
+                                game_info["defBatters"]["onDeck"]["hits"] = t["stats"]["hits"]
+                                game_info["defBatters"]["onDeck"]["ab"] = t["stats"]["atBats"]
+                                game_info["defBatters"]["onDeck"]["pa"] = t["stats"]["plateAppearances"]
+                            elif idx == 2:
+                                game_info["defBatters"]["inHole"]["hits"] = t["stats"]["hits"]
+                                game_info["defBatters"]["inHole"]["ab"] = t["stats"]["atBats"]
+                                game_info["defBatters"]["inHole"]["pa"] = t["stats"]["plateAppearances"]
+                                
+                        elif t["type"]["displayName"] == "statsSingleSeason" and t["group"]["displayName"] == "hitting":
+                            if idx == 0:
+                                game_info["defBatters"]["batter"]["avg"] = t["stats"]["avg"]
+                            elif idx == 1:
+                                game_info["defBatters"]["onDeck"]["avg"] = t["stats"]["avg"]
+                            elif idx == 2:
+                                game_info["defBatters"]["inHole"]["avg"] = t["stats"]["avg"]
+                except:
+                    pass
+            #
+
+            try:game_info["runsAway"] = linescore["teams"]["away"]["runs"]
+            except:game_info["runsAway"] = "-"
+            try:game_info["hitsAway"] = linescore["teams"]["away"]["hits"]
+            except:game_info["hitsAway"] = "-"
+            try:game_info["errorsAway"] = linescore["teams"]["away"]["errors"]
+            except:game_info["errorsAway"] = "-"
+            try:game_info["runsHome"] = linescore["teams"]["home"]["runs"]
+            except:game_info["runsHome"] = "-"
+            try:game_info["hitsHome"] = linescore["teams"]["home"]["hits"]
+            except:game_info["hitsHome"] = "-"
+            try:game_info["errorsHome"] = linescore["teams"]["home"]["errors"]
+            except:game_info["errorsHome"] = "-"
+
+            schedule.append(game_info)
+        
+        
+    return schedule

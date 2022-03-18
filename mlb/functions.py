@@ -50,7 +50,10 @@ from .constants import (
     W_SEASON,
     WO_SEASON
 )
-from .constants import sitCodes
+from .helpers import _parse_person
+# from .constants import sitCodes
+
+from typing import Union, Optional, Dict, List
 
 # ===============================================================
 # ASYNC
@@ -135,10 +138,10 @@ async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.Dat
 
     elif "/schedule?sportId=1&teamId=" in _url:
         sched_data = []
-        dates_dict_array : list[dict] = data.get("dates",[{}])
+        dates_dict_array : List[dict] = data.get("dates",[{}])
         for d in dates_dict_array:
             date_obj = dt.datetime.strptime(d["date"],r"%Y-%m-%d")
-            games : list[dict] = d["games"]
+            games : List[dict] = d["games"]
             for gm in games:
                 away        = gm.get("teams",{}).get("away")
                 home        = gm.get("teams",{}).get("home")
@@ -311,7 +314,7 @@ async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.Dat
     elif "statSplits" in _url and "/roster/fullSeason?season=" in _url:
         stat_data = []
 
-        roster : list[dict] = data['roster']
+        roster : List[dict] = data['roster']
 
         for roster_entry in roster:
             # p = roster_entry.get('person',{})
@@ -370,7 +373,7 @@ async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.Dat
     elif "/roster/fullSeason?season=" in _url:
         stat_data = []
 
-        roster : list[dict] = data['roster']
+        roster : List[dict] = data['roster']
 
         for roster_entry in roster:
             # p = roster_entry.get('person',{})
@@ -473,7 +476,7 @@ async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.Dat
 
     elif "/roster/coach?season=" in _url:
         coach_data = []
-        roster : list[dict] = data.get('roster',[{}])
+        roster : List[dict] = data.get('roster',[{}])
         for roster_entry in roster:
             job                 = roster_entry.get('job','-')
             job_title           = roster_entry.get('title','-')
@@ -627,7 +630,7 @@ async def _fetch_team_data(urls:list,lgs_df:pd.DataFrame,_mlbam,_logtime=None):
 # Bulk Retrieval
 # ===============================================================
 
-def _team_data(_mlbam,_season,**kwargs) -> dict | list:
+def _team_data(_mlbam,_season,**kwargs) -> Union[dict,list]:
     start = time.time()
     lgs_df = get_leagues_df().set_index('mlbam')
     tms_df = get_teams_df()
@@ -677,6 +680,14 @@ def _team_data(_mlbam,_season,**kwargs) -> dict | list:
 
         url_list.append(url_to_add)
     _logtime = kwargs.get('_logtime')
+    
+    # Generator attempt ====
+    def url_gen():
+        for url in url_list:
+            yield url
+    url_list = url_gen()
+    # ======================
+    
     loop = _determine_loop()
     team_data_dict = loop.run_until_complete(_fetch_team_data(urls=url_list,lgs_df=lgs_df,_mlbam=_mlbam,_logtime=_logtime))
 
@@ -711,19 +722,14 @@ def _team_data(_mlbam,_season,**kwargs) -> dict | list:
         print(f"--- {time.time() - start} seconds ---")
 
     return fetched_data
-
-def _player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
+Dict
+def _player_data(_mlbam,**kwargs) -> dict:
     """Fetch a variety of player information/stats in one API call
 
     Parameters
     ----------
     mlbam : str or int
-        Official team MLB ID
-
-    season : int or str
-        Specify a specific season to query
-
-    ***
+        Player's official "MLB Advanced Media" ID
     
     """
     
@@ -1461,7 +1467,7 @@ def _franchise_data(mlbam,**kwargs) -> dict:
 
 
     # ---- Parsing 'team_stats' --------
-    team_stats_json = team_stats # using alias to for consistency
+    team_stats_json = team_stats # using alias for consistency
 
     hit_data = []
     hit_adv_data = []
@@ -4085,871 +4091,6 @@ def leaderboards(tm_mlbam=None,league_mlbam=None,season=None,gameTypes=None,sitC
     data = get_leaders(tm_mlbam,league_mlbam,season,gameTypes,sitCodes,limit,startDate,endDate,group_by_team)
     return data
 
-def get_matchup_stats(batter,pitcher,count="",outs="",inning="",runners_on=[],tm_hitting="",tm_pitching="",score_tm_hitting="",score_tm_pitching="",batter_stands="",pitcher_throws="",bat_order_pos="",isLeadoff=False,pitch_num="",isFirstIP=False):
-    # batter=547989 (Jose Abreu),pitcher=453562 (Jake Arietta)
-    # EDIT TERMINAL INPUT HERE: 
-    # batter=547989,batter_stands="right",bat_order_pos="2",isLeadoff=True,pitcher=453562,pitcher_throws="left",count="01",outs="1",inning="5",runners_on=[3],tm_hitting=145,tm_pitching=112,score_tm_hitting="3",score_tm_pitching="3",pitch_num=57
-    """Retrieve batter's and pitcher's splits for the current matchup situation
-
-    'batter' and 'pitcher' values should be their respective mlbam IDs
-    """
-   #
-    # For BATTER: "statSplits" (for given situation),"careerStatSplits","vsTeam" (totals/current season), "vsPlayer"
-    # relevant HITTING sitCodes -> h,a,vl,vr,sah,sbh,sti,b[1-9]/lo,ph,i[01-09/ix],e/ron/r[0,123,1,12,13,2,23,3],ron2,risp,risp2,o[0-2],fp/ac/bc/ec/2s/fc/c[00,01,02,10,11,12,20,21,22,30,31,32],zn[01-14]
-    #       pitchTypes & sitCodes -> 
-    #       FASTBALL/pfa, FOUR-SEAM_FB/pff, TWO-SEAM_FB/pft, CUTTER/pfc, SINKER/psi, SPLITTER/pfs, FORKBALL/pfo, SLIDER/psl,
-    #       CURVEBALL/pcu, KNUCKLE-CURVE/pkc, SCREWBALL/psc, GYROBALL/pgy, CHANGEUP/pch, KNUCKLE/pkn, EEPHUS/pep
-    #       (could also maybe add splits for "vsLeft/Right and zone","outs and zone"/"count & zone"/"runnersOn & zone" e.g. - o107 = 1 out Zone 7) 
-    #           --  MAYBE SHOW IN "MATCHUP GRAPHIC"! (put "AVG." stat in each respective zone!!!)
-    #           -- FORMATS: o107, ec01/ac01/bc/01, r001 (bases empty zone 1), r210 (runner on zone 10), rsp08 (risp zone 08)
-    #           -- PRIORITY ORDER: "vl/vr", count&zone, outs&zone, runnersOn&zone
-    # 
-    # For PITCHER: mostly the same, but might add a few more -> pitch count (grouped), fip (first inning pitched)
-    # 
-    # **In an effort to not clutter the screen, USER should have option to select on the front-end which stat is being displayed (maybe have a couple defaults?)
-   # 
-    if score_tm_hitting == "":score_tm_hitting = 0
-    else: score_tm_hitting = int(score_tm_hitting)
-
-    if score_tm_pitching == "":score_tm_pitching = 0
-    else: score_tm_pitching = int(score_tm_pitching)
-
-    count_balls = int(count[0])
-    count_strikes = int(count[-1])
-    outs = int(outs)
-    inning = int(inning)
-    runners_on = runners_on # need to figure out how I'll be retrieving this
-    # score_tm_hitting
-    # score_tm_pitching
-    # batter_stands - hopefully available on game page -- you could ALSO retrieve this by getting ALL the data first & sorting it out after
-    # pitcher_throws - hopefully available on game page -- you could ALSO retrieve this by getting ALL the data first & sorting it out after
-
-    zonesList = ['01','02','03','04','05','06','07','08','09','10','11','12','13','14']
-
-   # SETTING UP VALUES FOR 'batCodes' ==========================================
-    batCodes = [] # ---- 'batCodes' defined ----
-
-    # ASSIGNING "batCodes" (sitCodes) to retrieve for BATTER
-    
-    if "l" in pitcher_throws.lower():
-        batCodes.append("vl")
-    elif "r" in pitcher_throws.lower():
-        batCodes.append("vr")
-
-
-    cCount = f"c{count_balls}{count_strikes}"
-    cOuts = f"o{outs}"
-    cInns = f"i0{inning}"
-    cBatOrder = f"b{bat_order_pos}"
-
-    # Outs Code
-    if outs == 3:pass
-    else:
-        batCodes.append(cOuts)
-
-    # Inning Code
-    if inning <= 9:
-        batCodes.append(cInns)
-    else:batCodes.append("ix")
-
-    # Batting Order Code
-    if isLeadoff is True:
-        batCodes.append("lo")
-    batCodes.append(cBatOrder)
-
-    # Team Ahead/Behind Code
-    if score_tm_hitting > score_tm_pitching:
-        batCodes.append("sah")
-    elif score_tm_hitting < score_tm_pitching:
-        batCodes.append("sbh")
-    else:
-        batCodes.append("sti")
-
-    # Count Codes
-    if count_strikes == 2:
-        batCodes.append("2s")
-    if count_balls == count_strikes and cCount != "c00": # even count (NOT first pitch)
-        batCodes.append("ec")
-        batCodes.append(cCount)
-    elif count_balls > count_strikes and cCount != "c32": # batter ahead (NOT a full count)
-        batCodes.append("ac")
-        batCodes.append(cCount)
-    elif count_balls < count_strikes: # batter behind
-        batCodes.append("bc")
-        batCodes.append(cCount)
-    elif count_balls == 3 & count_strikes == 2: # full count
-        batCodes.append("fc")
-    elif count_balls == 0 & count_strikes == 0: # first pitch
-        batCodes.append("fp")
-
-    
-    # Runners-On Codes
-    if len(runners_on) == 0:                        # bases empty
-        batCodes.append("r0")
-    if len(runners_on) > 0:                         # runner(s) on
-        batCodes.append("ron")
-        if outs == 2:
-            batCodes.append("ron2")                 # runner(s) on (2 outs)
-    if 2 in runners_on or 3 in runners_on:          # runner(s) in scoring position
-        batCodes.append("risp")
-        if outs == 2:                               # runner(s) in scoring position (2 outs)
-            batCodes.append("risp2")
-
-    if len(runners_on) == 1:    # (ONE base occupied)
-        if 1 in runners_on:                         # runner on 1st
-            batCodes.append("r1")
-        elif 2 in runners_on:                       # runner on 2nd
-            batCodes.append("r2")
-        elif 3 in runners_on:                       # runner on 3rd
-            batCodes.append("r3")
-    elif len(runners_on) == 2:  # (TWO bases occupied)
-        if 1 in runners_on and 2 in runners_on:     # runners on 1st and 2nd
-            batCodes.append("r12")
-        elif 1 in runners_on and 3 in runners_on:   # runners on 1st and 3rd
-            batCodes.append("r13")
-        elif 2 in runners_on and 3 in runners_on:   # runners on 2nd and 3rd
-            batCodes.append("r23")
-    elif len(runners_on) == 3:                      # runners on 1st, 2nd, and 3rd (BASES LOADED)
-        batCodes.append("r123")
-
-    # ---- ZONE Codes ----
-
-    # All Zones
-    for znLoc in zonesList:
-        batCodes.append(f"zn{znLoc}")
-
-    # Outs
-    for out_num in [0,1,2]: # add zone split for each "out count"
-        for znLoc in zonesList:
-            batCodes.append(f"o{out_num}{znLoc}")
-
-    # Count situation (ahead, behind, and even)
-    for znLoc in zonesList:
-        batCodes.append(f"ac{znLoc}")
-        batCodes.append(f"bc{znLoc}")
-        batCodes.append(f"ec{znLoc}")
-    
-    # vsRHP/LHP
-    for znLoc in zonesList:
-        batCodes.append(f"vr{znLoc}")
-        batCodes.append(f"vl{znLoc}")
-
-    # Current Bases occupied
-    if "r0" in batCodes:
-        for znLoc in zonesList:
-            batCodes.append(f"r0{znLoc}")
-    if "ron" in batCodes:
-        for znLoc in zonesList:
-            batCodes.append(f"ron{znLoc}")
-    if "risp" in batCodes:
-        for znLoc in zonesList:
-            batCodes.append(f"rsp{znLoc}")
-    if "r123" in batCodes:
-        for znLoc in zonesList:
-            batCodes.append(f"rbl{znLoc}")
-
-    batCodes_str = ",".join(batCodes)
-   #
-
-   # SETTING UP VALUES FOR 'pitchCodes' ==========================================
-    if pitch_num == "":pitch_num = 0
-    else: pitch_num = int(pitch_num)
-    pitchCodes = [] # ---- 'pitchCodes' defined ----
-
-    # ASSIGNING "pitchCodes" (sitCodes) to retrieve for BATTER
-    
-    if "l" in batter_stands.lower():
-        pitchCodes.append("vl")
-    elif "r" in batter_stands.lower():
-        pitchCodes.append("vr")
-
-    # ALREADY DEFINED ABOVE (HERE FOR REFERENCE):
-    # cCount = f"c{count_balls}{count_strikes}"
-    # cOuts = f"o{outs}"
-    # cInns = f"i0{inning}"
-    # cBatOrder = f"b{bat_order_pos}"
-
-    # Outs Code
-    if outs == 3:pass
-    else:
-        pitchCodes.append(cOuts)
-
-    # Inning Code
-    if inning <= 9:
-        pitchCodes.append(cInns)
-    else:pitchCodes.append("ix")
-
-    if isFirstIP is True: # if this is pitcher's first inning of the game (ONLY FOR PITCHER)
-        pitchCodes.append("fip")
-
-    # Batting Order Code
-    if isLeadoff is True:
-        pitchCodes.append("lo")
-    pitchCodes.append(cBatOrder)
-
-    # Team Ahead/Behind Code
-    if score_tm_pitching > score_tm_hitting:
-        pitchCodes.append("sah")
-    elif score_tm_pitching < score_tm_hitting:
-        pitchCodes.append("sbh")
-    else:
-        pitchCodes.append("sti")
-
-    # Count Codes
-    if count_strikes == 2:
-        pitchCodes.append("2s")
-    if count_balls == count_strikes and cCount != "c00": # even count (NOT first pitch)
-        pitchCodes.append("ec")
-        pitchCodes.append(cCount)
-    elif count_balls < count_strikes and cCount != "c32": # pitcher ahead
-        pitchCodes.append("ac")
-        pitchCodes.append(cCount)
-    elif count_balls > count_strikes: # pitcher behind
-        pitchCodes.append("bc")
-        pitchCodes.append(cCount)
-    elif count_balls == 3 & count_strikes == 2: # full count
-        pitchCodes.append("fc")
-    elif count_balls == 0 & count_strikes == 0: # first pitch
-        pitchCodes.append("fp")
-
-    
-    # Runners-On Codes
-    if len(runners_on) == 0:                        # bases empty
-        pitchCodes.append("r0")
-    if len(runners_on) > 0:                         # runner(s) on
-        pitchCodes.append("ron")
-        if outs == 2:
-            pitchCodes.append("ron2")                 # runner(s) on (2 outs)
-    if 2 in runners_on or 3 in runners_on:          # runner(s) in scoring position
-        pitchCodes.append("risp")
-        if outs == 2:                               # runner(s) in scoring position (2 outs)
-            pitchCodes.append("risp2")
-
-    if len(runners_on) == 1:    # (ONE base occupied)
-        if 1 in runners_on:                         # runner on 1st
-            pitchCodes.append("r1")
-        elif 2 in runners_on:                       # runner on 2nd
-            pitchCodes.append("r2")
-        elif 3 in runners_on:                       # runner on 3rd
-            pitchCodes.append("r3")
-    elif len(runners_on) == 2:  # (TWO bases occupied)
-        if 1 in runners_on and 2 in runners_on:     # runners on 1st and 2nd
-            pitchCodes.append("r12")
-        elif 1 in runners_on and 3 in runners_on:   # runners on 1st and 3rd
-            pitchCodes.append("r13")
-        elif 2 in runners_on and 3 in runners_on:   # runners on 2nd and 3rd
-            pitchCodes.append("r23")
-    elif len(runners_on) == 3:                      # runners on 1st, 2nd, and 3rd (BASES LOADED)
-        pitchCodes.append("r123")
-
-    # Pitch Count Code (ONLY FOR PITCHER)
-    if pitch_num <= 15:
-        pitchCodes.append("pi001")
-    elif 16 <= pitch_num <= 30:
-        pitchCodes.append("pi016")
-    elif 31 <= pitch_num <= 45:
-        pitchCodes.append("pi031")
-    elif 46 <= pitch_num <= 60:
-        pitchCodes.append("pi046")
-    elif 61 <= pitch_num <= 75:
-        pitchCodes.append("pi061")
-    elif 76 <= pitch_num <= 90:
-        pitchCodes.append("pi076")
-    elif 91 <= pitch_num <= 105:
-        pitchCodes.append("pi091")
-    elif 106 <= pitch_num <= 120:
-        pitchCodes.append("pi106")
-    elif pitch_num > 120:
-        pitchCodes.append("pi121")
-
-    # --- ZONE Codes ---
-
-    # All Zones
-    for znLoc in zonesList:
-        pitchCodes.append(f"zn{znLoc}")
-
-    # Outs
-    for out_num in [0,1,2]: # add zone split for each "out count"
-        for znLoc in zonesList:
-            pitchCodes.append(f"o{out_num}{znLoc}")
-
-    # Count situation (ahead, behind, and even)
-    for znLoc in zonesList:
-        pitchCodes.append(f"ac{znLoc}")
-        pitchCodes.append(f"bc{znLoc}")
-        pitchCodes.append(f"ec{znLoc}")
-    
-    # vsRHP/LHP
-    for znLoc in zonesList:
-        pitchCodes.append(f"vr{znLoc}")
-        pitchCodes.append(f"vl{znLoc}")
-
-    # Current Bases occupied
-    if "r0" in pitchCodes:
-        for znLoc in zonesList:
-            pitchCodes.append(f"r0{znLoc}")
-    if "ron" in pitchCodes:
-        for znLoc in zonesList:
-            pitchCodes.append(f"ron{znLoc}")
-    if "risp" in pitchCodes:
-        for znLoc in zonesList:
-            pitchCodes.append(f"rsp{znLoc}")
-    if "r123" in pitchCodes:
-        for znLoc in zonesList:
-            pitchCodes.append(f"rbl{znLoc}")
-
-    # Pitch Types (ONLY FOR PITCHER) - NEED PITCH ARSENAL
-
-
-    pitchCodes_str = ",".join(pitchCodes)
-   #
-
-
-    statTypes = "careerStatSplits,statSplits,vsPlayer"
-
-    # statTypes = "careerStatSplits,statSplits,vsTeam,vsPlayer" # "vsTeam" will display both 'vsTeam' AND 'vsTeamTotal'
-    # 'vsTeam' taking a back seat for now
-    # batter_url = BASE + f"/people?personIds={batter}&hydrate=stats(type=[{statTypes}],group=[hitting],sitCodes=[{batCodes}],opposingTeamId={tm_pitching},opposingPlayerId={pitcher})"
-    batter_url = BASE + f"/people?personIds={batter}&hydrate=stats(type=[{statTypes}],group=[hitting],sitCodes=[{batCodes_str}],opposingTeamId={tm_pitching},opposingPlayerId={pitcher})"
-    pitcher_url = BASE + f"/people?personIds={pitcher}&hydrate=stats(type=[{statTypes}],group=[pitching],sitCodes=[{pitchCodes_str}],opposingTeamId={tm_hitting},opposingPlayerId={batter})"
-
-    with requests.Session() as sesh:
-        print(batter_url)
-        print(pitcher_url)
-        batter_resp = sesh.get(batter_url).json()
-        pitcher_resp = sesh.get(pitcher_url).json()
-
-    batter_info = batter_resp["people"][0]
-    pitcher_info = pitcher_resp["people"][0]
-
-    hit_stats = {
-        "category":"",
-        "groundOuts":"",
-        "airOuts":"",
-        "runs":"",
-        "homeRuns":"",
-        "strikeOuts":"",
-        "baseOnBalls":"",
-        "intentionalWalks":"",
-        "hits":"",
-        "avg":"",
-        "atBats":"",
-        "obp":"",
-        "plateAppearances":"",
-        "totalBases":"",
-        "rbi":"",
-        "sacBunts":"",
-        "sacFlies":""
-        }
-
-    h_dict = {
-        "name":"",
-        "bats":"",
-        "careerSplits":{
-            "outs":{},
-            "inning":{},
-            "count":{},
-            "runners_on":{},
-            "score_sit":{},
-            "batting_order":{},
-            "zones":{
-                "all":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                },
-                "outs":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                },
-                "count":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                },
-                "throws":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                },
-                "runners":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                    },
-                
-                "pitch_types":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                    }
-                },
-            },
-        "seasonSplits":{
-            "outs":{},
-            "inning":{},
-            "count":{},
-            "runners_on":{},
-            "score_sit":{},
-            "batting_order":{},
-            "zones":{
-                "all":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                },
-                "outs":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                },
-                "count":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                },
-                "throws":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                },
-                "runners":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                    },
-                
-                "pitch_types":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                    }
-                },
-            },
-        "vsPlayerTotal":{
-            "outs":{},
-            "inning":{},
-            "count":{},
-            "runners_on":{},
-            "score_sit":{},
-            "batting_order":{}
-            },
-        "vsTeam":{
-            "outs":{},
-            "inning":{},
-            "count":{},
-            "runners_on":{},
-            "score_sit":{},
-            "batting_order":{}
-            },
-        "vsTeamTotal":{
-            "outs":{},
-            "inning":{},
-            "count":{},
-            "runners_on":{},
-            "score_sit":{},
-            "batting_order":{}
-            }
-        }
-    
-    out_codes = ["o0","o1","o2"]
-    inning_codes = ['i01','i02','i03','i04','i05','i06','i07','i08','i09','ix']
-    count_codes = ['fp','ac','bc','ec','2s','fc','c00','c01','c02','c10','c11','c12','c20','c21','c22','c30','c31','c32']
-    runnersOn_codes = ['e','r0','r123','r1','r12','r13','r2','r23','r3','ron','ron2','risp','risp2']
-    scoreSituation_codes = ['sah','sbh','sti']
-    battingOrder_codes = ['b1','b2','b3','b4','b5','b6','b7','b8','b9','lo']
-    zone_codes = []
-    # Parse BATTER response
-
-    for stat_group in batter_info["stats"]:
-        statType = stat_group["type"]["displayName"]
-        if statType == "careerStatSplits":
-
-            for split in stat_group["splits"]:
-                split_desc = split["split"]["description"]
-                split_code = split["split"]["code"]
-                stat_data = split["stat"]
-
-                code = split_code
-
-                key_label = f"{split_desc} ({code})"
-
-                if code in out_codes:
-                    if key_label not in h_dict["careerSplits"]["outs"].keys():
-                        h_dict["careerSplits"]["outs"][key_label] = {}
-                    for f in list(hit_stats.keys())[1:]:
-                        h_dict["careerSplits"]["outs"][key_label][f] = stat_data.get(f,"--")
-                elif code in inning_codes:
-                    if key_label not in h_dict["careerSplits"]["inning"].keys():
-                        h_dict["careerSplits"]["inning"][key_label] = {}
-                    for f in list(hit_stats.keys())[1:]:
-                        h_dict["careerSplits"]["inning"][key_label][f] = stat_data.get(f,"--")
-                elif code in runnersOn_codes:
-                    if key_label not in h_dict["careerSplits"]["runners_on"].keys():
-                        h_dict["careerSplits"]["runners_on"][key_label] = {}
-                    for f in list(hit_stats.keys())[1:]:
-                        h_dict["careerSplits"]["runners_on"][key_label][f] = stat_data.get(f,"--")
-                elif code in count_codes:
-                    if key_label not in h_dict["careerSplits"]["count"].keys():
-                        h_dict["careerSplits"]["count"][key_label] = {}
-                    for f in list(hit_stats.keys())[1:]:
-                        h_dict["careerSplits"]["count"][key_label][f] = stat_data.get(f,"--")
-                elif code in scoreSituation_codes:
-                    if key_label not in h_dict["careerSplits"]["score_sit"].keys():
-                        h_dict["careerSplits"]["score_sit"][key_label] = {}
-                    for f in list(hit_stats.keys())[1:]:
-                        h_dict["careerSplits"]["score_sit"][key_label][f] = stat_data.get(f,"--")
-                elif code in battingOrder_codes:
-                    if key_label not in h_dict["careerSplits"]["batting_order"].keys():
-                        h_dict["careerSplits"]["batting_order"][key_label] = {}
-                    for f in list(hit_stats.keys())[1:]:
-                        h_dict["careerSplits"]["batting_order"][key_label][f] = stat_data.get(f,"--")
-                elif code in zone_codes:
-                    if key_label not in h_dict["careerSplits"]["zones"].keys():
-                        h_dict["careerSplits"]["zones"][key_label] = {}
-                    for f in list(hit_stats.keys())[1:]:
-                        h_dict["careerSplits"]["zones"][key_label][f] = stat_data.get(f,"--")
-
-        if statType == "statSplits":
-
-            for split in stat_group["splits"]:
-                split_desc = split["split"]["description"]
-                split_code = split["split"]["code"]
-                stat_data = split["stat"]
-
-                code = split_code
-
-                key_label = f"{split_desc} ({code})"
-
-                if code in out_codes:
-                    if key_label not in h_dict["seasonSplits"]["outs"].keys():
-                        h_dict["seasonSplits"]["outs"][key_label] = {}
-                    for f in list(hit_stats.keys())[1:]:
-                        h_dict["seasonSplits"]["outs"][key_label][f] = stat_data.get(f,"--")
-                elif code in inning_codes:
-                    if key_label not in h_dict["seasonSplits"]["inning"].keys():
-                        h_dict["seasonSplits"]["inning"][key_label] = {}
-                    for f in list(hit_stats.keys())[1:]:
-                        h_dict["seasonSplits"]["inning"][key_label][f] = stat_data.get(f,"--")
-                elif code in runnersOn_codes:
-                    if key_label not in h_dict["seasonSplits"]["runners_on"].keys():
-                        h_dict["seasonSplits"]["runners_on"][key_label] = {}
-                    for f in list(hit_stats.keys())[1:]:
-                        h_dict["seasonSplits"]["runners_on"][key_label][f] = stat_data.get(f,"--")
-                elif code in count_codes:
-                    if key_label not in h_dict["seasonSplits"]["count"].keys():
-                        h_dict["seasonSplits"]["count"][key_label] = {}
-                    for f in list(hit_stats.keys())[1:]:
-                        h_dict["seasonSplits"]["count"][key_label][f] = stat_data.get(f,"--")
-                elif code in scoreSituation_codes:
-                    if key_label not in h_dict["seasonSplits"]["score_sit"].keys():
-                        h_dict["seasonSplits"]["score_sit"][key_label] = {}
-                    for f in list(hit_stats.keys())[1:]:
-                        h_dict["seasonSplits"]["score_sit"][key_label][f] = stat_data.get(f,"--")
-                elif code in battingOrder_codes:
-                    if key_label not in h_dict["seasonSplits"]["batting_order"].keys():
-                        h_dict["seasonSplits"]["batting_order"][key_label] = {}
-                    for f in list(hit_stats.keys())[1:]:
-                        h_dict["seasonSplits"]["batting_order"][key_label][f] = stat_data.get(f,"--")
-                elif code in zone_codes:
-                    if key_label not in h_dict["seasonSplits"]["zones"].keys():
-                        h_dict["seasonSplits"]["zones"][key_label] = {}
-                    for f in list(hit_stats.keys())[1:]:
-                        h_dict["seasonSplits"]["zones"][key_label][f] = stat_data.get(f,"--")             
-
-
-    pitch_stats = {
-        "category":"",
-        "groundOuts":"",
-        "airOuts":"",
-        "runs":"",
-        "homeRuns":"",
-        "strikeOuts":"",
-        "baseOnBalls":"",
-        "intentionalWalks":"",
-        "hits":"",
-        "atBats":"",
-        "battersFaced":"",
-        "hitBatsmen":"",
-        "totalBases":"",
-        "rbi":"",
-        "pickoffs":"",
-        "wildPitches":"",
-        "sacBunts":"",
-        "sacFlies":""}
-    
-    p_dict = {
-        "name":"",
-        "throws":"",
-        "careerSplits":{
-            "outs":pitch_stats,
-            "inning":pitch_stats,
-            "count":pitch_stats,
-            "runners_on":pitch_stats,
-            "score_sit":pitch_stats,
-            "batting_order":pitch_stats,
-            "zones":{
-                "all":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                },
-                "outs":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                },
-                "count":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                },
-                "throws":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                },
-                "runners":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                    },
-                
-                "pitch_types":{
-                    "zn01":{},
-                    "zn02":{},
-                    "zn03":{},
-                    "zn04":{},
-                    "zn05":{},
-                    "zn06":{},
-                    "zn07":{},
-                    "zn08":{},
-                    "zn09":{},
-                    "zn10":{},
-                    "zn11":{},
-                    "zn12":{},
-                    "zn13":{},
-                    "zn14":{}
-                    }
-                },
-            },
-        "vsPlayerTotal":{
-            "outs":pitch_stats,
-            "inning":pitch_stats,
-            "count":pitch_stats,
-            "runners_on":pitch_stats,
-            "score_sit":pitch_stats,
-            "batting_order":pitch_stats
-            },
-        "vsTeam":{
-            "outs":pitch_stats,
-            "inning":pitch_stats,
-            "count":pitch_stats,
-            "runners_on":pitch_stats,
-            "score_sit":pitch_stats,
-            "batting_order":pitch_stats
-            },
-        "vsTeamTotal":{
-            "outs":pitch_stats,
-            "inning":pitch_stats,
-            "count":pitch_stats,
-            "runners_on":pitch_stats,
-            "score_sit":pitch_stats,
-            "batting_order":pitch_stats
-            }
-        }
-
-    # Parse PITCHER response
-    return h_dict
-
 def play_search(mlbam,seasons=None,statGroup=None,opposingTeamId=None,eventTypes=None,pitchTypes=None,gameTypes=None,**kwargs):
     """Search for any individual play 2008 and later
 
@@ -5531,295 +4672,6 @@ def pitch_search(mlbam,seasons=None,statGroup=None,opposingTeamId=None,eventType
     
     return df
 
-def schedule_search(date:str,teamID="",oppID="",season="",startDate="",endDate=""):
-    query_str = []
-    if teamID != "":
-        query_str.append(f"teamId={teamID}")
-    if oppID != "":
-        query_str.append(f"opponentId={oppID}")
-    if season != "":
-        query_str.append(f"season={season}")
-    if startDate != "":
-        query_str.append(f"startDate={startDate}")
-    if endDate != "":
-        query_str.append(f"endDate={endDate}")
-    query_str = "&".join(query_str)
-    
-    gameType = "S,F,D,L,W,R,E"
-    hydrations = "linescore(matchup,person),team,previousPlay,probablePitcher,stats,broadcasts(all),person,lineups,decisions"
-    url = BASE + f"/schedule?sportId=1&date={date}&gameType={gameType}&{query_str}&hydrate={hydrations}"
-    # date=7/1/2021 &gamePk=633457 &timecode=20210701_172455
-    # print(url)
-    try:response = requests.get(url).json()["dates"]
-    except:return "no games found"
-    
-    schedule = []
-    for date in response:
-        game_list = date["games"]
-        for game in game_list:
-            game_info = {}
-            gamePk = game["gamePk"]
-            game_info["gamePk"] = gamePk
-            game_info["gameType"] = game["gameType"]
-            game_info["gameDesc"] = game.get("description","")
-            game_info["season"] = game.get("season","")
-            game_info["gameDate"] = game.get("officialDate","")
-            game_info["gameTime"] = game["gameDate"] # Needs to be converted to UTC (could do with JS)
-            game_info["gameState"] = game["status"]["detailedState"]
-            game_info["liveState"] = game["status"]["abstractGameState"]
-            game_info["reason"] = game["status"].get("reason","")
-            game_info["venueName"] = game.get("venue",{}).get("name","")
-            game_info["venue_mlbam"] = game.get("venue",{}).get("id","")
-
-            game_info["broadcastAwayTV"] = []
-            game_info["broadcastHomeTV"] = []
-            game_info["broadcastAwayRadio"] = []
-            game_info["broadcastHomeRadio"] = []
-            try:
-                for bc in game["broadcasts"]:
-                    if bc["language"] == "en":
-                        if bc["homeAway"] == "away" and bc["type"] == "TV":   # if AWAY TV broadcast
-                            broadcast = {
-                                "name":bc.get("name",""),
-                                "resolution":bc.get("videoResolution",{}).get("videoResolution","")}
-                            game_info["broadcastAwayTV"].append(broadcast)
-
-                        elif bc["homeAway"] == "home" and bc["type"] == "TV":   # if HOME TV broadcast
-                            broadcast = {
-                                "name":bc.get("name",""),
-                                "resolution":bc.get("videoResolution",{}).get("videoResolution","")}
-                            game_info["broadcastHomeTV"].append(broadcast)
-
-                        elif bc["homeAway"] == "away" and bc["type"] == "AM":   # if AWAY RADIO broadcast
-                            broadcast = {"name":bc.get("name","")}
-                            game_info["broadcastAwayRadio"].append(broadcast)
-
-                        elif bc["homeAway"] == "home" and bc["type"] == "AM":   # if HOME RADIO broadcast
-                            broadcast = {"name":bc.get("name","")}
-                            game_info["broadcastHomeRadio"].append(broadcast)
-
-                    else:
-                        pass
-
-            except:
-                pass
-
-            teams = game["teams"]
-            game_info["teamAway"] = teams["away"]["team"]["name"]
-            game_info["teamHome"] = teams["home"]["team"]["name"]
-            lineups = game.get("lineups",{})
-            game_info["lineupAway"] = lineups.get("awayPlayers",{})
-            game_info["lineupHome"] = lineups.get("homePlayers",{})
-            game_info["teamAway_clubName"] = teams["away"]["team"]["clubName"]
-            game_info["teamHome_clubName"] = teams["home"]["team"]["clubName"]
-            game_info["teamAway_mlbam"] = teams["away"]["team"]["id"]
-            game_info["teamHome_mlbam"] = teams["home"]["team"]["id"]
-            game_info["scoreAway"] = teams["away"].get("score","-")
-            game_info["scoreHome"] = teams["home"].get("score","-")
-            game_info["isWinnerAway"] = teams["away"].get("isWinner",False)
-            game_info["isWinnerHome"] = teams["home"].get("isWinner",False)
-            awayRecWins = teams["away"].get("leagueRecord",{}).get("wins")
-            awayRecLosses = teams["away"].get("leagueRecord",{}).get("losses")
-            homeRecWins = teams["home"].get("leagueRecord",{}).get("wins")
-            homeRecLosses = teams["home"].get("leagueRecord",{}).get("losses")
-            game_info["recordAway"] = f"{awayRecWins}-{awayRecLosses}"
-            game_info["recordHome"] = f"{homeRecWins}-{homeRecLosses}"
-            probPitcherAway = teams["away"].get("probablePitcher",{})
-            probPitcherHome = teams["home"].get("probablePitcher",{})
-            game_info["probPitcherAway"] = {"mlbam":probPitcherAway.get("id",""),"name":probPitcherAway.get("fullName",""),"nameShort":probPitcherAway.get("initLastName",""),"era":"","wins":"","losses":""}
-            game_info["probPitcherHome"] = {"mlbam":probPitcherHome.get("id",""),"name":probPitcherHome.get("fullName",""),"nameShort":probPitcherHome.get("initLastName",""),"era":"","wins":"","losses":""}
-            game_info["pitcherWin"] = game.get("decisions",{}).get("winner",{})
-            game_info["pitcherLoss"] = game.get("decisions",{}).get("loser",{})
-            game_info["pitcherSave"] = game.get("decisions",{}).get("save",{})
-
-            try:
-                for t in probPitcherAway["stats"]:
-                    if t["type"]["displayName"] == "statsSingleSeason" and t["group"]["displayName"] == "pitching":
-                        game_info["probPitcherAway"]["era"] = t["stats"]["era"]
-                        game_info["probPitcherAway"]["wins"] = t["stats"]["wins"]
-                        game_info["probPitcherAway"]["losses"] = t["stats"]["losses"]
-                        game_info["probPitcherAway"]["saves"] = t["stats"].get("saves","-")
-                        break
-            except:
-                pass
-            try:
-                for t in probPitcherHome["stats"]:
-                    if t["type"]["displayName"] == "statsSingleSeason" and t["group"]["displayName"] == "pitching":
-                        game_info["probPitcherHome"]["era"] = t["stats"]["era"]
-                        game_info["probPitcherHome"]["wins"] = t["stats"]["wins"]
-                        game_info["probPitcherHome"]["losses"] = t["stats"]["losses"]
-                        game_info["probPitcherHome"]["saves"] = t["stats"].get("saves","-")
-                        break
-            except:
-                pass
-            
-            game_info["isDoubleHeader"] = True if game.get("doubleHeader","") != "N" else False
-            game_info["gameNumberDay"] = game.get("gameNumber",1)
-            game_info["gameNumberSeries"] = game.get("seriesGameNumber",1)
-            game_info["gamesInSeries"] = game.get("gamesInSeries","-")
-
-            linescore = game.get("linescore",{})
-            innScores = linescore.get("innings",{})
-            offense = linescore.get("offense",{})
-            defense = linescore.get("defense",{})
-
-            game_info["scoreboard"] = linescore   # might not be necessary but could be another way to access data if it's easier
-            game_info["innScores"] = innScores
-            currentInning = linescore.get("currentInning","")
-            currentInningOrdinal = linescore.get("currentInningOrdinal")
-            inningHalf = linescore.get("inningHalf","").lower() # CHANGE TO 'inningState' at some point
-            inningState = linescore.get("inningState","").lower()
-            game_info["inning"] = currentInning
-            game_info["inningOrdinal"] = currentInningOrdinal
-            game_info["inningHalf"] = inningHalf
-            game_info["inningState"] = inningState
-            recentPlay_dict = game.get("previousPlay",{})
-            game_info["recentPlay"] = recentPlay_dict.get("result",{}).get("description","")
-            game_info["balls"] = linescore.get("balls","")
-            game_info["strikes"] = linescore.get("strikes","")
-            game_info["outs"] = linescore.get("outs","")
-            runnerOnFirst = True if "first" in offense.keys() else False
-            runenrOnSecond = True if "second" in offense.keys() else False
-            runnerOnThird = True if "third" in offense.keys() else False
-            game_info["runnersOn"] = {"first":runnerOnFirst,"second":runenrOnSecond,"third":runnerOnThird}
-
-            # Matchup, pitcher/hitter stats, bat order & situation info
-
-            game_info["teamBatting"] = offense.get("team",{}).get("id","")
-            game_info["teamFielding"]= defense.get("team",{}).get("id","")
-
-            # pitcher on mount & upcoming batters for current team batting
-            onMound = defense.get("pitcher",{})
-            qBatter = defense.get("batter",{})
-            qOnDeck = defense.get("onDeck",{})
-            qInHole = defense.get("inHole",{})
-            
-            # current batter/queue for team batting & pitcher for the team batting
-            offMound = offense.get("pitcher",{})
-            batter = offense.get("batter",{})
-            onDeck = offense.get("onDeck",{})
-            inHole = offense.get("inHole",{})
-
-
-            game_info["orderBatting"] = offense.get("battingOrder","")
-            game_info["orderFielding"] = defense.get("battingOrder","")
-
-            game_info["onMound"] = {"mlbam":onMound.get("id",""),"name":onMound.get("fullName",""),"nameShort":onMound.get("initLastName",""),"era":"","wins":"","losses":""}
-            game_info["offMound"] = {"mlbam":offMound.get("id",""),"name":offMound.get("fullName",""),"nameShort":offMound.get("initLastName",""),"era":"","wins":"","losses":""}
-
-            # get stats for current pitcher on mound
-            try:
-                for t in onMound["stats"]:
-                    if t["type"]["displayName"] == "statsSingleSeason" and t["group"]["displayName"] == "pitching":
-                        game_info["onMound"]["era"] = t["stats"]["era"]
-                        game_info["onMound"]["wins"] = t["stats"]["wins"]
-                        game_info["onMound"]["losses"] = t["stats"]["losses"]
-                        game_info["onMound"]["saves"] = t["stats"].get("saves","-")
-                        break
-            except:
-                pass
-
-            # get stats for pitcher on batting team
-            try:
-                for t in offMound["stats"]:
-                    if t["type"]["displayName"] == "statsSingleSeason" and t["group"]["displayName"] == "pitching":
-                        game_info["offMound"]["era"] = t["stats"]["era"]
-                        game_info["offMound"]["wins"] = t["stats"]["wins"]
-                        game_info["offMound"]["losses"] = t["stats"]["losses"]
-                        game_info["offMound"]["saves"] = t["stats"].get("saves","-")
-                        break
-            except:
-                pass
-
-
-            
-            game_info["batters"] = {
-                "batter":{"mlbam":batter.get("id",""),"name":batter.get("fullName",""),"nameShort":batter.get("initLastName",""),"avg":"","hits":"","ab":"","pa":""},
-                "onDeck":{"mlbam":onDeck.get("id",""),"name":onDeck.get("fullName",""),"nameShort":onDeck.get("initLastName",""),"avg":"","hits":"","ab":"","pa":""},
-                "inHole":{"mlbam":inHole.get("id",""),"name":inHole.get("fullName",""),"nameShort":inHole.get("initLastName",""),"avg":"","hits":"","ab":"","pa":""}
-                }
-            game_info["defBatters"] = {
-                "batter":{"mlbam":qBatter.get("id",""),"name":qBatter.get("fullName",""),"nameShort":qBatter.get("initLastName",""),"avg":"","hits":"","ab":"","pa":""},
-                "onDeck":{"mlbam":qOnDeck.get("id",""),"name":qOnDeck.get("fullName",""),"nameShort":qOnDeck.get("initLastName",""),"avg":"","hits":"","ab":"","pa":""},
-                "inHole":{"mlbam":qInHole.get("id",""),"name":qInHole.get("fullName",""),"nameShort":qInHole.get("initLastName",""),"avg":"","hits":"","ab":"","pa":""}
-                }
-            
-            # stats for current batting team order
-            for idx,b in enumerate([batter,onDeck,inHole]):
-                try:
-                    for t in b["stats"]:
-                        if t["type"]["displayName"] == "gameLog" and t["group"]["displayName"] == "hitting":
-                            if idx == 0:
-                                game_info["batters"]["batter"]["hits"] = t["stats"]["hits"]
-                                game_info["batters"]["batter"]["ab"] = t["stats"]["atBats"]
-                                game_info["batters"]["batter"]["pa"] = t["stats"]["plateAppearances"]
-                            elif idx == 1:
-                                game_info["batters"]["onDeck"]["hits"] = t["stats"]["hits"]
-                                game_info["batters"]["onDeck"]["ab"] = t["stats"]["atBats"]
-                                game_info["batters"]["onDeck"]["pa"] = t["stats"]["plateAppearances"]
-                            elif idx == 2:
-                                game_info["batters"]["inHole"]["hits"] = t["stats"]["hits"]
-                                game_info["batters"]["inHole"]["ab"] = t["stats"]["atBats"]
-                                game_info["batters"]["inHole"]["pa"] = t["stats"]["plateAppearances"]
-
-                        elif t["type"]["displayName"] == "statsSingleSeason" and t["group"]["displayName"] == "hitting":
-                            if idx == 0:
-                                game_info["batters"]["batter"]["avg"] = t["stats"]["avg"]
-                            elif idx == 1:
-                                game_info["batters"]["onDeck"]["avg"] = t["stats"]["avg"]
-                            elif idx == 2:
-                                game_info["batters"]["inHole"]["avg"] = t["stats"]["avg"]
-                except:
-                    pass
-            #
-
-            # stats for upcoming batters on fielding team
-            for idx,b in enumerate([qBatter,qOnDeck,qInHole]):
-                try:
-                    for t in b["stats"]:
-                        if t["type"]["displayName"] == "gameLog" and t["group"]["displayName"] == "hitting":
-                            if idx == 0:
-                                game_info["defBatters"]["batter"]["hits"] = t["stats"]["hits"]
-                                game_info["defBatters"]["batter"]["ab"] = t["stats"]["atBats"]
-                                game_info["defBatters"]["batter"]["pa"] = t["stats"]["plateAppearances"]
-                            elif idx == 1:
-                                game_info["defBatters"]["onDeck"]["hits"] = t["stats"]["hits"]
-                                game_info["defBatters"]["onDeck"]["ab"] = t["stats"]["atBats"]
-                                game_info["defBatters"]["onDeck"]["pa"] = t["stats"]["plateAppearances"]
-                            elif idx == 2:
-                                game_info["defBatters"]["inHole"]["hits"] = t["stats"]["hits"]
-                                game_info["defBatters"]["inHole"]["ab"] = t["stats"]["atBats"]
-                                game_info["defBatters"]["inHole"]["pa"] = t["stats"]["plateAppearances"]
-                                
-                        elif t["type"]["displayName"] == "statsSingleSeason" and t["group"]["displayName"] == "hitting":
-                            if idx == 0:
-                                game_info["defBatters"]["batter"]["avg"] = t["stats"]["avg"]
-                            elif idx == 1:
-                                game_info["defBatters"]["onDeck"]["avg"] = t["stats"]["avg"]
-                            elif idx == 2:
-                                game_info["defBatters"]["inHole"]["avg"] = t["stats"]["avg"]
-                except:
-                    pass
-            #
-
-            try:game_info["runsAway"] = linescore["teams"]["away"]["runs"]
-            except:game_info["runsAway"] = "-"
-            try:game_info["hitsAway"] = linescore["teams"]["away"]["hits"]
-            except:game_info["hitsAway"] = "-"
-            try:game_info["errorsAway"] = linescore["teams"]["away"]["errors"]
-            except:game_info["errorsAway"] = "-"
-            try:game_info["runsHome"] = linescore["teams"]["home"]["runs"]
-            except:game_info["runsHome"] = "-"
-            try:game_info["hitsHome"] = linescore["teams"]["home"]["hits"]
-            except:game_info["hitsHome"] = "-"
-            try:game_info["errorsHome"] = linescore["teams"]["home"]["errors"]
-            except:game_info["errorsHome"] = "-"
-
-            schedule.append(game_info)
-        
-        
-    return schedule
-
 def game_search(team=None,date=None,startDate=None,endDate=None,season=None,gameType=None):
     """
     Search for a games by team and/or date (fmt: 'mm/dd/yyyy')
@@ -5966,8 +4818,16 @@ def game_search(team=None,date=None,startDate=None,endDate=None,season=None,game
         return "No games found"
     return df
 
-def last_game(teamID):
-    teamID = str(teamID)
+def last_game(mlbam):
+    """Get basic game information for a team's last game
+    
+    Parameters:
+    -----------
+    mlbam : int | str
+        Official MLB Advanced Media ID for team
+    
+    """
+    teamID = str(mlbam)
 
     season_info = get_season_info()
     
@@ -6004,12 +4864,20 @@ def last_game(teamID):
 
     return df
 
-def next_game(teamID):
+def next_game(mlbam):
+    """Get basic game information for a team's next game
+    
+    Parameters:
+    -----------
+    mlbam : int | str
+        Official MLB Advanced Media ID for team
+        
+    """
+    teamID = mlbam
 
     m = curr_date.month
     d = curr_date.day
     y = curr_date.year
-
 
     try:
         url = BASE + f"/teams/{teamID}?hydrate=nextSchedule(date={m}/{d}/{y},inclusive=True,limit=1,season={y},gameType=[S,R,P])"
@@ -6043,8 +4911,8 @@ def schedule(mlbam=None,season=None,date=None,startDate=None,endDate=None,gameTy
 
     Parameters
     ----------
-    mlbam : int or str, optional
-        team's official MLB ID
+    mlbam : int | str, optional
+        Official MLB Advanced Media ID for team
 
     season : int or str, optional
         get schedule information for a specific season
@@ -6066,7 +4934,7 @@ def schedule(mlbam=None,season=None,date=None,startDate=None,endDate=None,gameTy
 
     Other Parameters
     ----------------
-    tz : str, optional (Default is Central time)
+    tz : str, optional (Defaults to Central time)
         keyword argument to specify which timezone to view game times
     
     hydrate : str, optional
@@ -6361,19 +5229,30 @@ def schedule(mlbam=None,season=None,date=None,startDate=None,endDate=None,gameTy
 
     return df
 
-def game_highlights(mlbam=None,date=None,startDate=None,endDate=None,season=None,month=None):
+def game_highlights(mlbam=None,date=None,startDate=None,endDate=None,season=None,month=None) -> pd.DataFrame:
     """
     Get video urls of team highlights for a specific date during the regular season.
 
-    Params:
-    -------
-    - 'mlbam' (Required)
-    - 'date' (conditionally required): format, mm/dd/yyyy
+    Parameters:
+    -----------
+    mlbam : int | str
+        Team's official "MLB Advanced Media" ID
+    
+    date : str, conditionally required (fmt: 'YYYY-mm-dd')
+        Search for games on a specific date
+        
+    startDate : str, conditionally required (fmt: 'YYYY-mm-dd')
+        Search games AFTER or on a certain date
+        
+    startDate : str, conditionally required (fmt: 'YYYY-mm-dd')
+        Search games BEFORE or on a certain date
+    
+    season : int
+        Search games by season
     """
 
     hydrations = "game(content(media(all),summary,gamenotes,highlights(highlights)))"
     if date is not None:
-        date = dt.datetime.strptime(date,r"%m/%d/%Y").strftime(r"%Y-%m-%d")
         url = BASE + f"/schedule?sportId=1&teamId={mlbam}&date={date}&hydrate={hydrations}"
     elif month is not None:
         if season is not None:
@@ -6491,7 +5370,7 @@ def game_highlights(mlbam=None,date=None,startDate=None,endDate=None,season=None
 
     return df
 
-def get_video_link(playID,broadcast=None) -> str:
+def get_video_link(playID:str,broadcast=None) -> str:
     if broadcast is not None:
         broadcast = str(broadcast).upper()
         url = f"https://baseballsavant.mlb.com/sporty-videos?playId={playID}&videoType={broadcast}"
@@ -6503,21 +5382,7 @@ def get_video_link(playID,broadcast=None) -> str:
     video_source = video_tag.find("source")["src"]
     return video_source
 
-def players_by_year(season):
-    """Retrieve player data from the MLB Stats API
-
-    Parameters
-    ----------
-    season : str or int
-        search for players in a given season
-
-    """
-
-    url = BASE + f"/sports/1/players?season={season}&hydrate=person"
-    resp = requests.get(url).json()
-    return resp
-
-def player_bio(mlbam):
+def player_bio(mlbam:int):
     """Get short biography of player from Baseball-Reference.com's Player Bullpen pages.
 
     Parameters
@@ -6546,3 +5411,65 @@ def player_bio(mlbam):
 
         return bio_p_tags
 
+def free_agents(season:Optional[int]=None,hydrate_person:Optional[bool]=None,sort_by=None,sort_asc=False) -> pd.DataFrame:
+    """Get data for free agents
+    
+    Parameters:
+    -----------
+    season : int, required (Defaults to the most recent season)
+        The season of play
+    
+    hydrate_person : bool, optional
+        Whether or not to use the API's "hydrate" parameter to fetch additional bio information for each free agent entry
+    
+    sort_by : str, optional
+        Sort the dataframe by a specific column
+    
+    sort_asc : bool
+        Determines the direction of sorting, (if "sort_asc" param is populated ('A-Z'  / 'Z-A')
+    
+    """
+    if season is None:
+        season = default_season()
+    
+    params = {'season':season}
+    if hydrate_person is True:
+        params['hydrate'] = 'person'
+    
+    url = f"{BASE}/people/freeAgents"
+    resp = requests.get(url,params=params)
+    
+    data = []
+    for fa in resp.json()['freeAgents']:
+        og_team = fa.get('originalTeam',{})
+        new_team = fa.get('newTeam',{})
+        notes = fa.get('notes','-')
+        date_signed = fa.get('dateSigned','-')
+        date_declared = fa.get('dateDeclared','-')
+        pos = fa.get('position',{})
+        fa_data = {
+            'date_signed':date_signed,
+            'date_declared':date_declared,
+            'notes':notes,
+            'og_tm_mlbam':og_team.get('id',0),
+            'og_tm_name':og_team.get('name','-'),
+            'new_tm_mlbam':new_team.get('id',0),
+            'new_tm_name':new_team.get('name','-'),
+        }
+        parsed_player_data = _parse_person(_obj=fa['player'])
+        parsed_player_data.update(**{'pos_code':pos.get('code','-'),
+                                     'pos_name':pos.get('name','-'),
+                                     'pos_type':pos.get('type','-'),
+                                     'pos_abbreviation':pos.get('abbreviation','-')
+                                     })
+        fa_data.update(**parsed_player_data)
+        
+        data.append(fa_data)
+    
+    df = pd.DataFrame.from_dict(data).drop()
+    
+    if sort_by is not None and type(sort_by) is str:
+        return df.sort_values(by=sort_by,ascending=sort_asc).reset_index(drop=True)
+    
+    return df
+    

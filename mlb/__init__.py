@@ -12,7 +12,6 @@ Issues: https://github.com/joerex1418/simplestats-mlb/issues
 
 License: https://raw.githubusercontent.com/joerex1418/simplestats-mlb/master/LICENSE
 
-
 """
 
 from .classes import Person
@@ -24,26 +23,21 @@ person = Person
 team = Team
 game = Game
 
+from .classes import api
 
-# from .objects import Player
-# from .objects import Team
-# from .objects import League
-
-# Parser objects
 
 from .functions import play_search
 from .functions import pitch_search
 from .functions import game_search
-from .functions import schedule_search
-from .functions import get_matchup_stats
+# from .functions import get_matchup_stats
 from .functions import leaderboards
 from .functions import last_game
 from .functions import next_game
 from .functions import find_team
 from .functions import find_player
 from .functions import find_venue
-from .functions import players_by_year
 from .functions import schedule
+from .functions import free_agents
 from .functions import player_bio
 from .functions import player_stats
 from .functions import player_hitting
@@ -166,5 +160,3 @@ from .constants import (
     W_SEASON,
     WO_SEASON
 )
-
-from .classes import api

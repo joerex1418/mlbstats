@@ -21,49 +21,41 @@ from .async_mlb import get_updated_records
 from .async_mlb import get_bios
 
 def update_bios(return_df=False,replace_existing=True):
-    """Update player bios in the package's 'baseball.db'
+    """Update player bios in the library's CSV files
     
-    Arguments:
-    -------------------
-    return_df: default False
-    replace_existing: default TRUE
-                        if FALSE, function will simply return the data retrieved from the statsapi
-                            without updating the database
+    Parameters:
+    -----------
+    return_df : bool
+        whether or not to return the new dataframe
+    replace_existing : bool default TRUE
+        if FALSE, function will simply return the data retrieved from the API without updating the current CSV file
+        
     """
     df = get_bios(include_list_data=True)
     if replace_existing is False:
         return df
-    # engine = create_engine(f"sqlite:///{os.path.abspath('simplestats/baseball.db')}")
     try:
-        # print("opening connection")
-        # conn = engine.connect()
-        # df.to_sql("bios",con=conn,if_exists="replace")
         df.to_csv(BIOS_CSV,index=False)
-        # print("SUCCESS! - closing connection")
-        # conn.close()
-        # engine.dispose()
         if return_df is True:
             return df
     except Exception as e:
         try:
             print(e)
-            # print("'df.to_sql' FAILED - closing connection")
-            # conn.close()
-            # engine.dispose()
         except:
             pass
         if return_df is True:
             return df
 
 def update_people(return_df=False,replace_existing=True):
-    """Update yby records in the package's 'baseball.db'
+    """Update 'people' in the library's CSV files
     
-    Arguments:
-    -------------------
-    return_df: default False
-    replace_existing: default TRUE
-                        if FALSE, function will simply return the data retrieved from the statsapi without updating the 
-                            database
+    Parameters:
+    -----------
+    return_df : bool
+        whether or not to return the new dataframe
+    replace_existing : bool default TRUE
+        if FALSE, function will simply return the data retrieved from the API without updating the current CSV file
+        
     """
     url = "https://raw.githubusercontent.com/chadwickbureau/register/master/data/people.csv"
     df = pd.read_csv(url)
@@ -130,12 +122,13 @@ def update_people(return_df=False,replace_existing=True):
 def update_yby_records(return_df=False,replace_existing=True):
     """Update yby records in the package's 'baseball.db'
     
-    Arguments:
-    -------------------
-    return_df: default False
-    replace_existing: default TRUE
-                        if FALSE, function will simply return the data retrieved from the statsapi
-                            without updating the database
+    Parameters:
+    -----------
+    return_df : bool
+        whether or not to return the new dataframe
+    replace_existing : bool default TRUE
+        if FALSE, function will simply return the data retrieved from the API without updating the current CSV file
+        
     """
     df = get_updated_records()
     df = df.sort_values(by=["season","W%"],ascending=[False,False])
@@ -164,6 +157,16 @@ def update_yby_records(return_df=False,replace_existing=True):
             return df
 
 def update_hof(return_df=False,replace_existing=True):
+    """Update "Hall Of Fame" data in the library's CSV files
+    
+    Parameters:
+    -----------
+    return_df : bool
+        whether or not to return the new dataframe
+    replace_existing : bool default TRUE
+        if FALSE, function will simply return the data retrieved from the API without updating the current CSV file
+        
+    """
     url = "https://statsapi.mlb.com/api/v1/awards/MLBHOF/recipients?sportId=1&hydrate=results,team"
 
     response = requests.get(url)
@@ -199,6 +202,16 @@ def update_hof(return_df=False,replace_existing=True):
             return df
 
 def update_seasons(return_df=False,replace_existing=True):
+    """Update 'seasons' data in the library's CSV files
+    
+    Parameters:
+    -----------
+    return_df : bool
+        whether or not to return the new dataframe
+    replace_existing : bool default TRUE
+        if FALSE, function will simply return the data retrieved from the API without updating the current CSV file
+        
+    """
     cols = COLS_SEASON
     date_cols = ['preSeasonStartDate','preSeasonEndDate','seasonStartDate','seasonEndDate','springStartDate','springEndDate','regularSeasonStartDate','regularSeasonEndDate','allStarDate','postSeasonStartDate','postSeasonEndDate','offSeasonStartDate','offSeasonEndDate']
 
@@ -227,6 +240,16 @@ def update_seasons(return_df=False,replace_existing=True):
             return df
 
 def update_venues(return_df=False,replace_existing=True):
+    """Update 'venues' data in the library's CSV files
+    
+    Parameters:
+    -----------
+    return_df : bool
+        whether or not to return the new dataframe
+    replace_existing : bool default TRUE
+        if FALSE, function will simply return the data retrieved from the API without updating the current CSV file
+        
+    """
     base = "https://statsapi.mlb.com/api/v1"
     hydrations = "location,social,timezone,fieldInfo,metadata,images,xrefId,video"
     url = base + f"/venues?hydrate={hydrations}"
@@ -359,6 +382,17 @@ def update_bbref_pitching_war(return_df=False,replace_existing=True):
         return df
 
 def update_leagues(return_df=False,replace_existing=True):
+    """Update 'leagues' data in the library's CSV files
+    
+    Parameters:
+    -----------
+    return_df : bool
+        whether or not to return the new dataframe
+    replace_existing : bool default TRUE
+        if FALSE, function will simply return the data retrieved from the API without updating the current CSV file
+        
+    """
+    
     divs_url = "https://statsapi.mlb.com/api/v1/divisions?sportId=1&hydrate=league"
     lgs_url  = "https://statsapi.mlb.com/api/v1/leagues?sportId=1"
 
@@ -399,3 +433,4 @@ def update_leagues(return_df=False,replace_existing=True):
     if return_df is True:
         return df
     
+

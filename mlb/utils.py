@@ -25,6 +25,7 @@ from .constants import (
 )
 
 from .mlbdata import get_season_info
+from typing import Union, Optional, List, Dict
 
 today_date = dt.datetime.today()
 
@@ -55,6 +56,11 @@ def make_dt_obj(_dt_str:str,_date_only=False):
             return dt.datetime.strptime(_dt_str,r"%m/%d/%Y").date()
 
 def default_season() -> int:
+    """Returns the most recent season with data available.
+    
+    (Typically either the one that is currently in progress or the last complete season)
+    
+    """
     season_info = get_season_info()
     if season_info['in_progress'] is None:
         season = season_info['last_completed']
@@ -686,7 +692,7 @@ class metadata:
         meta_list.sort()
         return meta_list
 
-    def baseballStats(df=False) -> list[dict] | pd.DataFrame:
+    def baseballStats(df=False) -> Union[List[Dict],pd.DataFrame]:
         url = "https://statsapi.mlb.com/api/v1/baseballStats"
         data = []
         resp = requests.get(url)
@@ -713,7 +719,7 @@ class metadata:
         else:
             return resp.json()
 
-    def leagueLeaderTypes(df=False) -> list | pd.DataFrame:
+    def leagueLeaderTypes(df=False) -> Union[list,pd.DataFrame]:
         url = "https://statsapi.mlb.com/api/v1/leagueLeaderTypes"
         data = []
         resp = requests.get(url)
@@ -721,7 +727,7 @@ class metadata:
             data.append(i['displayName'])
         return data
 
-    def statGroups(df=False) -> list | pd.DataFrame:
+    def statGroups(df=False) -> Union[list,pd.DataFrame]:
         url = "https://statsapi.mlb.com/api/v1/statGroups"
         data = []
         resp = requests.get(url)
@@ -731,7 +737,7 @@ class metadata:
             return pd.DataFrame(data=data)
         return data
 
-    def statTypes(df=False) -> list | pd.DataFrame:
+    def statTypes(df=False) -> Union[list,pd.DataFrame]:
         url = "https://statsapi.mlb.com/api/v1/statTypes"
         data = []
         resp = requests.get(url)

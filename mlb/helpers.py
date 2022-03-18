@@ -3,6 +3,8 @@ from .utils import pd
 from .utils import keys
 from tabulate import tabulate as tab
 
+from typing import Union, Optional
+
 
 class standings_wrapper:
     def __new__(cls,records,splits=None):
@@ -190,7 +192,7 @@ class mlb_date:
     def __str__(self):
         return self.__date_str
     
-    def __call__(self) -> dt.date | None:
+    def __call__(self) -> Union[dt.date,None]:
         """Returns datetime.date object from built-in datetime module"""
         return self.__date_obj
 
@@ -243,12 +245,12 @@ class mlb_date:
         return self.__month_name_short
 
     @property
-    def obj(self) -> dt.date | None:
+    def obj(self) -> Union[dt.date,None]:
         """Returns datetime.date object from built-in datetime module"""
         return self.__date_obj
     
     @property
-    def date_obj(self) -> dt.date | None:
+    def date_obj(self) -> Union[dt.date,None]:
         """Returns datetime.date object from built-in datetime module"""
         return self.__date_obj
 
@@ -291,7 +293,7 @@ class edu_wrapper:
         def __repr__(self):
             return self.__repr
         
-        def __call__(self,school_attr:str|None=None,row_idx:int=0) -> pd.DataFrame | str:
+        def __call__(self,school_attr:Optional[str]=None,row_idx:int=0) -> Union[pd.DataFrame,str]:
             """Return either a dataframe of all schools data OR a specific school attribute by providing index ('row_idx')
             
             Parameters:
@@ -364,7 +366,7 @@ class edu_wrapper:
             return df.iloc[int(row_idx)]['state']
             
 
-    def __new__(cls,edu_df:pd.DataFrame|None=None):
+    def __new__(cls,edu_df:Optional[pd.DataFrame]=None):
         self = object.__new__(cls)
         hs_df = edu_df[edu_df["type"]=="highschool"]
         co_df = edu_df[edu_df["type"]=="college"]
@@ -379,7 +381,7 @@ class edu_wrapper:
     def __repr__(self):
         return self.__repr
 
-    def __call__(self,school_type:str|None=None) -> pd.DataFrame:
+    def __call__(self,school_type:Optional[str]=None) -> pd.DataFrame:
         """Return education/school dataframe by 'school_type'. If 'school_type' is not provided, all school data will be returned
         
         Parameters:
@@ -421,7 +423,7 @@ class venue_name_wrapper(mlb_wrapper):
     def __repr__(self):
         return self._name
     
-    def __call__(self,attr:str|None=None) -> str | int:
+    def __call__(self,attr:Optional[Union[str,None]]=None) -> Union[str,int]:
         if attr is None:
             return self._name
         else:
@@ -448,7 +450,7 @@ class league_name_wrapper(mlb_wrapper):
     def __repr__(self):
         return self._name
     
-    def __call__(self,attr:str|None=None) -> str | int:
+    def __call__(self,attr:Optional[str]=None) -> Union[str,int]:
         if attr is None:
             return self._name
         else:
@@ -650,9 +652,9 @@ class stat_collection(mlb_wrapper):
     def __init__(
         self,
         stat_group:str,
-        career_regular:pd.DataFrame|None=None,career_advanced:pd.DataFrame|None=None,
-        season_regular:pd.DataFrame|None=None,season_advanced:pd.DataFrame|None=None,
-        yby_regular:pd.DataFrame|None=None,yby_advanced:pd.DataFrame|None=None):
+        career_regular:Optional[pd.DataFrame]=None,career_advanced:Optional[pd.DataFrame]=None,
+        season_regular:Optional[pd.DataFrame]=None,season_advanced:Optional[pd.DataFrame]=None,
+        yby_regular:Optional[pd.DataFrame]=None,yby_advanced:Optional[pd.DataFrame]=None):
 
         if stat_group == 'hitting':
             self.__cols_reg = keys.hit
@@ -731,17 +733,17 @@ class stat_collection(mlb_wrapper):
 
 class player_stats(mlb_wrapper):
     def __init__(self,
-                 hit_car_reg:pd.DataFrame|None=None,hit_car_adv:pd.DataFrame|None=None,
-                 hit_ssn_reg:pd.DataFrame|None=None,hit_ssn_adv:pd.DataFrame|None=None,
-                 hit_yby_reg:pd.DataFrame|None=None,hit_yby_adv:pd.DataFrame|None=None,
+                 hit_car_reg:Optional[pd.DataFrame]=None,hit_car_adv:Optional[pd.DataFrame]=None,
+                 hit_ssn_reg:Optional[pd.DataFrame]=None,hit_ssn_adv:Optional[pd.DataFrame]=None,
+                 hit_yby_reg:Optional[pd.DataFrame]=None,hit_yby_adv:Optional[pd.DataFrame]=None,
                  
-                 pit_car_reg:pd.DataFrame|None=None,pit_car_adv:pd.DataFrame|None=None,
-                 pit_ssn_reg:pd.DataFrame|None=None,pit_ssn_adv:pd.DataFrame|None=None,
-                 pit_yby_reg:pd.DataFrame|None=None,pit_yby_adv:pd.DataFrame|None=None,
+                 pit_car_reg:Optional[pd.DataFrame]=None,pit_car_adv:Optional[pd.DataFrame]=None,
+                 pit_ssn_reg:Optional[pd.DataFrame]=None,pit_ssn_adv:Optional[pd.DataFrame]=None,
+                 pit_yby_reg:Optional[pd.DataFrame]=None,pit_yby_adv:Optional[pd.DataFrame]=None,
                  
-                 fld_car_reg:pd.DataFrame|None=None,
-                 fld_ssn_reg:pd.DataFrame|None=None,
-                 fld_yby_reg:pd.DataFrame|None=None
+                 fld_car_reg:Optional[pd.DataFrame]=None,
+                 fld_ssn_reg:Optional[pd.DataFrame]=None,
+                 fld_yby_reg:Optional[pd.DataFrame]=None
                  ):
         super().__init__(**{'hit_car_reg':hit_car_reg,'hit_car_adv':hit_car_adv,
                             'hit_ssn_reg':hit_ssn_reg,'hit_ssn_adv':hit_ssn_adv,
@@ -787,7 +789,7 @@ class player_stats(mlb_wrapper):
             yby_regular     = fld_yby_reg,
         )
         
-    def __call__(self,stat_group:str,stat_type:str,filter_by:str|None=None,filter_val:str|None=None,advanced:bool|str=False,**kwargs):
+    def __call__(self,stat_group:str,stat_type:str,filter_by:Optional[str]=None,filter_val:Optional[str]=None,advanced:Union[bool,str]=False,**kwargs):
         """Get stats data through class call
         
         Parameters:
@@ -800,7 +802,7 @@ class player_stats(mlb_wrapper):
         
         advanced : bool (required, Default is False)
         
-        filter_by : str | None
+        filter_by : str
         
         """
         try:
@@ -823,7 +825,7 @@ class player_stats(mlb_wrapper):
             else:
                 return None
     
-    def get(self,stat_group:str,stat_type:str,filter_by:str|None=None,filter_val:str|None=None,advanced:bool|str=False,**kwargs):
+    def get(self,stat_group:str,stat_type:str,filter_by:Optional[str]=None,filter_val:Optional[str]=None,advanced:Union[bool,str]=False,**kwargs):
         """Get stats data through class call
         
         Parameters:
@@ -836,7 +838,9 @@ class player_stats(mlb_wrapper):
         
         advanced : bool (required, Default is False)
         
-        filter_by : str | None
+        filter_by : str
+        
+        filter_val : str
         
         """
         try:
@@ -880,17 +884,17 @@ class player_stats(mlb_wrapper):
     
 class team_stats(mlb_wrapper):
     def __init__(self,
-                 hit_car_reg:pd.DataFrame|None=None,hit_car_adv:pd.DataFrame|None=None,
-                 hit_ssn_reg:pd.DataFrame|None=None,hit_ssn_adv:pd.DataFrame|None=None,
-                 hit_yby_reg:pd.DataFrame|None=None,hit_yby_adv:pd.DataFrame|None=None,
+                 hit_car_reg:Optional[pd.DataFrame]=None,hit_car_adv:Optional[pd.DataFrame]=None,
+                 hit_ssn_reg:Optional[pd.DataFrame]=None,hit_ssn_adv:Optional[pd.DataFrame]=None,
+                 hit_yby_reg:Optional[pd.DataFrame]=None,hit_yby_adv:Optional[pd.DataFrame]=None,
                  
-                 pit_car_reg:pd.DataFrame|None=None,pit_car_adv:pd.DataFrame|None=None,
-                 pit_ssn_reg:pd.DataFrame|None=None,pit_ssn_adv:pd.DataFrame|None=None,
-                 pit_yby_reg:pd.DataFrame|None=None,pit_yby_adv:pd.DataFrame|None=None,
+                 pit_car_reg:Optional[pd.DataFrame]=None,pit_car_adv:Optional[pd.DataFrame]=None,
+                 pit_ssn_reg:Optional[pd.DataFrame]=None,pit_ssn_adv:Optional[pd.DataFrame]=None,
+                 pit_yby_reg:Optional[pd.DataFrame]=None,pit_yby_adv:Optional[pd.DataFrame]=None,
                  
-                 fld_car_reg:pd.DataFrame|None=None,
-                 fld_ssn_reg:pd.DataFrame|None=None,
-                 fld_yby_reg:pd.DataFrame|None=None
+                 fld_car_reg:Optional[pd.DataFrame]=None,
+                 fld_ssn_reg:Optional[pd.DataFrame]=None,
+                 fld_yby_reg:Optional[pd.DataFrame]=None
                  ):
         super().__init__(**{'hit_car_reg':hit_car_reg,'hit_car_adv':hit_car_adv,
                             'hit_ssn_reg':hit_ssn_reg,'hit_ssn_adv':hit_ssn_adv,
@@ -1108,7 +1112,7 @@ def _parse_person(_obj:dict):
     zoneTop = d.get('strikeZoneTop',None)
     zoneBottom = d.get('strikeZoneBottom',None)
     primaryNumber = d.get('primaryNumber',0)
-    return {'mlbam':d.get('id',0),
+    data = {'mlbam':d.get('id',0),
             'name_full':d.get('fullName','-'),
             'name_first':d.get('firstName','-'),
             'name_middle':d.get('middleName','-'),
@@ -1160,4 +1164,5 @@ def _parse_person(_obj:dict):
             'pos_type':pos.get('type','-'),
             'pos_abbreviation':pos.get('abbreviation','-'),
             }
+    return data
 
