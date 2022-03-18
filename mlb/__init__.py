@@ -47,7 +47,7 @@ Highlights
 
 """
 
-
+from .classes import api
 from .classes import Person
 from .classes import Franchise
 from .classes import Team
@@ -56,8 +56,6 @@ franchise = Franchise
 person = Person
 team = Team
 game = Game
-
-from .classes import api
 
 
 from .functions import play_search

@@ -666,13 +666,13 @@ def _team_data(_mlbam,_season,**kwargs) -> Union[dict,list]:
     sched_hydrations = "game(content(media(epg))),team"
     for m in range(12):
         month = int(m) + 1
-        seas = int(_season)
-        date_obj_1 = dt.date(year=seas,month=month,day=1)
+        ssn = int(_season)
+        date_obj_1 = dt.date(year=ssn,month=month,day=1)
         if month != 12:
-            date_obj_2 = dt.date(year=seas,month=month+1,day=1)
+            date_obj_2 = dt.date(year=ssn,month=month+1,day=1)
         else:
-            seas = seas + 1
-            date_obj_2 = dt.date(year=seas,month=1,day=1)
+            ssn = ssn + 1
+            date_obj_2 = dt.date(year=ssn,month=1,day=1)
         date_obj_2 = date_obj_2 - dt.timedelta(days = 1)
         
         date_range_query = f"startDate={date_obj_1.strftime(r'%Y-%m-%d')}&endDate={date_obj_2.strftime(r'%Y-%m-%d')}"
@@ -682,10 +682,7 @@ def _team_data(_mlbam,_season,**kwargs) -> Union[dict,list]:
     _logtime = kwargs.get('_logtime')
     
     # Generator attempt ====
-    def url_gen():
-        for url in url_list:
-            yield url
-    url_list = url_gen()
+    url_list = (url for url in url_list)
     # ======================
     
     loop = _determine_loop()
@@ -722,7 +719,7 @@ def _team_data(_mlbam,_season,**kwargs) -> Union[dict,list]:
         print(f"--- {time.time() - start} seconds ---")
 
     return fetched_data
-Dict
+
 def _player_data(_mlbam,**kwargs) -> dict:
     """Fetch a variety of player information/stats in one API call
 
@@ -4069,26 +4066,30 @@ def find_venue(query):
 
     return df.drop(columns="vname")
   
-def leaderboards(tm_mlbam=None,league_mlbam=None,season=None,gameTypes=None,sitCodes=None,limit=None,startDate=None,endDate=None,group_by_team=False):
+def leaderboards(tm_mlbam=None,lg_mlbam=None,season=None,gameTypes=None,sitCodes=None,limit=None,startDate=None,endDate=None,group_by_team=False):
     """Get Leaderboard stats
 
     tm_mlbam : str or int
-        official team MLB ID
+        Team's official "MLB Advanced Media" ID
+
+    lg_mlbam : str or int
+        League's official "MLB Advanced Media" ID
 
     season : str or int, optional (the default is the current season or the most recently completed if in the off-season)
         the specific season to get stats for
 
-    lg_mlbam : str or int
-        official league MLB ID
     
-    NOTE: statTypes: season, statsSingleSeason, byDateRange
+    ### Stat Types
+        - season 
+        - statsSingleSeason
+        - byDateRange
     
     """
 
     if season is None:
         season = default_season()
 
-    data = get_leaders(tm_mlbam,league_mlbam,season,gameTypes,sitCodes,limit,startDate,endDate,group_by_team)
+    data = get_leaders(tm_mlbam,lg_mlbam,season,gameTypes,sitCodes,limit,startDate,endDate,group_by_team)
     return data
 
 def play_search(mlbam,seasons=None,statGroup=None,opposingTeamId=None,eventTypes=None,pitchTypes=None,gameTypes=None,**kwargs):
@@ -4399,7 +4400,7 @@ def pitch_search(mlbam,seasons=None,statGroup=None,opposingTeamId=None,eventType
     Parameters
     ----------
     mlbam : str or int
-        player's official MLB ID
+        Player's official "MLB Advanced Media" ID
     
     seasons : str or int, optional
         filter by season
@@ -4672,150 +4673,74 @@ def pitch_search(mlbam,seasons=None,statGroup=None,opposingTeamId=None,eventType
     
     return df
 
-def game_search(team=None,date=None,startDate=None,endDate=None,season=None,gameType=None):
-    """
-    Search for a games by team and/or date (fmt: 'mm/dd/yyyy')
-
-    "team" values can be the team's mlbam or team name
+def game_search(mlbam:int=None,date=None,startDate=None,endDate=None,season=None,gameType=None) -> pd.DataFrame:
+    """Search for a games
+    
+    Paramaters:
+    -----------
+    mlbam : int
+        Team's official "MLB Advanced Media" ID
+    
+    date : str
+        Search for games by date (fmt: YYYY-mm-dd)
 
     NOTE: "date" will be ignored if "startDate" and "endDate" are used. If only "startDate" is used, "endDate" will default to today's date
     
     NEED TO ADD PARAMETER FOR 'OPPONENT TEAM'
+    
     """
-    tm_strQuery = True
-    teamSearch = True
-    query_str = []
-
-    if team is None:
-        teamSearch = False
-    elif type(team) is str:
-        if team.isdigit():
-            team = f"teamId={team}"
-            query_str.append(team)
-            tm_strQuery = False
-    elif type(team) is int:
-        team = f"teamId={team}"
-        query_str.append(team)
-        tm_strQuery = False
-
-    if date is None:
-        pass
-    elif startDate is None and endDate is None:
-        date = f"date={date}"
-        query_str.append(date)
     
-    if season is None and date is None:
-        if startDate is None and endDate is None:
-            season = f"season={curr_year}"
-            query_str.append(season)
-        elif endDate is None and startDate is not None:
-            startDate = f"startDate={startDate}"
-            endDate = f"endDate={dt.date.strftime(dt.date.today(),'%m/%d/%Y')}"
-            query_str.append(startDate)
-            query_str.append(endDate)
-        elif startDate is not None and endDate is not None:
-            startDate = f"startDate={startDate}"
-            endDate = f"endDate={endDate}"
-            query_str.append(startDate)
-            query_str.append(endDate)
-    elif season is not None:
-        season = f"season={season}"
-        query_str.append(season)
+    params = {'teamId':mlbam,
+              'date':date,
+              'startDate':startDate,
+              'endDate':endDate,
+              'season':season,
+              'gameType':gameType,
+              'sportId':1
+              }
     
-    if gameType is None:
-        pass
-    else:
-        gameType = f"gameType={gameType}"
-        query_str.append(gameType)
-    
-    query_str = "&".join(query_str)
-    
-    url = BASE + f"/schedule?sportId=1&{query_str}"
-    response = requests.get(url)
+    url = BASE + f"/schedule"
+    response = requests.get(url,params=params)
     all_results = []
 
-    if tm_strQuery is False and teamSearch is True:
-        for d in response.json()["dates"]:
-            for g in d["games"]:
-                home = g.get("teams",{}).get("home",{}).get("team",{}).get("name","-")
-                home_mlbam = g.get("teams",{}).get("home",{}).get("team",{}).get("id","-")
-                away = g.get("teams",{}).get("away",{}).get("team",{}).get("name","-")
-                away_mlbam = g.get("teams",{}).get("away",{}).get("team",{}).get("id","-")
-                game_date = g.get("officialDate","-")
-                game_pk = g.get("gamePk","-")
-                game_type = g.get("gameType","-")
-                status = g.get("status",{}).get("detailedState","-")
-                venue = g.get("venue",{}).get("name","-")
-                # start_time = g.get("gameDate","")
-                result = [
-                    game_pk,
-                    f"{away} ({away_mlbam})",
-                    f"{home} ({home_mlbam})",
-                    game_date,
-                    game_type,
-                    venue,
-                    # start_time,
-                    status]
-                all_results.append(result)
+    for d in response.json()["dates"]:
+        for g in d["games"]:
+            away_name   = g.get("teams",{}).get("away",{}).get("team",{}).get("name","-")
+            away_mlbam  = g.get("teams",{}).get("away",{}).get("team",{}).get("id","-")
+            home_name   = g.get("teams",{}).get("home",{}).get("team",{}).get("name","-")
+            home_mlbam  = g.get("teams",{}).get("home",{}).get("team",{}).get("id","-")
+            game_date   = g.get("officialDate","-")
+            game_date   = dt.datetime.strptime(game_date,r'%Y-%m-%d')
+            game_pk     = g.get("gamePk","-")
+            game_type   = g.get("gameType","-")
+            status      = g.get("status",{}).get("detailedState","-")
+            venue       = g.get("venue",{}).get("name","-")
+            start_time  = g.get("gameDate","-")
+            result      = [game_pk,
+                           away_mlbam,
+                           away_name,
+                           home_mlbam,
+                           home_name,
+                           game_date,
+                           game_type,
+                           venue,
+                           start_time,
+                           status]
+            all_results.append(result)
     
-    elif tm_strQuery is True and teamSearch is True:
-        for d in response.json()["dates"]:
-            for g in d["games"]:
-                home = g.get("teams",{}).get("home",{}).get("team",{}).get("name","-")
-                home_mlbam = g.get("teams",{}).get("home",{}).get("team",{}).get("id","-")
-                away = g.get("teams",{}).get("away",{}).get("team",{}).get("name","-")
-                away_mlbam = g.get("teams",{}).get("away",{}).get("team",{}).get("id","-")
-
-                # If team search query is not found in key:value pair, game will not be appended to results
-                if team.lower() in home.lower() or team.lower() in away.lower():
-                    pass
-                else:
-                    continue
-                
-                game_date = g.get("officialDate","-")
-                game_pk = g.get("gamePk","-")
-                game_type = g.get("gameType","-")
-                status = g.get("status",{}).get("detailedState","-")
-                venue = g.get("venue",{}).get("name","-")
-                # start_time = g.get("gameDate","")
-                result = [
-                    game_pk,
-                    f"{away} ({away_mlbam})",
-                    f"{home} ({home_mlbam})",
-                    game_date,
-                    game_type,
-                    venue,
-                    # start_time,
-                    status]
-                all_results.append(result)
-
-    elif tm_strQuery is True and teamSearch is False:
-        for d in response.json()["dates"]:
-            for g in d["games"]:
-                home = g.get("teams",{}).get("home",{}).get("team",{}).get("name","-")
-                home_mlbam = g.get("teams",{}).get("home",{}).get("team",{}).get("id","-")
-                away = g.get("teams",{}).get("away",{}).get("team",{}).get("name","-")
-                away_mlbam = g.get("teams",{}).get("away",{}).get("team",{}).get("id","-")
-                game_date = g.get("officialDate","-")
-                game_pk = g.get("gamePk","-")
-                game_type = g.get("gameType","-")
-                status = g.get("status",{}).get("detailedState","-")
-                venue = g.get("venue",{}).get("name","-")
-                # start_time = g.get("gameDate","")
-                result = [
-                    game_pk,
-                    f"{away} ({away_mlbam})",
-                    f"{home} ({home_mlbam})",
-                    game_date,
-                    game_type,
-                    venue,
-                    # start_time,
-                    status]
-                all_results.append(result)
-    
-    df = pd.DataFrame(data=all_results,columns=("gamePk","Away","Home","Date","Type","Venue","Status"))
+    df = pd.DataFrame(data=all_results,columns=["gamePk",
+                                                "away_mlbam",
+                                                "away_name",
+                                                "home_mlbam",
+                                                "home_name",
+                                                "date",
+                                                "type",
+                                                "venue",
+                                                "start_time",
+                                                "status"])
     if len(df) == 0:
-        return "No games found"
+        # print("No games found")
+        return pd.DataFrame()
     return df
 
 def last_game(mlbam):
@@ -4912,7 +4837,7 @@ def schedule(mlbam=None,season=None,date=None,startDate=None,endDate=None,gameTy
     Parameters
     ----------
     mlbam : int | str, optional
-        Official MLB Advanced Media ID for team
+        Official "MLB Advanced Media" ID for team
 
     season : int or str, optional
         get schedule information for a specific season
@@ -5387,7 +5312,6 @@ def player_bio(mlbam:int):
 
     Parameters
     ----------
-
     mlbam : str or int
         player's official MLB ID
     
@@ -5472,4 +5396,3 @@ def free_agents(season:Optional[int]=None,hydrate_person:Optional[bool]=None,sor
         return df.sort_values(by=sort_by,ascending=sort_asc).reset_index(drop=True)
     
     return df
-    

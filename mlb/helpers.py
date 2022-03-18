@@ -409,9 +409,6 @@ class edu_wrapper:
         return self.__college
         
     
-        
-
-
 class venue_name_wrapper(mlb_wrapper):
     def __init__(self,**kwargs):
         super().__init__(**kwargs)

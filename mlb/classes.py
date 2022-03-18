@@ -292,7 +292,7 @@ class Person:
 
     @property
     def mlbam(self) -> int:
-        """Player's official MLB ID"""
+        """Player's official \"MLB Advanced Media\" ID """
         return int(self._mlbam)
     
     @property
@@ -309,7 +309,7 @@ class Person:
         """Details of player's birth
         
         Keys/Attributes:
-        -----
+        ----------------
         - 'date' : mlb_date
         - 'city' : str
         - 'state' (or 'province') : str
@@ -323,7 +323,7 @@ class Person:
         """Details of player's death (if applicable)
         
         Keys/Attributes:
-        -----
+        ----------------
         - 'date' : mlb_date
         - 'city' : str
         - 'state' (or 'province') : str
@@ -336,7 +336,7 @@ class Person:
         """Wrapper for player's primary position
         
         Keys/Attributes:
-        -----
+        ----------------
         - 'code' : int (3)
         - 'name' : str ('First Base')
         - 'type' (or 'province') : str ('Infielder')
@@ -384,7 +384,6 @@ class Person:
         >>> abreu.stats.hitting.yby.advanced
         # OR
         >>> abreu.stats.hitting.yby.adv
-        
         ```
         
         """
@@ -2724,7 +2723,7 @@ class api:
         ----------
         
         name : str (required)
-            Name to search
+            Player name to search
             
         personIds
             Insert personId(s) to search and return biographical information for a specific player(s). Format '605151,592450'
@@ -2734,12 +2733,6 @@ class api:
 
         teamIds
             Insert teamId(s) to search and return biographical information for players on a specific team(s).
-
-        active
-            Insert active to search and return biographical information for players if they are active.
-
-        rookie
-            Insert rookie to search and return biographical information for players if they are rookies.
 
         hydrate : str
             Insert hydration(s) to return statistical or biographical data for a specific player(s).
