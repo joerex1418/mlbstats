@@ -746,6 +746,8 @@ def _player_data(_mlbam,**kwargs) -> dict[pd.DataFrame,dict]:
     url_list.append(BASE + f"/transactions?playerId={_mlbam}")                                              # player_transactions
     url_list.append(BASE + f"/people/{_mlbam}?&appContext=majorLeague&hydrate={hydrations}")                # player_info
     
+    # Generator attempt
+    url_list = (url for url in url_list)
     loop = _determine_loop()
     responses = loop.run_until_complete(_fetch_player_data(url_list,_get_bio=kwargs.get("_get_bio"),_mlbam=_mlbam))
     if kwargs.get("_get_bio") is True:
@@ -3985,7 +3987,7 @@ def league_leaders(season=None,statGroup=None,playerPool="Qualified"):
 # MISC Functions
 # ===============================================================
 def find_team(query,season=None):
-    """Search for teams by name.
+    """Search for teams by name. *Uses local db storage
 
     Paramaters
     ----------
@@ -6541,5 +6543,4 @@ def player_bio(mlbam):
         bio_p_tags = soup.find("span",id="Biographical_Information").findParent('h2').find_next_siblings('p')
 
         return bio_p_tags
-
 

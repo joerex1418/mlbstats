@@ -4,7 +4,7 @@ This is an UNOFFICIAL Python wrapper for the Official MLB StatsAPI (https://stat
 This repository and its author are not affiliated with the MLB in any way. Use of MLB data is subject to the notice posted at http://gdx.mlb.com/components/copyright.txt.
 
 ## Getting the library
-I haven't had the chance to make the library available on the Python Package Index just yet. So for now, you can just download from the Github Repo. 
+I haven't had the chance to make the library available on the Python Package Index just yet. So for now, you can just download from the GitHub Repo. 
 
 In the command line, copy and paste the following:
 ```python

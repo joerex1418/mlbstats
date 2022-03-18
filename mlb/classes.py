@@ -21,7 +21,9 @@ from .helpers import venue_name_wrapper
 from .helpers import league_name_wrapper
 from .helpers import team_name_data
 from .helpers import person_name_data
-from .helpers import team_slim
+from .helpers import standings_wrapper
+from .helpers import roster_wrapper
+from .helpers import edu_wrapper
 from .helpers import player_stats
 
 from .helpers import _teams_data_collection, _people_data_collection
@@ -43,9 +45,17 @@ class Person:
     
         The "mlb.Person" class is a comprehensive wrapper for many different types of data for a single person.
     All of the data (with the exception of content in the "bio" attribute/property) is pulled from the Official MLB 
-    Stats API - https://statsapi.mlb.com/api/v1 . The attributes intended for end-user retrieval have been made into
+    Stats API (https://statsapi.mlb.com/api/v1) The attributes intended for end-user retrieval have been made into
     read-only property attributes.
     
+    Parameters:
+    -----------
+    mlbam : int (required)
+        Official "MLB Advanced Media" ID for a player
+    
+    -------------------------------------------
+    Accessing the data
+    ------------------
         Data can be accessed by using standard dot-notation (e.g. `person.name`) or by treating the class as a
     subscriptable python dictionary (e.g. `person["name"]`).
     
@@ -90,10 +100,10 @@ class Person:
             print(Exception(cls,'Player not found'))
             return None
     
-    def __new__(cls,_player_mlbam:int,**kwargs):
+    def __new__(cls,mlbam:int,**kwargs):
         self = object.__new__(cls)
         _pd_df = pd.DataFrame
-        data = _player_data(_player_mlbam)
+        data = _player_data(mlbam)
         
         _bio  : list|None  = data['bio']
         _info : dict       = data['info']
@@ -207,16 +217,16 @@ class Person:
         self._awards = _awards
 
         # self.current_team = data.get('team',{})
-        _all_teams_data = []
-        for _tm_mlbam, _tm_data in _teams.items():
-            _all_teams_data.append([
-                int(_tm_mlbam),
-                _tm_data['full'],
-                _tm_data['location'],
-                _tm_data['club'],
-                _tm_data['slug'],
-            ])
-        self._teams = pd.DataFrame(data=_all_teams_data,columns=['tm_mlbam','tm_full_name','tm_location','tm_club','tm_slug'])
+        # _all_teams_data = []
+        # for _tm_mlbam, _tm_data in _teams.items():
+        #     _all_teams_data.append([
+        #         int(_tm_mlbam),
+        #         _tm_data['full'],
+        #         _tm_data['location'],
+        #         _tm_data['club'],
+        #         _tm_data['slug'],
+        #     ])
+        # self._teams = pd.DataFrame(data=_all_teams_data,columns=['tm_mlbam','tm_full_name','tm_location','tm_club','tm_slug'])
         
         # stats info
         self._stats = player_stats(
@@ -232,17 +242,10 @@ class Person:
         # roster entries
         self._roster_entries = _info['roster_entries']
         
-        # past teams (full data)
-        self._past_teams = _past_teams
-        print(self._past_teams)
-        print('')
-        print(_teams)
-        # self._past_teams = {}
-        _past_teams_list = []
+        _past_teams_data = []
         for idx in range(len(_past_teams)):
             t = _past_teams.iloc[idx]
-            _past_teams_list.append(
-                team_slim(
+            mlb_tm = mlb_team( raw_data=t.to_dict(),
                     mlbam=t['mlbam'],
                     full=t['full'],
                     season=t['season'],
@@ -251,48 +254,24 @@ class Person:
                     mascot=t['mascot'],
                     club=t['club'],
                     short=t['short'],
-                    lg_mlbam = t['lg_mlbam'],
-                    lg_name_full = t['lg_name_full'],
-                    lg_name_short = t['lg_name_short'],
-                    lg_abbrv = t['lg_abbrv'],
-                    div_mlbam = t['div_mlbam'],
-                    div_name_full = t['div_name_full'],
-                    div_name_short = t['div_name_short'],
-                    div_abbrv = t['div_abbrv'],
-                    venue_mlbam = t['venue_mlbam'],
-                    venue_name = t['venue_name']
-                )
-                )
-        
-        self._past_teams_list = _past_teams_list
+                    lg_mlbam=t['lg_mlbam'],
+                    lg_name_full=t['lg_name_full'],
+                    lg_name_short=t['lg_name_short'],
+                    lg_abbrv=t['lg_abbrv'],
+                    div_mlbam=t['div_mlbam'],
+                    div_name_full=t['div_name_full'],
+                    div_name_short=t['div_name_short'],
+                    div_abbrv=t['div_abbrv'],
+                    venue_mlbam=t['venue_mlbam'],
+                    venue_name=t['venue_name']
+                    )
+            _past_teams_data.append(mlb_tm)
+        self._past_teams = pd.DataFrame.from_dict(_past_teams)
         
         # education info
-        edu = _info['education']
-        print(edu)
-        _hs_df = edu[edu["type"]=="highschool"]
-        _co_df = edu[edu["type"]=="college"]
-        if len(_hs_df) > 0:
-            self._highschool = mlb_wrapper(
-                name=_hs_df.iloc[0]["school"],
-                city=_hs_df.iloc[0]["city"],
-                state=_hs_df.iloc[0]["state"]
-            )
-        else:
-            self._highschool = "-"
-        if len(_co_df) > 0:
-            self._college = mlb_wrapper(
-                name=_co_df.iloc[0]["school"],
-                city=_co_df.iloc[0]["city"],
-                state=_co_df.iloc[0]["state"]
-            )
-        else:
-            self._college = "-"
-            
-        self._education = mlb_wrapper(
-            schools=edu,
-            highschool=self._highschool,
-            college=self._college
-        )
+        edu : pd.DataFrame = _info['education']
+        
+        self._edu = edu_wrapper(edu_df=edu)
         
         return self
     
@@ -428,11 +407,6 @@ class Person:
         ALIAS for 'transactions'
         """
         return self._trx
-
-    @property
-    def teams(self) -> pd.DataFrame | None:
-        """Dataframe of teams that person has played for"""
-        return self._teams
     
     @property
     def roster_entries(self):
@@ -445,16 +419,18 @@ class Person:
         return self._awards
 
     @property
-    def past_teams_list(self) -> list[team_slim]:
-        """List of person's teams as "wrapper" objects"""
-        return self._past_teams_list
+    def teams(self) -> _teams_data_collection:
+        """Teams played for"""
+        return self._past_teams
     
     @property
     def debut_game(self):
+        """Data for player's debut game"""
         return self._debut
     
     @property
     def last_game(self):
+        """Data for player's last/most recent game"""
         return self._last_game
     
     @property
@@ -466,179 +442,52 @@ class Person:
         return self._zone_bottom
     
     @property
-    def education(self):
-        """Player's education information (alias for `education`)
+    def education(self) -> edu_wrapper:
+        """Player's education information
         
         Keys:
         -----
-        - edu.highschool
+        - education.highschool
         - edu.college
 
         """
-        return self._education
+        return self._edu
     
     @property
-    def edu(self):
-        """Player's education information (alias for `education`)
+    def edu(self) -> edu_wrapper:
+        """Player's education information
         
         Keys:
         -----
-        - edu.highschool
-        - edu.college
+        - education.highschool
+        - education.college
 
         ALIAS for 'education'
         """
-        return self._education
-
-
-class _standings:
-    def __new__(cls,records,splits=None):
-        self = object.__new__(cls)
-        self.__records = records
-        self.__splits = splits
-
-        return self
-    
-    @property
-    def records(self):
-        """Year-by-year season records"""
-        return self.__records
-    
-    @property
-    def splits(self):
-        """Year-by-year season record splits"""
-        return self.__splits
-
-
-class _roster:
-    def __new__(cls,**rosters):
-        self = object.__new__(cls)
-        # self.__dict__.update(rosters)
-        self.__all      = rosters["all"]
-        self.__pitcher  = rosters["pitcher"]
-        self.__catcher  = rosters["catcher"]
-        self.__first    = rosters["first"]
-        self.__second   = rosters["second"]
-        self.__third    = rosters["third"]
-        self.__short    = rosters["short"]
-        self.__left     = rosters["left"]
-        self.__center   = rosters["center"]
-        self.__right    = rosters["right"]
-        self.__dh       = rosters["dh"]
-        self.__infield  = rosters['infield']
-        self.__outfield = rosters['outfield']
-        self.__active   = rosters['active']
-
-        return self
-    
-    def __get__(self):
-        return self.all
-
-    def __getitem__(self,__attr) -> pd.DataFrame:
-        return getattr(self,__attr)
-    
-    def __len__(self) -> int:
-        return len(self.all)
-
-    def __call__(self,_pos=None) -> pd.DataFrame:
-        df = self.all
-        if _pos is not None:
-            df = df[df['pos']==_pos]
-        return df
-
-    @property
-    def all(self) -> pd.DataFrame:
-        """Alltime Roster"""
-        return self.__all
-
-    @property
-    def pitcher(self) -> pd.DataFrame:
-        """All Pitchers"""
-        return self.__pitcher
-
-    @property
-    def catcher(self) -> pd.DataFrame:
-        """All Catchers"""
-        return self.__catcher
-
-    @property
-    def first(self) -> pd.DataFrame:
-        """All First Basemen"""
-        return self.__first
-
-    @property
-    def second(self) -> pd.DataFrame:
-        """All Second Basemen"""
-        return self.__second
-
-    @property
-    def third(self) -> pd.DataFrame:
-        """All Third Basemen"""
-        return self.__third
-
-    @property
-    def short(self) -> pd.DataFrame:
-        """All Shortstops"""
-        return self.__short
-
-    @property
-    def left(self) -> pd.DataFrame:
-        """All Left Fielders"""
-        return self.__left
-
-    @property
-    def center(self) -> pd.DataFrame:
-        """All Center Fielders"""
-        return self.__center
-
-    @property
-    def right(self) -> pd.DataFrame:
-        """All Right Fielders"""
-        return self.__right
-
-    @property
-    def infield(self) -> pd.DataFrame:
-        """All Infielders"""
-        return self.__infield
-
-    @property
-    def outfield(self) -> pd.DataFrame:
-        """All Outfielders"""
-        return self.__outfield
-
-    @property
-    def dh(self) -> pd.DataFrame:
-        """All Outfielders"""
-        return self.__dh
-
-    @property
-    def designated_hitter(self) -> pd.DataFrame:
-        """All Outfielders"""
-        return self.__dh
-    
-    @property
-    def active(self) -> pd.DataFrame:
-        """All active players"""
-        return self.__active
+        return self._edu
 
 
 class Franchise:
-    """# franchise
+    """# Franchise
     
-    Get franchise data in bulk through a bunch of API calls (uses `async` and `aiohttp` libraries)
+        The "mlb.Franchise" class is a comprehensive wrapper for retrieving and accesing data for a team's franchise in bulk fashion.
+    All data is pulled from the Official MLB Stats API (https://statsapi.mlb.com/api/v1) The attributes intended for end-user 
+    retrieval have been made into read-only property attributes.
     
     Parameters
     ----------
 
-    mlbam : int or str
-        Player's official MLB ID
+    mlbam : int | str (required)
+        Official "MLB Advanced Media" ID for franchise (team)
 
-    season : int or str
-        retrieve data for a specific season
+    ### See also:
+    - 'mlb.Team()'
+    - 'mlb.teams()'
+    
     
     """
-    def __init__(self,mlbam):
-        data = _franchise_data(mlbam)
+    def __init__(self,mlbam:int):
+        data = _franchise_data(int(mlbam))
 
         records         = data["records"]
         record_splits   = data["record_splits"] # like standings splits
@@ -682,7 +531,7 @@ class Franchise:
             _name=ti['venue_name'],
             _mlbam=ti['venue_mlbam']
         )
-        self.__standings = _standings(
+        self.__standings = standings_wrapper(
             records=records,
             splits=record_splits
             )
@@ -703,7 +552,7 @@ class Franchise:
         self.__legends : pd.DataFrame = hof
         self.__retired : pd.DataFrame = retired
 
-        self.__roster = mlb_wrapper(
+        self.__roster = roster_wrapper(
             all         = roster,
             pitcher     = roster[roster['pos']=='P'].reset_index(drop=True),
             catcher     = roster[roster['pos']=='C'].reset_index(drop=True),
@@ -760,7 +609,7 @@ class Franchise:
         return self.__stats
 
     @property
-    def roster(self) -> _roster:
+    def roster(self) -> roster_wrapper:
         """Roster data"""
         return self.__roster
 
@@ -771,6 +620,7 @@ class Franchise:
 
     @property
     def legends(self) -> pd.DataFrame:
+        """Team's "Hall of Fame" Inductees"""
         return self.__legends
     
     @property
@@ -785,10 +635,12 @@ class Franchise:
 
     @property
     def first_year(self) -> int:
+        """First year of play"""
         return self.__first_year
 
     @property
     def last_year(self) -> int:
+        """Last/most recent year of play"""
         return self.__last_year
 
 
@@ -803,12 +655,12 @@ class Team:
     mlbam : int
         Team's official MLB ID
 
-    season : int or str
+    season : int
         Retrieve data for a specific season. Default value is None -- retrieves data for the most recent season
     
     """
     
-    def __new__(cls,mlbam:int,season=None,**kwargs):
+    def __new__(cls,mlbam:int,season:int|None=None,**kwargs):
         cls.today = md(dt.datetime.today().date().strftime(r"%Y-%m-%d"))
 
         if season is None:
@@ -2818,7 +2670,6 @@ class Game:
     def home_season_stats(self):
         """This method has not been configured yet"""
         pass
-    
 
 # ===============================================================
 # API Wrapper | Function | Classes
@@ -2837,15 +2688,22 @@ class api:
             self._mlbam = _mlbam
         
         @classmethod
-        def search_by_name(cls,query:str,season:int|None=None):
+        def search_by_name(cls,query:str,season:int|None=None,hydrate:str|None=None):
             if season is None:
                 season = default_season()
-                
-            resp = requests.get(f'{BASE}/teams?sportId=1&season={season}')
+            if hydrate is not None:
+                if type(hydrate) is str:
+                    hydrations = hydrate.replace(', ',',')
+                elif type(hydrate) is list:
+                    hydrations = ','.join(hydrations)
+                hydrations = f'&hydrate={hydrations}'
+            else:
+                hydrations = ''
+            resp = requests.get(f'{BASE}/teams?sportId=1&season={season}{hydrations}')
             
             for t in resp.json()['teams']:
                 if query.lower() in t.get('name').lower():
-                    return mlb_team(**_parse_team(t))
+                    return mlb_team(raw_data=t,**_parse_team(t))
                 
         @classmethod
         def search_by_venue(cls,query:str,season:int|None=None):
@@ -2863,14 +2721,15 @@ class api:
         def __init__(self,_mlbam):
             self._mlbam = _mlbam
     
-    def player_search(names,teamIds=None,**kwargs):
+    @classmethod
+    def player_search(cls,names:str|None=None,teamIds:str|list|None=None,**kwargs):
         """Search for a person using the API by name
         
         Paramaters
         ----------
         
         name : str (required)
-            person's name
+            Name to search
             
         personIds
             Insert personId(s) to search and return biographical information for a specific player(s). Format '605151,592450'
@@ -2887,17 +2746,24 @@ class api:
         rookie
             Insert rookie to search and return biographical information for players if they are rookies.
 
-        limit
-            Insert a limit to limit return {Limit 50}.
-
-        hydrate
+        hydrate : str
             Insert hydration(s) to return statistical or biographical data for a specific player(s).
 
         """
+        
         url = f"https://statsapi.mlb.com/api/v1/people/search?"
-        params = kwargs
-        params['names'] = names
-        params['sportId'] = 1
+        
+        params = {'sportId':1}
+        
+        if names is not None:
+            params['names'] = names
+        else:
+            if kwargs.get('season') is not None:
+                url = f'https://statsapi.mlb.com/api/v1/sports/1/players?'
+                params['season'] = kwargs['season']
+        if kwargs.get('hydrate') is not None:
+            params['hydrate'] = kwargs['hydrate']
+        
         
         if teamIds is not None:
             if type(teamIds) is str:
@@ -2913,7 +2779,7 @@ class api:
             parsed_data.append(pd.Series(_parse_person(_obj=p_dict)))
         
         df = pd.DataFrame(data=parsed_data).reset_index(drop=True)
-        return _people_data_collection(df)
+        return _people_data_collection(df.fillna('-'))
 
     
     def get_teams(start_season:int|None=None,end_season:int|None=None,hydrate_league=False,hydrate_division=False):

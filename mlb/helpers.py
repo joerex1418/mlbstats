@@ -1,6 +1,142 @@
 from .utils import dt
 from .utils import pd
 from .utils import keys
+from tabulate import tabulate as tab
+
+
+class standings_wrapper:
+    def __new__(cls,records,splits=None):
+        self = object.__new__(cls)
+        self.__records = records
+        self.__splits = splits
+
+        return self
+    
+    @property
+    def records(self):
+        """Year-by-year season records"""
+        return self.__records
+    
+    @property
+    def splits(self):
+        """Year-by-year season record splits"""
+        return self.__splits
+
+
+class roster_wrapper:
+    def __new__(cls,**rosters):
+        self = object.__new__(cls)
+        # self.__dict__.update(rosters)
+        self.__all      = rosters["all"]
+        self.__pitcher  = rosters["pitcher"]
+        self.__catcher  = rosters["catcher"]
+        self.__first    = rosters["first"]
+        self.__second   = rosters["second"]
+        self.__third    = rosters["third"]
+        self.__short    = rosters["short"]
+        self.__left     = rosters["left"]
+        self.__center   = rosters["center"]
+        self.__right    = rosters["right"]
+        self.__dh       = rosters["dh"]
+        self.__infield  = rosters['infield']
+        self.__outfield = rosters['outfield']
+        self.__active   = rosters['active']
+
+        return self
+    
+    def __get__(self):
+        return self.all
+
+    def __getitem__(self,__attr) -> pd.DataFrame:
+        return getattr(self,__attr)
+    
+    def __len__(self) -> int:
+        return len(self.all)
+
+    def __call__(self,_pos=None) -> pd.DataFrame:
+        df = self.all
+        if _pos is not None:
+            df = df[df['pos']==_pos]
+        return df
+
+    @property
+    def all(self) -> pd.DataFrame:
+        """Full Roster
+        
+        - Shows alltime players for for Franchise object
+        - Shows all players in a given season for Team object
+        """
+        return self.__all
+
+    @property
+    def pitcher(self) -> pd.DataFrame:
+        """All Pitchers"""
+        return self.__pitcher
+
+    @property
+    def catcher(self) -> pd.DataFrame:
+        """All Catchers"""
+        return self.__catcher
+
+    @property
+    def first(self) -> pd.DataFrame:
+        """All First Basemen"""
+        return self.__first
+
+    @property
+    def second(self) -> pd.DataFrame:
+        """All Second Basemen"""
+        return self.__second
+
+    @property
+    def third(self) -> pd.DataFrame:
+        """All Third Basemen"""
+        return self.__third
+
+    @property
+    def short(self) -> pd.DataFrame:
+        """All Shortstops"""
+        return self.__short
+
+    @property
+    def left(self) -> pd.DataFrame:
+        """All Left Fielders"""
+        return self.__left
+
+    @property
+    def center(self) -> pd.DataFrame:
+        """All Center Fielders"""
+        return self.__center
+
+    @property
+    def right(self) -> pd.DataFrame:
+        """All Right Fielders"""
+        return self.__right
+
+    @property
+    def infield(self) -> pd.DataFrame:
+        """All Infielders"""
+        return self.__infield
+
+    @property
+    def outfield(self) -> pd.DataFrame:
+        """All Outfielders"""
+        return self.__outfield
+
+    @property
+    def dh(self) -> pd.DataFrame:
+        """All Outfielders"""
+        return self.__dh
+
+    @property
+    def designated_hitter(self) -> pd.DataFrame:
+        """All Outfielders"""
+        return self.__dh
+    
+    @property
+    def active(self) -> pd.DataFrame:
+        """All active players"""
+        return self.__active
 
 
 class mlb_date:
@@ -140,6 +276,138 @@ class mlb_wrapper:
         
     def __call__(self,_attr):
         return getattr(self,_attr)
+
+
+class edu_wrapper:
+    """Education wrapper
+    """
+    class school_data:
+        def __new__(cls,school_df:pd.DataFrame):
+            self = object.__new__(cls)
+            self.__df = school_df
+            self.__repr = tab(self.__df,headers='keys',tablefmt='simple',showindex=False)
+            return self
+
+        def __repr__(self):
+            return self.__repr
+        
+        def __call__(self,school_attr:str|None=None,row_idx:int=0) -> pd.DataFrame | str:
+            """Return either a dataframe of all schools data OR a specific school attribute by providing index ('row_idx')
+            
+            Parameters:
+            -----------
+            school_attr : str
+                School attribute (column label from dataframe) to retrieve
+            
+            row_idx : int (conditionally required) Default -> 1
+                Row index to query from dataframe. Required if using 'school_attr' to return string
+                
+            
+            ### See also:
+            - 'school.name()'
+            - 'school.city()'
+            - 'school.state()'
+                
+            """
+            if school_attr is None:
+                return self.__df
+            df = self.__df
+            if len(df) == 1:
+                row_idx = 0
+            elif len(df) == 0:
+                return '-'
+            return df.iloc[int(row_idx)]['school']
+
+        def name(self,row_idx:int=0) -> str:
+            """Get school's name given an integer
+            
+            Parameters:
+            -----------
+            row_idx : int (required) Default -> 1
+                Row index to query from dataframe
+            """
+            df = self.__df
+            if len(df) == 1:
+                row_idx = 0
+            elif len(df) == 0:
+                return '-'
+            return df.iloc[int(row_idx)]['school']
+        
+        def city(self,row_idx:int=0) -> str:
+            """Get school's city given an integer
+            
+            Parameters:
+            -----------
+            row_idx : int (required) Default -> 1
+                Row index to query from dataframe
+            """
+            df = self.__df
+            if len(df) == 1:
+                row_idx = 0
+            elif len(df) == 0:
+                return '-'
+            return df.iloc[int(row_idx)]['city']
+        
+        def state(self,row_idx:int=0) -> str:
+            """Get school's state given an integer
+            
+            Parameters:
+            -----------
+            row_idx : int (required) Default -> 1
+                Row index to query from dataframe
+            """
+            df = self.__df
+            if len(df) == 1:
+                row_idx = 0
+            elif len(df) == 0:
+                return '-'
+            return df.iloc[int(row_idx)]['state']
+            
+
+    def __new__(cls,edu_df:pd.DataFrame|None=None):
+        self = object.__new__(cls)
+        hs_df = edu_df[edu_df["type"]=="highschool"]
+        co_df = edu_df[edu_df["type"]=="college"]
+        self.__df = edu_df
+        self.__highschool = cls.school_data(school_df=hs_df)
+        self.__college = cls.school_data(school_df=co_df)
+        
+        self.__repr = tab(self.__df,headers='keys',tablefmt='simple',showindex=False)
+        
+        return self
+    
+    def __repr__(self):
+        return self.__repr
+
+    def __call__(self,school_type:str|None=None) -> pd.DataFrame:
+        """Return education/school dataframe by 'school_type'. If 'school_type' is not provided, all school data will be returned
+        
+        Parameters:
+        -----------
+        school_type : str (optional)
+            Get data by school type ('highschool','college')
+            
+        """
+        if school_type is None:
+            return self.__df
+        else:
+            if school_type.lower() == 'highschool':
+                return self.__highschool
+            elif school_type == 'college':
+                return self.__college
+    
+    @property
+    def highschool(self) -> school_data:
+        """Highschool data (if available)"""
+        return self.__highschool
+    
+    @property
+    def college(self) -> school_data:
+        """College data (if available)"""
+        return self.__college
+        
+    
+        
 
 
 class venue_name_wrapper(mlb_wrapper):
@@ -679,9 +947,13 @@ class team_stats(mlb_wrapper):
 class _teams_data_collection:
     def __init__(self,_df:pd.DataFrame):
         self.__teams_df = _df
+        self.__repr = tab(self.__teams_df,headers='keys',showindex=False,tablefmt='simple')
         
     def __call__(self):
         return self.__teams_df
+    
+    def __repr__(self):
+        return self.__repr
     
     def display(self):
         return self.__teams_df
@@ -702,9 +974,15 @@ class _teams_data_collection:
 class _people_data_collection:
     def __init__(self,_df:pd.DataFrame):
         self.__pdf = _df
+        renamed_cols = {'pos_abbreviation':'Pos','name_full':'Name','draft_year':'Drafted','mlb_debut':'Debut'}
+        _df = _df[['mlbam','name_full','pos_abbreviation','draft_year','mlb_debut']].rename(columns=renamed_cols)
+        self.__repr = tab(_df,headers='keys',showindex=False,tablefmt='simple')
         
     def __call__(self) -> pd.DataFrame:
         return self.__pdf
+
+    def __repr__(self):
+        return self.__repr
     
     def display(self) -> pd.DataFrame:
         return self.__pdf
@@ -722,26 +1000,38 @@ class _people_data_collection:
         
         return pd.DataFrame(data=found_data).reset_index(drop=True)
 
-class mlb_team(mlb_wrapper):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        
-        to_display = []
-        for k,v in self.__dict__.items():
+class mlb_team:
+    def __init__(self,raw_data:dict,**kwargs):
+        self.__dict__.update(kwargs)
+        self.__og_dict = kwargs
+        to_display = ["{:20}{:<25}".format('KEYS/ATTRS','VALUES'),
+                      "{:20}{:<25}".format('==================  ','====================     ')]
+        for k,v in self.__og_dict.items():
             to_display.append("{:20}{:<25}".format(k,v))
         self.__repr =  "\n".join(to_display)
+        
+        self.__raw_data = raw_data
+        
+    def __getitem__(self, key: str):
+        # print(__name)
+        return self.__og_dict[key]
+        # return getattr(self,__name)
     
     def __str__(self):
         return self.name_full
     
     def __repr__(self):
         return self.__repr
+    
+    def raw_data(self):
+        return self.__raw_data
 
 class mlb_person(mlb_wrapper):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         
-        to_display = []
+        to_display = ["{:20}{:<25}".format('KEYS/ATTRS','VALUES'),
+                      "{:20}{:<25}".format('==================  ','====================     ')]
         for k,v in self.__dict__.items():
             to_display.append("{:20}{:<25}".format(k,v))
         self.__repr =  "\n".join(to_display)
