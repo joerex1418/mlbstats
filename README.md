@@ -29,6 +29,12 @@ The class and function names should speak for themselves but if you need a good 
 
 # Creating an instance of the Person class (Jose Abreu)
 >>> abreu = mlb.Person(547989)
+
+# Get the 2005 schedule for the Chicago White Sox (additional arguments)
+>>> mlb.schedule(mlbam=145,season=2005)
+
+# Get hitting stats for the Chicago White Sox in their 1992 season
+>>> mlb.team_hitting(mlbam=145,season=1992)
 ```
 NOTE:
   Use `mlb.people()` to look up a person's official ID.
@@ -49,6 +55,11 @@ There are 4 primary classes in this library that have been configured to make da
   * Get team data for a specific season
 * `Game`
   * Get live game data
+
+The `Franchise` class is more oriented towards a franchise/team's "year-by-year" data. Where as the `Team` class focuses on a single year and can provide stats and other information for the player's on a team's roster.
+
+<hr>
+
 ## Person
 ### Stats
 ```python

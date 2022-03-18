@@ -2979,7 +2979,7 @@ def team_hitting(mlbam,season=None) -> pd.DataFrame:
                     hittingAdvanced.append(single_stat_row)
 
         except:
-            print(f"Error retrieving stats for --- {playerName}")
+            # print(f"Error retrieving stats for --- {playerName}")
             pass
     
     df = pd.DataFrame(hitting,columns=hitting_cols).rename(columns=STATDICT)
@@ -3053,7 +3053,7 @@ def team_pitching(mlbam,season=None) -> pd.DataFrame:
                     got_pitchAdv = True
                     pitchingAdvanced.append(single_stat_row)
         except:
-            # print(f"Error retrieving stats for --- {playerName}")
+            # # print(f"Error retrieving stats for --- {playerName}")
             pass
 
     df = pd.DataFrame(pitching,columns=pitching_cols).rename(columns=STATDICT)
@@ -3120,7 +3120,7 @@ def team_fielding(mlbam,season=None) -> pd.DataFrame:
                         got_field = True
                         fielding.append(single_stat_row)
         except:
-            print(f"Error retrieving stats for --- {playerName}")
+            # print(f"Error retrieving stats for --- {playerName}")
             pass
 
     df = pd.DataFrame(fielding,columns=fielding_cols).rename(columns=STATDICT)
@@ -3197,7 +3197,7 @@ def team_hitting_advanced(mlbam,season=None) -> pd.DataFrame:
                     hittingAdvanced.append(single_stat_row)
 
         except:
-            print(f"Error retrieving stats for --- {playerName}")
+            # print(f"Error retrieving stats for --- {playerName}")
             pass
     
     df = pd.DataFrame(hittingAdvanced,columns=hittingAdv_cols).rename(columns=STATDICT)
@@ -3270,7 +3270,7 @@ def team_pitching_advanced(mlbam,season=None) -> pd.DataFrame:
                     got_pitchAdv = True
                     pitchingAdvanced.append(single_stat_row)
         except:
-            # print(f"Error retrieving stats for --- {playerName}")
+            # # print(f"Error retrieving stats for --- {playerName}")
             pass
 
     # df = pd.DataFrame(pitching,columns=pitching_cols).rename(columns=STATDICT)
@@ -6079,6 +6079,8 @@ def schedule(mlbam=None,season=None,date=None,startDate=None,endDate=None,gameTy
     params = {
         "sportId":1
     }
+    if kwargs.get('teamId') is not None:
+        mlbam = kwargs['teamId']
     if startDate is not None and endDate is not None:
         # params['startDate']   = dt.datetime.strptime(startDate,r"%m/%d/%Y").strftime(r"%Y-%m-%d")
         params['startDate']     = startDate

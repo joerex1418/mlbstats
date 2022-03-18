@@ -212,7 +212,7 @@ async def parse_data(response,idx,mlbam):
                                 got_field = True
                                 fielding.append(single_stat_row)
                 except:
-                    # print(f"Error retrieving stats for --- {playerName}")
+                    # # print(f"Error retrieving stats for --- {playerName}")
                     pass
             roster_stats_dict['hitting'] = pd.DataFrame(hitting,columns=hitting_cols).rename(columns=STATDICT)
             roster_stats_dict['hittingAdvanced'] = pd.DataFrame(hittingAdvanced,columns=hittingAdv_cols).rename(columns=STATDICT)
