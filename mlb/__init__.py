@@ -137,7 +137,7 @@ from .transactions import prospects as get_prospects
 from .transactions import free_agents as get_free_agents
 from .transactions import transactions as get_transactions
 
-from .utils_team import team_leaders
+# from .utils_team import team_leaders
 
 from .async_mlb import fetch
 from .async_mlb import fetch_text
