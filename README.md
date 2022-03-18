@@ -10,10 +10,7 @@ In the command line, copy and paste the following:
 ```
 pip install git+https://github.com/joerex1418/simplestats-mlb.git
 ```
-Or you can clone the repo for the dev version
-```
-git clone https://github.com/joerex1418/simplestats-mlb.git
-```
+
 <!-- ## Installing from PyPI
 In the command line, copy and paste the following:
 ```
