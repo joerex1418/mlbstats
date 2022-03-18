@@ -30,9 +30,14 @@ The class and function names should speak for themselves but if you need a good 
 # Creating an instance of the Person class (Jose Abreu)
 >>> abreu = mlb.Person(547989)
 ```
-NOTE: Use `mlb.people()` to for looking up people's official IDs
+NOTE:
+  Use `mlb.people()` to look up a person's official ID.
+  Alternatively, you could use the api interface class and search for players directly from the API using `mlb.api.player_search()`
 
+<br>
 Now that we have our Person instance, we can start accessing the data!
+
+<br>
 
 # Classes
 There are 4 primary classes in this library that have been configured to make data retrieval as painless as possible (at least, in my personal opinion)
