@@ -18,6 +18,9 @@ from .helpers import standings_wrapper
 from .helpers import roster_wrapper
 from .helpers import edu_wrapper
 from .helpers import player_stats
+from .helpers import team_stats
+from .helpers import stats_roster
+from .helpers import stats_totals
 
 from .helpers import _teams_data_collection, _people_data_collection
 from .helpers import _parse_team,_parse_league,_parse_division,_parse_person,_parse_venue
@@ -37,7 +40,7 @@ from typing import Union, Optional, Dict, List
 
 
 class Person:
-    """## Person
+    """# Person
     
         The "mlb.Person" class is a comprehensive wrapper for many different types of data for a single person.
     All of the data (with the exception of content in the "bio" attribute/property) is pulled from the Official MLB 
@@ -165,7 +168,6 @@ class Person:
                 'team': team_name_data(
                     _full=team.get("name"),
                     _mlbam=team.get("id"),
-                    # _team=team.get("teamName"),
                     _short=team.get("shortName"),
                     _club=team.get("clubName"),
                     _location=team.get("locationName"),
@@ -176,7 +178,6 @@ class Person:
                 'opponent': team_name_data(
                     _full=opponent.get("name"),
                     _mlbam=opponent.get("id"),
-                    # _team=opponent.get("teamName"),
                     _short=opponent.get("shortName"),
                     _club=opponent.get("clubName"),
                     _location=opponent.get("locationName"),
@@ -194,34 +195,22 @@ class Person:
         }
         
         self._mlbam      = _info['mlbam']
-        
-        self._bio       = _bio
-        self._name      = person_name_data(**_name_data)
+        self._bio        = _bio
+        self._name       = person_name_data(**_name_data)
         self._position   = mlb_wrapper(**_position_data)
         self._birth      = mlb_wrapper(**_birth_data)
         self._death      = mlb_wrapper(**_death_data)
         self._debut      = mlb_wrapper(**_debut_data)
         self._last_game  = mlb_wrapper(**_last_game_data)
         
-        self._zone_top    = _info['zoneTop']
-        self._zone_bottom = _info['zoneBot']
+        self._zone_top  = _info['zoneTop']
+        self._zone_bot  = _info['zoneBot']
         
         # transaction df
         self._trx = _trx
+        
         # awards df
         self._awards = _awards
-
-        # self.current_team = data.get('team',{})
-        # _all_teams_data = []
-        # for _tm_mlbam, _tm_data in _teams.items():
-        #     _all_teams_data.append([
-        #         int(_tm_mlbam),
-        #         _tm_data['full'],
-        #         _tm_data['location'],
-        #         _tm_data['club'],
-        #         _tm_data['slug'],
-        #     ])
-        # self._teams = pd.DataFrame(data=_all_teams_data,columns=['tm_mlbam','tm_full_name','tm_location','tm_club','tm_slug'])
         
         # stats info
         self._stats = player_stats(
@@ -432,8 +421,8 @@ class Person:
         return self._zone_top
     
     @property
-    def zone_bottom(self):
-        return self._zone_bottom
+    def zone_bot(self):
+        return self._zone_bot
     
     @property
     def education(self) -> edu_wrapper:
@@ -500,15 +489,14 @@ class Franchise:
         self.__mlbam = ti['mlbam']
         self.__franchise = ti['franchise_name']
         self.__name = mlb_wrapper(
-            _full=ti['full_name'],
-            _location=ti['location_name'],
-            _franchise=self.__franchise,
-            _mascot=ti['team_name'],
-            _club=ti['club_name'],
-            _short=ti['short_name']
+            full=ti['full_name'],
+            location=ti['location_name'],
+            franchise=self.__franchise,
+            mascot=ti['team_name'],
+            club=ti['club_name'],
+            short=ti['short_name']
             )
         
-
         self.__league : league_name_wrapper = league_name_wrapper(
             _mlbam=ti['league_mlbam'],
             _name=ti['league_name'],
@@ -639,7 +627,7 @@ class Franchise:
 
 
 class Team:
-    """# team
+    """# Team
 
     Represents a collection of team data for a single year
 
@@ -698,43 +686,15 @@ class Team:
         cls.transactions : pd.DataFrame = data['transactions']
         cls.coaches      : pd.DataFrame = data['coaches']
     
-        cls.stats = mlb_wrapper(
-            hitting=mlb_wrapper(
-                reg=data['hitting_reg'],
-                adv=data['hitting_adv'],
-                regular=data['hitting_reg'],
-                advanced=data['hitting_adv'],
-            ),
-            pitching=mlb_wrapper(
-                reg=data['pitching_reg'],
-                adv=data['pitching_adv'],
-                regular=data['pitching_reg'],
-                advanced=data['pitching_adv'],
-            ),
-            fielding=mlb_wrapper(
-                reg=data['fielding_reg'],
-                regular=data['fielding_reg'],
-            ),
-            totals=mlb_wrapper(
-                hitting=mlb_wrapper(
-                    reg=data['total_hitting_reg'],
-                    adv=data['total_hitting_adv'],
-                    regular=data['total_hitting_reg'],
-                    advanced=data['total_hitting_adv'],
-                    ),
-                pitching=mlb_wrapper(
-                    reg=data['total_pitching_reg'],
-                    adv=data['total_pitching_adv'],
-                    regular=data['total_pitching_reg'],
-                    advanced=data['total_pitching_adv'],
-                ),
-                fielding=mlb_wrapper(
-                    reg=data['total_fielding_reg'],
-                    regular=data['total_fielding_reg']
-                )
+        cls._stats = team_stats(
+            totals={'hit_reg':data['total_hitting_reg'],'hit_adv':data['total_hitting_adv'],
+                    'pit_reg':data['total_pitching_reg'],'pit_adv':data['total_pitching_reg'],
+                    'fld_reg':data['total_fielding_reg']},
+            roster={'hit_reg':data['hitting_reg'],'hit_adv':data['hitting_adv'],
+                    'pit_reg':data['pitching_reg'],'pit_adv':data['pitching_adv'],
+                    'fld_reg':data['fielding_reg']},
             )
-        )
-
+        
         self = object.__new__(cls)
         return self
 
@@ -775,14 +735,22 @@ class Team:
 
     def get_splits(self):
         pass
+    
+    @property
+    def stats(self):
+        """Wrapper for both team's cumulative & player-level stats
+        """
+        return self._stats
 
 
 class Game:
-    """MLB Game instance
+    """# Game
+    
+    MLB Game instance
     
     Paramaters
     ----------
-    gameID : int or str
+    gamePk : int or str
         numeric ID for the game
     
     timecode : str
@@ -795,8 +763,6 @@ class Game:
 
     Methods:
     --------
-    overview() -> str
-        prints a boxscore-like visual as text
 
     boxscore() -> dict
         returns a python dictionary of boxscore information
@@ -849,7 +815,6 @@ class Game:
     
     def __init__(self,gamePk,timecode=None,tz="ct"):
         game_id = gamePk
-        # self.__people = get_people_df()
         self.__tz = tz
         self.game_id = game_id
         self.gamePk  = game_id
@@ -1280,16 +1245,16 @@ class Game:
 
         try:
             matchup = self.__curr_play["matchup"]
-            zoneTop = self.__curr_play["playEvents"][-1]["pitchData"]["strikeZoneTop"]
-            zoneBot = self.__curr_play["playEvents"][-1]["pitchData"]["strikeZoneBottom"]
+            zone_top = self.__curr_play["playEvents"][-1]["pitchData"]["strikeZoneTop"]
+            zone_bot = self.__curr_play["playEvents"][-1]["pitchData"]["strikeZoneBottom"]
         except:
             return {"atBat":{},"pitching":{},"zone":(3.5,1.5)}
         atBat = {
             "name":matchup["batter"]["fullName"],
             "id":matchup["batter"]["id"],
             "bats":matchup["batSide"]["code"],
-            "zoneTop":self.__players[f'ID{matchup["batter"]["id"]}']["strikeZoneTop"],
-            "zoneBottom":self.__players[f'ID{matchup["batter"]["id"]}']["strikeZoneBottom"],
+            "zone_top":self.__players[f'ID{matchup["batter"]["id"]}']["strikeZoneTop"],
+            "zone_bot":self.__players[f'ID{matchup["batter"]["id"]}']["strikeZoneBottom"],
             "stands":matchup["batSide"]["code"]
             }
         pitching = {
@@ -1297,7 +1262,7 @@ class Game:
             "id":matchup["pitcher"]["id"],
             "throws":matchup["pitchHand"]["code"]}
         
-        return {"atBat":atBat,"pitching":pitching,"zone":(zoneTop,zoneBot)}
+        return {"atBat":atBat,"pitching":pitching,"zone":(zone_top,zone_bot)}
 
     def matchup_event_log(self) -> pd.DataFrame:
         """
@@ -1322,8 +1287,8 @@ class Game:
         headers = [
             "pitch_num",
             "details",
-            "zoneTop",
-            "zoneBottom",
+            "zone_top",
+            "zone_bot",
             "zoneTopInitial",
             "zoneBottomInitial",
             "pitch_type",
@@ -1386,11 +1351,11 @@ class Game:
                         zoneTopInitial = 3.5
                         zoneBottomInitial = 1.5
                 try:
-                    zoneTop = ab_log["pitchData"]["strikeZoneTop"]
-                    zoneBottom = ab_log["pitchData"]["strikeZoneBottom"]
+                    zone_top = ab_log["pitchData"]["strikeZoneTop"]
+                    zone_bot = ab_log["pitchData"]["strikeZoneBottom"]
                 except:
-                    zoneTop = 3.5
-                    zoneBottom = 1.5
+                    zone_top = 3.5
+                    zone_bot = 1.5
 
                 try:spin = ab_log["pitchData"]["breaks"]["spinRate"]
                 except:spin = ""
@@ -1407,8 +1372,8 @@ class Game:
 
                 event.append(pitchNumber)
                 event.append(details)
-                event.append(zoneTop)
-                event.append(zoneBottom)
+                event.append(zone_top)
+                event.append(zone_bot)
                 event.append(zoneTopInitial)
                 event.append(zoneBottomInitial)
                 event.append(pitchType)
@@ -1440,8 +1405,8 @@ class Game:
             Dataframe begins with most recent plate appearance
         """
         headers = [
-            "bat_teamID",
-            "bat_team",
+            "bat_tm_mlbam",
+            "bat_tm_name",
             "pa",
             "inning",
             "batter",
@@ -1643,8 +1608,8 @@ class Game:
         NOTE: Dataframe begins with most recent pitch event
         """
         headers = [
-            "bat_teamID",
-            "bat_team",
+            "bat_tm_mlbam",
+            "bat_tm_name",
             "pa",
             "event",
             "event_type",
@@ -1653,8 +1618,8 @@ class Game:
             "batter",
             "batter_mlbam",
             "bat_side",
-            "batter_zoneTop",
-            "batter_zoneBottom",
+            "zone_top",
+            "zone_bot",
             "pitcher",
             "pitcher_mlbam",
             "details",
@@ -1664,8 +1629,8 @@ class Game:
             "call",
             "count",
             "outs",
-            "zoneTop",
-            "zoneBottom",
+            "zone_top",
+            "zone_bot",
             "release_velocity",
             "end_velocity",
             "spin_rate",
@@ -1679,7 +1644,7 @@ class Game:
             "hX",
             "hY",
             "category",
-            "endTime",
+            "end_time",
             "isHome",
             "play_id"]
 
@@ -1692,11 +1657,11 @@ class Game:
             try:pitcher = play["matchup"]["pitcher"]
             except:pitcher = "--"
             try:
-                batter_zoneTop = self.__players[f'ID{batter["id"]}']["strikeZoneTop"]
-                batter_zoneBottom = self.__players[f'ID{batter["id"]}']["strikeZoneBottom"]
+                zone_top = self.__players[f'ID{batter["id"]}']["strikeZoneTop"]
+                zone_bot = self.__players[f'ID{batter["id"]}']["strikeZoneBottom"]
             except:
-                batter_zoneTop = "-"
-                batter_zoneBottom = "-"
+                zone_top = "-"
+                zone_bot = "-"
             try:bat_side = play["matchup"]["batSide"]["code"]
             except:bat_side = "-"
 
@@ -1768,11 +1733,11 @@ class Game:
                     pX = "--"
                     pZ = "--"
                 try:
-                    zoneTop = pitchData["strikeZoneTop"]
-                    zoneBottom = pitchData["strikeZoneBottom"]
+                    zone_top = pitchData["strikeZoneTop"]
+                    zone_bot = pitchData["strikeZoneBottom"]
                 except:
-                    zoneTop = 3.5
-                    zoneBottom = 1.5
+                    zone_top = 3.5
+                    zone_bot = 1.5
 
                # Hit Data
                 if "hitData" in event.keys():
@@ -1826,8 +1791,8 @@ class Game:
                     batter["fullName"],
                     batter["id"],
                     bat_side,
-                    batter_zoneTop,
-                    batter_zoneBottom,
+                    zone_top,
+                    zone_bot,
                     pitcher["fullName"],
                     pitcher["id"],
                     desc,
@@ -1837,8 +1802,8 @@ class Game:
                     call,
                     count,
                     outs,
-                    zoneTop,
-                    zoneBottom,
+                    zone_top,
+                    zone_bot,
                     startSpeed,
                     endSpeed,
                     spinRate,
@@ -1868,8 +1833,8 @@ class Game:
         NOTE: Dataframe begins with most recent pitch event
         """
         headers = [
-            "bat_teamID",
-            "bat_team",
+            "bat_tm_mlbam",
+            "bat_tm_name",
             "pa",
             "event",
             "event_type",
@@ -1899,7 +1864,7 @@ class Game:
             "hX",
             "hY",
             "category",
-            "endTime",
+            "end_time",
             "isHome"]
 
         events_data = []
@@ -2094,7 +2059,7 @@ class Game:
             tm = self.__away_stats["batting"]
             players = self.__away_player_data
             # headers = ["Player","Pos","AB","R","H","RBI","SO","BB","AVG","HR","2B","3B","FO","GO","IBB","SacBunts","SacFlies","GIDP","batting","substitute","bbrefID","mlbam"]
-            headers = ["Player","Pos","AB","R","H","RBI","SO","BB","AVG","HR","2B","3B","FO","GO","IBB","SacBunts","SacFlies","GIDP","batting","substitute","mlbam"]
+            headers = ["Player","Pos","AB","R","H","RBI","SO","BB","AVG","HR","2B","3B","FO","GO","IBB","sB","sF","GIDP","at_bat","is_sub","mlbam"]
             rows = []
             for playerid in self.__away_lineup:
                 player = players[f"ID{playerid}"]
@@ -2196,7 +2161,7 @@ class Game:
         if self.gameState == "Live" or self.gameState == "Final" or self.gameState == "Preview":
             tm = self.__home_stats["batting"]
             players = self.__home_player_data
-            headers = ["Player","Pos","AB","R","H","RBI","SO","BB","AVG","HR","2B","3B","FO","GO","IBB","SacBunts","SacFlies","GIDP","batting","substitute","mlbam"]
+            headers = ["Player","Pos","AB","R","H","RBI","SO","BB","AVG","HR","2B","3B","FO","GO","IBB","sB","sF","GIDP","at_bat","is_sub","mlbam"]
             rows = []
             for playerid in self.__home_lineup:
                 player = players[f"ID{playerid}"]
@@ -2670,6 +2635,30 @@ class Game:
 # ===============================================================
 
 class api:
+    
+    @classmethod
+    def get(*endpoints:str,hydrate=None,**query_params):
+        """## get()
+        
+        Make your own customized calls to https://statsapi.mlb.com
+        
+        --------------------------------------------------------------------
+        
+        Parameters:
+        -----------
+        
+        personId : int (alias -> 'mlbam')
+        
+        teamId : int (alias -> 'tm_mlbam')
+
+        """
+        pass
+    
+    def prepare(path,**query_params):
+        """Build
+        
+        """
+        pass
     
     class people:
         def __init__(self,_mlbam):

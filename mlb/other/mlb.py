@@ -1676,8 +1676,8 @@
 #             Dataframe begins with most recent plate appearance
 #         """
 #         headers = [
-#             "bat_teamID",
-#             "bat_team",
+#             "bat_tm_mlbam",
+#             "bat_tm_name",
 #             "pa",
 #             "inning",
 #             "batter",
@@ -1879,8 +1879,8 @@
 #         NOTE: Dataframe begins with most recent pitch event
 #         """
 #         headers = [
-#             "bat_teamID",
-#             "bat_team",
+#             "bat_tm_mlbam",
+#             "bat_tm_name",
 #             "pa",
 #             "event",
 #             "event_type",
@@ -1889,8 +1889,8 @@
 #             "batter",
 #             "batter_mlbam",
 #             "bat_side",
-#             "batter_zoneTop",
-#             "batter_zoneBottom",
+#             "zone_top",
+#             "zone_bot",
 #             "pitcher",
 #             "pitcher_mlbam",
 #             "details",
@@ -1928,11 +1928,11 @@
 #             try:pitcher = play["matchup"]["pitcher"]
 #             except:pitcher = "--"
 #             try:
-#                 batter_zoneTop = self.__players[f'ID{batter["id"]}']["strikeZoneTop"]
-#                 batter_zoneBottom = self.__players[f'ID{batter["id"]}']["strikeZoneBottom"]
+#                 zone_top = self.__players[f'ID{batter["id"]}']["strikeZoneTop"]
+#                 zone_bot = self.__players[f'ID{batter["id"]}']["strikeZoneBottom"]
 #             except:
-#                 batter_zoneTop = "-"
-#                 batter_zoneBottom = "-"
+#                 zone_top = "-"
+#                 zone_bot = "-"
 #             try:bat_side = play["matchup"]["batSide"]["code"]
 #             except:bat_side = "-"
 
@@ -2062,8 +2062,8 @@
 #                     batter["fullName"],
 #                     batter["id"],
 #                     bat_side,
-#                     batter_zoneTop,
-#                     batter_zoneBottom,
+#                     zone_top,
+#                     zone_bot,
 #                     pitcher["fullName"],
 #                     pitcher["id"],
 #                     desc,
@@ -2104,8 +2104,8 @@
 #         NOTE: Dataframe begins with most recent pitch event
 #         """
 #         headers = [
-#             "bat_teamID",
-#             "bat_team",
+#             "bat_tm_mlbam",
+#             "bat_tm_name",
 #             "pa",
 #             "event",
 #             "event_type",

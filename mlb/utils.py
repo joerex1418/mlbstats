@@ -4,16 +4,13 @@ import datetime as dt
 from dateutil import tz
 # from tabulate import tabulate
 
-from .constants import ZONE_TOP_STANDARD
-from .constants import ZONE_BOTTOM_STANDARD
-
 from .constants import (
-    BAT_FIELDS,
+    STATDICT,
+    # BAT_FIELDS,
     # BAT_FIELDS_ADV,
     # PITCH_FIELDS,
     # PITCH_FIELDS_ADV,
     # FIELD_FIELDS,
-    STATDICT,
     # LEAGUE_IDS,
     COLS_HIT,
     COLS_HIT_ADV,
@@ -21,8 +18,10 @@ from .constants import (
     COLS_PIT_ADV,
     COLS_FLD,
     W_SEASON,
-    WO_SEASON
-)
+    WO_SEASON,
+    ZONE_TOP_STANDARD,
+    ZONE_BOTTOM_STANDARD
+    )
 
 from .mlbdata import get_season_info
 from typing import Union, Optional, List, Dict
@@ -95,8 +94,8 @@ def draw_strikezone(matchup):
             "endVelocity":i["end_velocity"],
             "spinRate":i["spin_rate"],
             "zone":i["zone"],
-            "zoneTop":i["batter_zoneTop"],
-            "zoneBottom":i["batter_zoneBottom"],
+            "zoneTop":i["zone_top"],
+            "zoneBottom":i["zone_bot"],
             "distance":i["distance"]
         })
 

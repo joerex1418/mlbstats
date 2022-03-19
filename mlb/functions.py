@@ -53,7 +53,7 @@ from .constants import (
 from .helpers import _parse_person
 # from .constants import sitCodes
 
-from typing import Union, Optional, Dict, List
+from typing import Union, Optional, List
 
 # ===============================================================
 # ASYNC
@@ -72,8 +72,8 @@ async def _parse_player_data(data,session:aiohttp.ClientSession,_url,_mlbam=None
     else:
         soup = bs(data,'lxml',parse_only=SoupStrainer("a"))
         href_url = soup.find("a",text="View Player Info")["href"]
-        resp = await session.get(href_url) #await session.get(href_url)
-        bio_page = await resp.text() #await resp.text()
+        resp = await session.get(href_url)
+        bio_page = await resp.text()
         soup = bs(bio_page,'lxml',parse_only=SoupStrainer(['div','h2','p']))
 
         all_ps = soup.find(id="mw-content-text").find("div",class_="mw-parser-output").find("h2").find_all_next("p")
@@ -250,68 +250,65 @@ async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.Dat
                     recap_url,
                     recap_avail,
                 ])
-        sched_df = pd.DataFrame(
-            data=sched_data,
-
-            columns=[
-                'season',
-                'date',
-                'gamePk',
-                'game_type',
-                'status_abstract',
-                'status_detailed',
-                'is_home',
-                'is_win',
-                'away_mlbam',
-                'away_name',
-                'away_location',
-                'away_franchise',
-                'away_club',
-                'away_lg_mlbam',
-                'away_lg_name',
-                'away_lg_short',
-                'away_lg_abbrv',
-                'away_div_mlbam',
-                'away_div_name',
-                'away_div_short',
-                'away_div_abbrv',
-                'away_score',
-                'home_mlbam',
-                'home_name',
-                'home_location',
-                'home_franchise',
-                'home_club',
-                'home_lg_mlbam',
-                'home_lg_name',
-                'home_lg_short',
-                'home_lg_abbrv',
-                'home_div_mlbam',
-                'home_div_name',
-                'home_div_short',
-                'home_div_abbrv',
-                'home_score',
-                'day_game_number',
-                'double_header',
-                'series_game',
-                'series_length',
-                'series_description',
-                'scheduled_inns',
-                'reschedule_date_to',
-                'rescheduled_date_from',
-                'venue_mlbam',
-                'venue_name',
-                'recap_title',
-                'recap_desc',
-                'recap_url',
-                'recap_avail',
-                ])
+        sched_df = pd.DataFrame(data=sched_data,
+                                columns=['season',
+                                         'date',
+                                         'gamePk',
+                                         'game_type',
+                                         'status_abstract',
+                                         'status_detailed',
+                                         'is_home',
+                                         'is_win',
+                                         'away_mlbam',
+                                         'away_name',
+                                         'away_location',
+                                         'away_franchise',
+                                         'away_club',
+                                         'away_lg_mlbam',
+                                         'away_lg_name',
+                                         'away_lg_short',
+                                         'away_lg_abbrv',
+                                         'away_div_mlbam',
+                                         'away_div_name',
+                                         'away_div_short',
+                                         'away_div_abbrv',
+                                         'away_score',
+                                         'home_mlbam',
+                                         'home_name',
+                                         'home_location',
+                                         'home_franchise',
+                                         'home_club',
+                                         'home_lg_mlbam',
+                                         'home_lg_name',
+                                         'home_lg_short',
+                                         'home_lg_abbrv',
+                                         'home_div_mlbam',
+                                         'home_div_name',
+                                         'home_div_short',
+                                         'home_div_abbrv',
+                                         'home_score',
+                                         'day_game_number',
+                                         'double_header',
+                                         'series_game',
+                                         'series_length',
+                                         'series_description',
+                                         'scheduled_inns',
+                                         'reschedule_date_to',
+                                         'rescheduled_date_from',
+                                         'venue_mlbam',
+                                         'venue_name',
+                                         'recap_title',
+                                         'recap_desc',
+                                         'recap_url',
+                                         'recap_avail',
+                                         ])
 
         if kwargs.get('_logtime') is True:
             print(f"\n{unquote(_url).replace(BASE,'')}")
             print(f'--- {time.time() - start} seconds ---\n')
         return sched_df
     
-    elif "statSplits" in _url and "/roster/fullSeason?season=" in _url:
+    elif "statSplits" in _url and "/roster/" in _url:
         stat_data = []
 
         roster : List[dict] = data['roster']
@@ -370,7 +367,39 @@ async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.Dat
 
         return combined_df
 
-    elif "/roster/fullSeason?season=" in _url:
+    elif "/roster/coach?season=" in _url:
+        coach_data = []
+        roster : List[dict] = data.get('roster',[{}])
+        for roster_entry in roster:
+            job                 = roster_entry.get('job','-')
+            job_title           = roster_entry.get('title','-')
+            job_id              = roster_entry.get('jobId','-')
+            jersey_number_coach = roster_entry.get('jerseyNumber','-')
+
+            p = roster_entry.get('person',{})
+            
+            coach_data.append([
+                job,
+                job_title,
+                job_id,
+                jersey_number_coach,
+                p.get('primaryNumber','-'),
+                p.get('fullName'),
+                p.get('birthDate','-'),
+                p.get('currentAge'),
+                p.get('primaryPosition',{}).get('abbreviation'),
+                p.get('mlbDebutDate','-'),
+                p.get('lastPlayedDate','-'),
+            ])
+        df = pd.DataFrame(data=coach_data,columns=['job','job_title','job_id','jersey_number_coach','jersey_number_primary','name','birth_date','age','pos','mlb_debut','last_played'])
+
+        if kwargs.get('_logtime') is True:
+            print(f"\n{unquote(_url).replace(BASE,'')}")
+            print(f'--- {time.time() - start} seconds ---\n')
+
+        return df
+
+    elif "/roster/" in _url:
         stat_data = []
 
         roster : List[dict] = data['roster']
@@ -436,75 +465,52 @@ async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.Dat
         return combined_df
 
     elif f"/teams/{_mlbam}/stats?stats=season,seasonAdvanced" in _url:
-        stat_dict = {'regular':None,'advanced':None}
-        # print(unquote(_url))
-        for stat_item in data['stats']:
-            stat_data = []
-            # sg = stat_item.get('group',{}).get('displayName')
-            st = stat_item.get('type',{}).get('displayName')
-            splits = stat_item.get('splits',[{}])
+        stat_dict = {'regular':pd.DataFrame(),'advanced':pd.DataFrame()}
+        if data.get('message') is None:
+            if 'gameType=S' in _url:
+                gt = 'S'
+            elif 'gameType=R' in _url:
+                gt = 'R'
+            elif 'gameType=P' in _url:
+                gt = 'P'
+
+            for stat_item in data['stats']:
+                stat_data = []
+                st = stat_item.get('type',{}).get('displayName')
+                splits = stat_item.get('splits',[{}])
+                
+                for s in splits:
+                    stat = s.get('stat',{})
+                    stat_data.append(pd.Series(stat))
+
+                    if st == 'seasonAdvanced':
+                        add_to = 'advanced'
+                        if 'hitting' in _url:
+                            reordered_cols = COLS_HIT_ADV
+                        elif 'pitching' in _url:
+                            reordered_cols = COLS_PIT_ADV
+
+                    else:
+                        add_to = 'regular'
+                        if 'hitting' in _url:
+                            reordered_cols = COLS_HIT
+                        elif 'pitching' in _url:
+                            reordered_cols = COLS_PIT
+                        elif 'fielding' in _url:
+                            reordered_cols = COLS_FLD
+
+                df = pd.DataFrame(data=stat_data).rename(columns=STATDICT).reindex(columns=reordered_cols)
+                df['game_type'] = gt
+
+                stat_dict[add_to] = df
             
-            for s in splits:
-                stat = s.get('stat',{})
-                stat_data.append(pd.Series(stat))
+            if kwargs.get('_logtime') is True:
+                print(f"\n{unquote(_url).replace(BASE,'')}")
+                print(f'--- {time.time() - start} seconds ---\n')
 
-                if st == 'seasonAdvanced':
-                    add_to = 'advanced'
-                    if 'hitting' in _url:
-                        reordered_cols = COLS_HIT_ADV
-                    elif 'pitching' in _url:
-                        reordered_cols = COLS_PIT_ADV
-
-                else:
-                    add_to = 'regular'
-                    if 'hitting' in _url:
-                        reordered_cols = COLS_HIT
-                    elif 'pitching' in _url:
-                        reordered_cols = COLS_PIT
-                    elif 'fielding' in _url:
-                        reordered_cols = COLS_FLD
-
-            df = pd.DataFrame(data=stat_data).rename(columns=STATDICT).reindex(columns=reordered_cols)
-
-            stat_dict[add_to] = df
-        
-        if kwargs.get('_logtime') is True:
-            print(f"\n{unquote(_url).replace(BASE,'')}")
-            print(f'--- {time.time() - start} seconds ---\n')
-
-        return stat_dict
-
-    elif "/roster/coach?season=" in _url:
-        coach_data = []
-        roster : List[dict] = data.get('roster',[{}])
-        for roster_entry in roster:
-            job                 = roster_entry.get('job','-')
-            job_title           = roster_entry.get('title','-')
-            job_id              = roster_entry.get('jobId','-')
-            jersey_number_coach = roster_entry.get('jerseyNumber','-')
-
-            p = roster_entry.get('person',{})
-            
-            coach_data.append([
-                job,
-                job_title,
-                job_id,
-                jersey_number_coach,
-                p.get('primaryNumber','-'),
-                p.get('fullName'),
-                p.get('birthDate','-'),
-                p.get('currentAge'),
-                p.get('primaryPosition',{}).get('abbreviation'),
-                p.get('mlbDebutDate','-'),
-                p.get('lastPlayedDate','-'),
-            ])
-        df = pd.DataFrame(data=coach_data,columns=['job','job_title','job_id','jersey_number_coach','jersey_number_primary','name','birth_date','age','pos','mlb_debut','last_played'])
-
-        if kwargs.get('_logtime') is True:
-            print(f"\n{unquote(_url).replace(BASE,'')}")
-            print(f'--- {time.time() - start} seconds ---\n')
-
-        return df
+            return stat_dict
+        else:
+            return stat_dict
 
     elif "/draft" in _url:
         draft_data = []
@@ -644,20 +650,55 @@ def _team_data(_mlbam,_season,**kwargs) -> Union[dict,list]:
     ssn_start = ssn_start.strftime(r"%Y-%m-%d")
     ssn_end   = ssn_end.strftime(r"%Y-%m-%d")
 
+    # Retrieves 'fullSeason' roster
+    # -----------------------------
+    # url_list = [
+    #     f"{BASE}/teams/{_mlbam}?season={_season}&hydrate=standings",
+    #     f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[season],group=[hitting],season={_season}))",
+    #     f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[season],group=[pitching],season={_season}))",
+    #     f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[season],group=[fielding],season={_season}))",
+    #     f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[hitting],season={_season}))",
+    #     f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[pitching],season={_season}))",
+
+    #     f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[statSplits],group=[pitching],sitCodes=[sp,rp],season={_season}))",
+    #     f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[statSplitsAdvanced],group=[pitching],sitCodes=[sp,rp],season={_season}))",
+
+    #     f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&season={_season}",
+    #     f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&season={_season}",
+    #     f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&season={_season}",
+    #     f"{BASE}/teams/{_mlbam}/roster/coach?season={_season}&hydrate=person",
+    #     f"{BASE}/draft/{_season}?sportId=1&teamId={_mlbam}",
+    #     f"{BASE}/transactions?teamId={_mlbam}&startDate={ssn_start}&endDate={ssn_end}",
+    # ]
+    
+    # Retrieves '40Man' roster
+    # -----------------------------
     url_list = [
         f"{BASE}/teams/{_mlbam}?season={_season}&hydrate=standings",
-        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[season],group=[hitting],season={_season}))",
-        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[season],group=[pitching],season={_season}))",
-        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[season],group=[fielding],season={_season}))",
-        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[hitting],season={_season}))",
-        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[pitching],season={_season}))",
+        f"{BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[season],group=[hitting],season={_season}))",
+        f"{BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[season],group=[pitching],season={_season}))",
+        f"{BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[season],group=[fielding],season={_season}))",
+        f"{BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[hitting],season={_season}))",
+        f"{BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[pitching],season={_season}))",
 
-        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[statSplits],group=[pitching],sitCodes=[sp,rp],season={_season}))",
-        f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[statSplitsAdvanced],group=[pitching],sitCodes=[sp,rp],season={_season}))",
+        f"{BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[statSplits],group=[pitching],sitCodes=[sp,rp],season={_season}))",
+        f"{BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[statSplitsAdvanced],group=[pitching],sitCodes=[sp,rp],season={_season}))",
 
-        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&season={_season}",
-        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&season={_season}",
-        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&season={_season}",
+        # Stats for 'gameType = S' (Spring Training)
+        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&gameType=S&season={_season}",
+        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&gameType=S&season={_season}",
+        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&gameType=S&season={_season}",
+        
+        # Stats for 'gameType = R' (Regular Season)
+        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&gameType=R&season={_season}",
+        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&gameType=R&season={_season}",
+        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&gameType=R&season={_season}",
+        
+        # Stats for 'gameType = P' (Postseason/Playoffs)
+        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&gameType=P&season={_season}",
+        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&gameType=P&season={_season}",
+        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&gameType=P&season={_season}",
+        
         f"{BASE}/teams/{_mlbam}/roster/coach?season={_season}&hydrate=person",
         f"{BASE}/draft/{_season}?sportId=1&teamId={_mlbam}",
         f"{BASE}/transactions?teamId={_mlbam}&startDate={ssn_start}&endDate={ssn_end}",
@@ -681,18 +722,33 @@ def _team_data(_mlbam,_season,**kwargs) -> Union[dict,list]:
         url_list.append(url_to_add)
     _logtime = kwargs.get('_logtime')
     
-    # Generator attempt ====
+    # Generator comprehension
     url_list = (url for url in url_list)
-    # ======================
     
     loop = _determine_loop()
     team_data_dict = loop.run_until_complete(_fetch_team_data(urls=url_list,lgs_df=lgs_df,_mlbam=_mlbam,_logtime=_logtime))
-
-    # monthly_schedules_combined_df = pd.concat(team_data_dict[-12:])
-
-    total_hitting = team_data_dict[8]
-    total_pitching = team_data_dict[9]
-    total_fielding = team_data_dict[10]
+    
+    total_hitting_S  = team_data_dict[8]
+    total_pitching_S = team_data_dict[9]
+    total_fielding_S = team_data_dict[10]
+    
+    total_hitting_R  = team_data_dict[11]
+    total_pitching_R = team_data_dict[12]
+    total_fielding_R = team_data_dict[13]
+    
+    total_hitting_P  = team_data_dict[14]
+    total_pitching_P = team_data_dict[15]
+    total_fielding_P = team_data_dict[16]
+    
+    total_hitting  = {'regular':pd.concat([total_hitting_S['regular'],total_hitting_R['regular'],total_hitting_P['regular']]).reset_index(drop=True),
+                      'advanced':pd.concat([total_hitting_S['advanced'],total_hitting_R['advanced'],total_hitting_P['advanced']]).reset_index(drop=True)
+                      }
+    total_pitching = {'regular':pd.concat([total_pitching_S['regular'],total_pitching_R['regular'],total_pitching_P['regular']]).reset_index(drop=True),
+                      'advanced':pd.concat([total_pitching_S['advanced'],total_pitching_R['advanced'],total_pitching_P['advanced']]).reset_index(drop=True)
+                      }
+    total_fielding = {'regular':pd.concat([total_fielding_S['regular'],total_fielding_R['regular'],total_fielding_P['regular']]).reset_index(drop=True)
+                      }
+    
     fetched_data = {
         'team_info'    : team_data_dict[0],
         'hitting_reg'  : team_data_dict[1],
@@ -702,15 +758,16 @@ def _team_data(_mlbam,_season,**kwargs) -> Union[dict,list]:
         'pitching_adv' : team_data_dict[5],
         'p_splits_reg' : team_data_dict[6],
         'p_splits_adv' : team_data_dict[7],
+        
         'total_hitting_reg' : total_hitting['regular'],
         'total_pitching_reg': total_pitching['regular'],
         'total_fielding_reg': total_fielding['regular'],
         'total_hitting_adv' : total_hitting['advanced'],
         'total_pitching_adv': total_pitching['advanced'],
-        'coaches'           : team_data_dict[11],
-        'drafts'            : team_data_dict[12],
-        'transactions'      : team_data_dict[13],
-
+        
+        'coaches'           : team_data_dict[-15],
+        'drafts'            : team_data_dict[-14],
+        'transactions'      : team_data_dict[-13],
         'schedule'     : pd.concat(team_data_dict[-12:]),
     }
 

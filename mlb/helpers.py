@@ -3,7 +3,7 @@ from .utils import pd
 from .utils import keys
 from tabulate import tabulate as tab
 
-from typing import Union, Optional
+from typing import Union, Optional, Literal
 
 
 class standings_wrapper:
@@ -267,7 +267,7 @@ class mlb_date:
 
 class mlb_wrapper:
     """### Data wrapper
-    Namespace/subscriptable object for interacting with nested data
+    Namespace/subscriptable object for retrieving nested data
     
     """
     def __init__(self,**kwargs):
@@ -645,27 +645,28 @@ class person_name_data(mlb_wrapper):
         return self._pronunciation
 
     
-class stat_collection(mlb_wrapper):
+class stat_group(mlb_wrapper):
     def __init__(
         self,
-        stat_group:str,
         career_regular:Optional[pd.DataFrame]=None,career_advanced:Optional[pd.DataFrame]=None,
         season_regular:Optional[pd.DataFrame]=None,season_advanced:Optional[pd.DataFrame]=None,
-        yby_regular:Optional[pd.DataFrame]=None,yby_advanced:Optional[pd.DataFrame]=None):
-
-        if stat_group == 'hitting':
-            self.__cols_reg = keys.hit
-            self.__cols_adv = keys.hit_adv
-        elif stat_group == 'pitching':
-            self.__cols_reg = keys.pitch
-            self.__cols_adv = keys.pitch_adv
-        elif stat_group == 'fielding':
-            self.__cols_reg = keys.field
-            self.__cols_adv = keys.field
+        yby_regular:Optional[pd.DataFrame]=None,yby_advanced:Optional[pd.DataFrame]=None,
+        ):
+        # total_regular:Optional[pd.DataFrame]=None,total_advanced:Optional[pd.DataFrame]=None,
         
-        else:
-            self.__cols_reg = {'hitting':keys.hit,'pitching':keys.pitch,'fielding':keys.field}
-            self.__cols_adv = {'hitting':keys.hit_adv,'pitching':keys.pitch_adv,'fielding':keys.field}
+        # if stat_group == 'hitting':
+        #     self.__cols_reg = keys.hit
+        #     self.__cols_adv = keys.hit_adv
+        # elif stat_group == 'pitching':
+        #     self.__cols_reg = keys.pitch
+        #     self.__cols_adv = keys.pitch_adv
+        # elif stat_group == 'fielding':
+        #     self.__cols_reg = keys.field
+        #     self.__cols_adv = keys.field
+        
+        # else:
+        #     self.__cols_reg = {'hitting':keys.hit,'pitching':keys.pitch,'fielding':keys.field}
+        #     self.__cols_adv = {'hitting':keys.hit_adv,'pitching':keys.pitch_adv,'fielding':keys.field}
             
         self.__regular = mlb_wrapper(
             career=career_regular,
@@ -714,18 +715,6 @@ class stat_collection(mlb_wrapper):
     @property
     def advanced(self):
         return self.__advanced
-        
-    @property
-    def regular_cols(self):
-        return self.__cols_reg
-    
-    @property
-    def advanced_cols(self):
-        return self.__cols_adv
-    
-    @property
-    def group(self):
-        return self.__group
 
 
 class player_stats(mlb_wrapper):
@@ -770,17 +759,17 @@ class player_stats(mlb_wrapper):
                                  }
     
         
-        self.__hitting = stat_collection('hitting',
+        self.__hitting = stat_group(
             career_regular  = hit_car_reg,career_advanced = hit_car_adv,
             season_regular  = hit_ssn_reg,season_advanced = hit_ssn_adv,
             yby_regular     = hit_yby_reg,yby_advanced    = hit_yby_adv
         )
-        self.__pitching = stat_collection('pitching',
+        self.__pitching = stat_group(
             career_regular  = pit_car_reg,career_advanced = pit_car_adv,
             season_regular  = pit_ssn_reg,season_advanced = pit_ssn_adv,
             yby_regular     = pit_yby_reg,yby_advanced    = pit_yby_adv
         )
-        self.__fielding = stat_collection('fielding',
+        self.__fielding = stat_group(
             career_regular  = fld_car_reg,
             season_regular  = fld_ssn_reg,
             yby_regular     = fld_yby_reg,
@@ -878,68 +867,116 @@ class player_stats(mlb_wrapper):
         """
         return self.__fielding
     
-    
-class team_stats(mlb_wrapper):
-    def __init__(self,
-                 hit_car_reg:Optional[pd.DataFrame]=None,hit_car_adv:Optional[pd.DataFrame]=None,
-                 hit_ssn_reg:Optional[pd.DataFrame]=None,hit_ssn_adv:Optional[pd.DataFrame]=None,
-                 hit_yby_reg:Optional[pd.DataFrame]=None,hit_yby_adv:Optional[pd.DataFrame]=None,
-                 
-                 pit_car_reg:Optional[pd.DataFrame]=None,pit_car_adv:Optional[pd.DataFrame]=None,
-                 pit_ssn_reg:Optional[pd.DataFrame]=None,pit_ssn_adv:Optional[pd.DataFrame]=None,
-                 pit_yby_reg:Optional[pd.DataFrame]=None,pit_yby_adv:Optional[pd.DataFrame]=None,
-                 
-                 fld_car_reg:Optional[pd.DataFrame]=None,
-                 fld_ssn_reg:Optional[pd.DataFrame]=None,
-                 fld_yby_reg:Optional[pd.DataFrame]=None
-                 ):
-        super().__init__(**{'hit_car_reg':hit_car_reg,'hit_car_adv':hit_car_adv,
-                            'hit_ssn_reg':hit_ssn_reg,'hit_ssn_adv':hit_ssn_adv,
-                            'hit_yby_reg':hit_yby_reg,'hit_yby_adv':hit_yby_adv,
-                            
-                            'pit_car_reg':pit_car_reg,'pit_car_adv':pit_car_adv,
-                            'pit_ssn_reg':pit_ssn_reg,'pit_ssn_adv':pit_ssn_adv,
-                            'pit_yby_reg':pit_yby_reg,'pit_yby_adv':pit_yby_adv,
-                            
-                            'fld_car_reg':fld_car_reg,
-                            'fld_ssn_reg':fld_ssn_reg,
-                            'fld_yby_reg':fld_yby_reg,
-                            })
+
+class stat_subtypes(mlb_wrapper):
+    def __init__(self,regular_df:pd.DataFrame,advanced_df:pd.DataFrame):
+        super().__init__()
+        self.__regular = regular_df
+        self.__advanced = advanced_df
         
-        self.__hitting = stat_collection('hitting',
-            career_regular  = hit_car_reg,career_advanced = hit_car_adv,
-            season_regular  = hit_ssn_reg,season_advanced = hit_ssn_adv,
-            yby_regular     = hit_yby_reg,yby_advanced    = hit_yby_adv
-        )
-        self.__pitching = stat_collection('pitching',
-            career_regular  = pit_car_reg,career_advanced = pit_car_adv,
-            season_regular  = pit_ssn_reg,season_advanced = pit_ssn_adv,
-            yby_regular     = pit_yby_reg,yby_advanced    = pit_yby_adv
-        )
-        self.__fielding = stat_collection('fielding',
-            career_regular  = fld_car_reg,
-            season_regular  = fld_ssn_reg,
-            yby_regular     = fld_yby_reg,
-        )
+    def __call__(self,_subtype:Literal['regular','advanced']=None):
+        if _subtype is None or 'reg' in _subtype:
+            return self.regular
+        elif 'adv' in _subtype:
+            return self.advanced
     
     @property
-    def hitting(self):
-        """Player's hitting stats (regular or advanced)
-        """
+    def regular(self) -> pd.DataFrame:
+        """Standard statistics dataframe"""
+        return self.__regular
+    
+    @property
+    def standard(self) -> pd.DataFrame:
+        """Standard statistics dataframe"""
+        return self.__regular
+    
+    @property
+    def advanced(self) -> pd.DataFrame:
+        """Advanced statistics dataframe"""
+        return self.__advanced
+
+
+class stats_roster(mlb_wrapper):
+    """Statistics for each player on team roster"""
+    def __init__(self,
+                 hit_reg:Optional[pd.DataFrame]=None,hit_adv:Optional[pd.DataFrame]=None,
+                 pit_reg:Optional[pd.DataFrame]=None,pit_adv:Optional[pd.DataFrame]=None,
+                 fld_reg:Optional[pd.DataFrame]=None
+                 ):
+        
+        super().__init__()
+        self.__hitting = stat_subtypes(hit_reg,hit_adv)
+        self.__pitching = stat_subtypes(pit_reg,pit_adv)
+        self.__fielding = stat_subtypes(fld_reg,fld_reg)
+        
+    @property
+    def hitting(self) -> stat_subtypes:
+        """Team players' hitting stats"""
         return self.__hitting
     
     @property
-    def pitching(self):
-        """Player's pitching stats (regular or advanced)
-        """
+    def pitching(self) -> stat_subtypes:
+        """Team pitchers' stats"""
         return self.__pitching
     
     @property
-    def fielding(self):
-        """Player's fielding stats
-        """
+    def fielding(self) -> stat_subtypes:
+        """Team players' fielding stats"""
         return self.__fielding
+        
+class stats_totals(mlb_wrapper):
+    """Cumulative statistics for team"""
+    def __init__(self,
+                 hit_reg:Optional[pd.DataFrame]=None,hit_adv:Optional[pd.DataFrame]=None,
+                 pit_reg:Optional[pd.DataFrame]=None,pit_adv:Optional[pd.DataFrame]=None,
+                 fld_reg:Optional[pd.DataFrame]=None
+                 ):
+        
+        super().__init__()
+        self.__hitting = stat_subtypes(hit_reg,hit_adv)
+        self.__pitching = stat_subtypes(pit_reg,pit_adv)
+        self.__fielding = stat_subtypes(fld_reg,fld_reg)
+        
+    @property
+    def hitting(self) -> stat_subtypes:
+        """Team cumulative hitting stats"""
+        return self.__hitting
     
+    @property
+    def pitching(self) -> stat_subtypes:
+        """Team cumulative pitching stats"""
+        return self.__pitching
+    
+    @property
+    def fielding(self) -> stat_subtypes:
+        """Team cumulative fielding stats"""
+        return self.__fielding
+
+
+class team_stats(mlb_wrapper):
+    def __init__(self,totals:dict,roster:dict):
+        super().__init__()
+        t = totals
+        r = roster
+        
+        self.__totals = stats_totals(hit_reg=t['hit_reg'],hit_adv=t['hit_adv'],
+                                     pit_reg=t['pit_reg'],pit_adv=t['pit_adv'],
+                                     fld_reg=t['fld_reg']
+                                     )
+        self.__roster = stats_roster(hit_reg=r['hit_reg'],hit_adv=r['hit_adv'],
+                                     pit_reg=r['pit_reg'],pit_adv=r['pit_adv'],
+                                     fld_reg=r['fld_reg']
+                                     )
+        
+    @property
+    def totals(self):
+        """Cumulative statistics for team"""
+        return self.__totals
+    
+    @property
+    def roster(self):
+        """Statistics for each player on team roster"""
+        return self.__roster
 
 # ===============================================================
 # Parsing Utils
