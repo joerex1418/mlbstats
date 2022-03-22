@@ -828,6 +828,7 @@ class Game:
         game_url = BASE + f"/v1.1/game/{self.game_id}/feed/live?hydrate=venue,flags,preState{timecodeQuery}"
 
         gm = requests.get(game_url).json()
+        self.__raw_game_data = gm
 
         gameData = gm["gameData"]
         liveData = gm["liveData"]
@@ -878,41 +879,51 @@ class Game:
 
      # AWAY Team Data
         away = gameData["teams"]["away"]
+        _away_data = self.__boxscore["teams"]["away"]
+        _away_score_data = self.__linescore['teams']['away']
         self.away_id                = away["id"]
         self.__away_team_full       = away["name"]
         self.__away_team            = away["clubName"]
         self.__away_team_abbrv      = away["abbreviation"]
-        self.__away_record          = f'({away["record"]["wins"]},{away["record"]["losses"]})'
-        self.__away_stats           = self.__boxscore["teams"]["away"]["teamStats"]
-        self.__away_player_data     = self.__boxscore["teams"]["away"]["players"]
-        self.__away_lineup          = self.__boxscore["teams"]["away"]["batters"]
-        self.__away_starting_order  = self.__boxscore["teams"]["away"]["battingOrder"]
-        self.__away_pitcher_lineup  = self.__boxscore["teams"]["away"]["pitchers"]
-        self.__away_bullpen         = self.__boxscore["teams"]["away"]["bullpen"]
+        self.__away_stats           = _away_data["teamStats"]
+        self.__away_player_data     = _away_data["players"]
+        self.__away_lineup          = _away_data["batters"]
+        self.__away_starting_order  = _away_data["battingOrder"]
+        self.__away_pitcher_lineup  = _away_data["pitchers"]
+        self.__away_bullpen         = _away_data["bullpen"]
         self.__away_rhe             = self.__linescore["teams"]["away"]
-        self.__away_bench           = self.__boxscore["teams"]["away"]["bench"]
+        self.__away_bench           = _away_data["bench"]
         self.away_full              = self.__away_team_full
         self.away_club              = self.__away_team
         self.away_abbrv             = self.__away_team_abbrv
+        self.away_runs              = _away_score_data['runs']
+        self.away_hits              = _away_score_data['hits']
+        self.away_errs              = _away_score_data['errors']
+        self.away_record            = f'{away["record"]["wins"]}-{away["record"]["losses"]}'
 
      # HOME Team Data
         home = gameData["teams"]["home"]
+        _home_data = self.__boxscore["teams"]["home"]
+        _home_score_data = self.__linescore['teams']['home']
         self.home_id                = home["id"]
         self.__home_team_full       = home["name"]
         self.__home_team            = home["clubName"]
         self.__home_team_abbrv      = home["abbreviation"]
-        self.__home_record          = f'({home["record"]["wins"]},{home["record"]["losses"]})'
-        self.__home_stats           = self.__boxscore["teams"]["home"]["teamStats"]
-        self.__home_player_data     = self.__boxscore["teams"]["home"]["players"]
-        self.__home_lineup          = self.__boxscore["teams"]["home"]["batters"]
-        self.__home_starting_order  = self.__boxscore["teams"]["home"]["battingOrder"]
-        self.__home_pitcher_lineup  = self.__boxscore["teams"]["home"]["pitchers"]
-        self.__home_bullpen         = self.__boxscore["teams"]["home"]["bullpen"]
+        self.__home_stats           = _home_data["teamStats"]
+        self.__home_player_data     = _home_data["players"]
+        self.__home_lineup          = _home_data["batters"]
+        self.__home_starting_order  = _home_data["battingOrder"]
+        self.__home_pitcher_lineup  = _home_data["pitchers"]
+        self.__home_bullpen         = _home_data["bullpen"]
         self.__home_rhe             = self.__linescore["teams"]["home"]
-        self.__home_bench           = self.__boxscore["teams"]["home"]["bench"]
+        self.__home_bench           = _home_data["bench"]
         self.home_full              = self.__home_team_full
         self.home_club              = self.__home_team
         self.home_abbrv             = self.__home_team_abbrv
+        self.home_runs              = _home_score_data['runs']
+        self.home_hits              = _home_score_data['hits']
+        self.home_errs              = _home_score_data['errors']
+        self.home_record            = f'{home["record"]["wins"]}-{home["record"]["losses"]}'
 
         self.__curr_defense         = self.__linescore["defense"]
         self.__curr_offense         = self.__linescore["offense"]
@@ -951,10 +962,10 @@ class Game:
         # self.__str_display = game_str_display(self)
 
     def __str__(self):
-        return f"mlb.Game | gamePk {self.game_id} | {self.__away_team_abbrv} ({self.__away_rhe.get('runs',0)}) @ {self.__home_team_abbrv} ({self.__home_rhe.get('runs',0)})"
+        return f"{self.game_id} | {self.__away_team_abbrv} ({self.__away_rhe.get('runs',0)}) @ {self.__home_team_abbrv} ({self.__home_rhe.get('runs',0)})"
 
     def __repr__(self):
-        return f"mlb.Game | gamePk {self.game_id} | {self.__away_team_abbrv} ({self.__away_rhe.get('runs',0)}) @ {self.__home_team_abbrv} ({self.__home_rhe.get('runs',0)})"
+        return f"{self.game_id} | {self.__away_team_abbrv} ({self.__away_rhe.get('runs',0)}) @ {self.__home_team_abbrv} ({self.__home_rhe.get('runs',0)})"
 
     def __getitem__(self,key):
         return getattr(self,key)
@@ -2296,39 +2307,43 @@ class Game:
 
         df = pd.DataFrame(data=rows,columns=headers)
 
-        sum_of_K_percs = 0
-        for num in list(df["Strike %"]):
-            try:sum_of_K_percs+=num
-            except:pass
-        try:rounded_strike_perc = round((sum_of_K_percs/len(df)),3)
-        except:rounded_strike_perc = ""
-        sum_df = pd.DataFrame(data=[[
-            "Summary",
-            df["Ct"].sum(),
-            df["IP"].sum(),
-            df["R"].sum(),
-            df["H"].sum(),
-            df["ER"].sum(),
-            df["SO"].sum(),
-            df["BB"].sum(),
-            df["K"].sum(),
-            df["B"].sum(),
-            self.__away_stats["pitching"]["era"],
-            rounded_strike_perc,
-            df["HR"].sum(),
-            df["2B"].sum(),
-            df["3B"].sum(),
-            df["PkOffs"].sum(),
-            df["Outs"].sum(),
-            df["IBB"].sum(),
-            df["HBP"].sum(),
-            df["SB"].sum(),
-            df["WP"].sum(),
-            df["BF"].sum(),
-            " "
-        ]],columns=headers)
+        # sum_of_K_percs = 0
+        # for num in list(df["Strike %"]):
+        #     try:sum_of_K_percs+=num
+        #     except:pass
+        # try:rounded_strike_perc = round((sum_of_K_percs/len(df)),3)
+        # except:rounded_strike_perc = ""
+        
+        # sum_df = pd.DataFrame(data=[[
+        #     "Summary",
+        #     df["Ct"].sum(),
+        #     df["IP"].sum(),
+        #     df["R"].sum(),
+        #     df["H"].sum(),
+        #     df["ER"].sum(),
+        #     df["SO"].sum(),
+        #     df["BB"].sum(),
+        #     df["K"].sum(),
+        #     df["B"].sum(),
+        #     self.__away_stats["pitching"]["era"],
+        #     rounded_strike_perc,
+        #     df["HR"].sum(),
+        #     df["2B"].sum(),
+        #     df["3B"].sum(),
+        #     df["PkOffs"].sum(),
+        #     df["Outs"].sum(),
+        #     df["IBB"].sum(),
+        #     df["HBP"].sum(),
+        #     df["SB"].sum(),
+        #     df["WP"].sum(),
+        #     df["BF"].sum(),
+        #     " "
+        # ]],columns=headers)
 
-        return pd.concat([df,sum_df])
+        # return pd.concat([df,sum_df])
+
+        return df
+
 
     def home_pitching_stats(self) -> pd.DataFrame:
         """
@@ -2393,39 +2408,41 @@ class Game:
 
         df = pd.DataFrame(data=rows,columns=headers)
 
-        sum_of_K_percs = 0
-        for num in list(df["Strike %"]):
-            try:sum_of_K_percs+=num
-            except:pass
-        try:rounded_strike_perc = round((sum_of_K_percs/len(df)),3)
-        except:rounded_strike_perc = ""
-        sum_df = pd.DataFrame(data=[[
-            "Summary",
-            df["Ct"].sum(),
-            df["IP"].sum(),
-            df["R"].sum(),
-            df["H"].sum(),
-            df["ER"].sum(),
-            df["SO"].sum(),
-            df["BB"].sum(),
-            df["K"].sum(),
-            df["B"].sum(),
-            self.__home_stats["pitching"]["era"],
-            rounded_strike_perc,
-            df["HR"].sum(),
-            df["2B"].sum(),
-            df["3B"].sum(),
-            df["PkOffs"].sum(),
-            df["Outs"].sum(),
-            df["IBB"].sum(),
-            df["HBP"].sum(),
-            df["SB"].sum(),
-            df["WP"].sum(),
-            df["BF"].sum(),
-            " "
-        ]],columns=headers)
+        # sum_of_K_percs = 0
+        # for num in list(df["Strike %"]):
+        #     try:sum_of_K_percs+=num
+        #     except:pass
+        # try:rounded_strike_perc = round((sum_of_K_percs/len(df)),3)
+        # except:rounded_strike_perc = ""
+        # sum_df = pd.DataFrame(data=[[
+        #     "Summary",
+        #     df["Ct"].sum(),
+        #     df["IP"].sum(),
+        #     df["R"].sum(),
+        #     df["H"].sum(),
+        #     df["ER"].sum(),
+        #     df["SO"].sum(),
+        #     df["BB"].sum(),
+        #     df["K"].sum(),
+        #     df["B"].sum(),
+        #     self.__home_stats["pitching"]["era"],
+        #     rounded_strike_perc,
+        #     df["HR"].sum(),
+        #     df["2B"].sum(),
+        #     df["3B"].sum(),
+        #     df["PkOffs"].sum(),
+        #     df["Outs"].sum(),
+        #     df["IBB"].sum(),
+        #     df["HBP"].sum(),
+        #     df["SB"].sum(),
+        #     df["WP"].sum(),
+        #     df["BF"].sum(),
+        #     " "
+        # ]],columns=headers)
 
-        return pd.concat([df,sum_df])
+        # return pd.concat([df,sum_df])
+    
+        return df
 
     # TEAMS' INDIVIDUAL FIELDER STATS
     def away_fielding_stats(self) -> pd.DataFrame:
@@ -2610,6 +2627,10 @@ class Game:
         resp = requests.get(url)
         return resp.json()
     
+    def raw_feed_data(self):
+        """Return the raw JSON data"""
+        return self.__raw_game_data
+    
     def get_feed_data(self,timecode=None):
         if timecode is not None:
             url = f"https://statsapi.mlb.com/api/v1.1/game/{self.gamePk}/feed/live?timecode={timecode}"
@@ -2636,11 +2657,11 @@ class Game:
 
 class api:
     
-    @classmethod
-    def get(*endpoints:str,hydrate=None,**query_params):
-        """## get()
+    # @classmethod
+    def get(path:str,hydrate=None,**query_parameters):
+        """## get
         
-        Make your own customized calls to https://statsapi.mlb.com
+        Create your own customized API calls to https://statsapi.mlb.com
         
         --------------------------------------------------------------------
         
@@ -2650,19 +2671,37 @@ class api:
         personId : int (alias -> 'mlbam')
         
         teamId : int (alias -> 'tm_mlbam')
-
+        
+        PATHS:
+        ------
+        * people
+            * /changes
+            * /freeAgents
+            * /{personId}
+            * /{personId}
+            * /{personId}/stats/game/{gamePk}
+            * /{personId}/stats/game/current
+            
+        
+        
         """
-        pass
-    
+        params = {}
+        if path[0] == '/':
+            path = path[1:]
+            
+        params = query_parameters
+        
+        url = f'{BASE}/{path}'
+        
+        req = requests.Request('GET',url,params=params).prepare()
+        
+        
     def prepare(path,**query_params):
         """Build
         
         """
         pass
-    
-    class people:
-        def __init__(self,_mlbam):
-            self._mlbam = _mlbam
+
             
             
     class teams:

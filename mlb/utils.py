@@ -76,8 +76,8 @@ def compile_codes(*code_lists,output_list=False) -> str:
     return all_codes
 
 def draw_strikezone(matchup):
-    player_zoneTop = matchup[0]["zoneTop"]
-    player_zoneBottom = matchup[0]["zoneBottom"]
+    player_zoneTop = matchup[0]["zone_top"]
+    player_zoneBottom = matchup[0]["zone_bot"]
     bat_side = matchup[0]["bat_side"]
     batter = matchup[0]["batter"]
     batter_mlbam = matchup[0]["batter_mlbam"]
