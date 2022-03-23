@@ -174,6 +174,8 @@ from .transactions import transactions as get_transactions
 from .async_mlb import fetch
 from .async_mlb import fetch_text
 
+from .paths import *
+
 from .constants import (
     BASE,
     GAME_TYPES_ALL,

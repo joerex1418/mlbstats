@@ -27,8 +27,7 @@ from .helpers import _parse_team,_parse_league,_parse_division,_parse_person,_pa
 from .helpers import mlb_team, mlb_person
 
 
-from .constants import BASE
-from .constants import POSITION_DICT
+from .constants import BASE, POSITION_DICT, ORDINALS
 
 # from .utils import curr_year
 from .utils import iso_format_ms
@@ -36,7 +35,7 @@ from .utils import utc_zone
 from .utils import prettify_time
 from .utils import default_season
 
-from typing import Union, Optional, Dict, List
+from typing import Union, Optional, Dict, List, Literal
 
 
 class Person:
@@ -932,12 +931,13 @@ class Game:
         self.balls                  = self.__linescore.get("balls",0)
         self.strikes                = self.__linescore.get("strikes",0)
         self.outs                   = self.__linescore.get("outs",0)
-        self.inning                 = self.__linescore.get("currentInning","-")
-        self.inning_ordinal         = self.__linescore.get("currentInningOrdinal","-")
-        self.inning_state           = self.__linescore.get("inningState","-")
+        self.__inning               = self.__linescore.get("currentInning","-")
+        self.__inning_ordinal       = self.__linescore.get("currentInningOrdinal","-")
+        self.__inning_state         = self.__linescore.get("inningState","-")
 
         self.__inn_half             = self.__linescore.get("inningHalf","-")
-        self.__inn_label            = f"{self.__inn_half} of the {self.inning_ordinal}"
+        self.__inn_label            = f"{self.__inn_half} of the {self.__inning_ordinal}"
+        self.__scheduled_innings    = self.__linescore.get('scheduledInnings',9)
 
      # PLAYS and EVENTS
         self.__all_plays = liveData["plays"]["allPlays"]
@@ -972,10 +972,45 @@ class Game:
 
     # def overview(self):
     #     print(self.__str_display)
+    @property
+    def scheduled_innings(self) -> int:
+        """Number of scheduled innings"""
+        return int(self.__scheduled_innings)
+
+    @property
+    def inning(self) -> str:
+        """Current inning as an string formatted integer
+        
+        """
+        return str(self.__inning)
+
+    @property
+    def inning_half(self) -> str:
+        """Label for the current inning
+        
+        "Top", "Bottom"
+        
+        """
+        return str(self.__inning_half)
+    
+    @property
+    def inning_state(self) -> str:
+        """State of current inning
+        
+        """
+        return str(self.__inning_state)
+    
+    @property
+    def inning_ordinal(self) -> str:
+        """Ordinal display for current inning
+        
+        "1st", "2nd", "3rd", etc...
+        
+        """
+        return str(self.__inning_ordinal)
 
     def umpires(self,base=None):
-        """
-        Get info for umpires. If 'base' is None, all umpire data is returned
+        """Get info for umpires. If 'base' is None, all umpire data is returned
         """
         if base is None:
             return self.__umpires
@@ -1037,10 +1072,11 @@ class Game:
                 "errors":ls.get("teams",{}).get("home",{}).get("errors","-")
                 }
         }
-
+        
         ls_inns = []
-
-        for inn in ls["innings"]:
+        ls_innings_array = ls['innings']
+        for inn in ls_innings_array:
+            # inn = ls_innings_array[idx]
             ls_inns.append({
             "away":{
                 "runs":inn.get("away",{}).get("runs","-"),
@@ -1052,10 +1088,29 @@ class Game:
                 "hits":inn.get("home",{}).get("hits","-"),
                 "errors":inn.get("home",{}).get("errors","-")
                 },
-            "inning":inn.get("num",""),
-            "inningOrdinal":inn.get("ordinalNum","")
-            
+            "inning":inn.get("num","-"),
+            "inningOrdinal":ORDINALS[str(inn.get("num","-"))]
             })
+        if len(ls_innings_array) < self.scheduled_innings:
+            most_recent_inn = int(ls_inns[-1]['inning'])
+            inns_til_9 = self.scheduled_innings - len(ls_innings_array)
+            rem_innings = list(range(inns_til_9))
+            for inn in rem_innings:
+                next_inn = most_recent_inn + inn + 1
+                ls_inns.append({
+                "away":{
+                    "runs":'-',
+                    "hits":'-',
+                    "errors":'-'
+                    },
+                "home":{
+                    "runs":'-',
+                    "hits":'-',
+                    "errors":'-'
+                    },
+                "inning":str(next_inn),
+                "inningOrdinal":ORDINALS[str(next_inn)]
+                })
         return {
             "total":ls_total,
             "innings":ls_inns,

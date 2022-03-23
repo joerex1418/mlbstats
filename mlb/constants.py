@@ -6,6 +6,8 @@ BBREF_BASE = "https://widgets.sports-reference.com/wg.fcgi?site=br&url="
 
 LEAGUES = "100,101,102,103,104,105,106"
 
+ORDINALS = {'1':'1st','2':'2nd','3':'3rd','4':'4th','5':'5th','6':'6th','7':'7th','8':'8th','9':'9th','-':'-'}
+
 GAME_TYPES_ALL = "R,D,F,L,C,W,S"
 
 LEADER_CATEGORIES = "assists,shutouts,homeRuns,sacrificeBunts,sacrificeFlies,runs,groundoutToFlyoutRatio,stolenBases,battingAverage,groundOuts,numberOfPitches,onBasePercentage,caughtStealing,groundIntoDoublePlays,totalBases,earnedRunAverage,fieldingPercentage,walksAndHitsPerInningPitched,flyouts,hitByPitches,gamesPlayed,walks,sluggingPercentage,onBasePlusSlugging,runsBattedIn,triples,extraBaseHits,hits,atBats,strikeouts,doubles,totalPlateAppearances,intentionalWalks,wins,losses,saves,wildPitch,airOuts,balk,blownSaves,catcherEarnedRunAverage,catchersInterference,chances,completeGames,doublePlays,earnedRun,errors,gamesFinished,gamesStarted,hitBatsman,hitsPer9Inn,holds,innings,inningsPitched,outfieldAssists,passedBalls,pickoffs,pitchesPerInning,putOuts,rangeFactorPerGame,rangeFactorPer9Inn,saveOpportunities,stolenBasePercentage,strikeoutsPer9Inn,strikeoutWalkRatio,throwingErrors,totalBattersFaced,triplePlays,walksPer9Inn,winPercentage"
