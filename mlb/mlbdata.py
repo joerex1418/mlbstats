@@ -57,7 +57,6 @@ def get_seasons_df() -> pd.DataFrame:
     except Exception as e:
         print(e)
 
-
 def get_venues_df(active_only=False) -> pd.DataFrame:
     """Get Dataframe of Venues
     
@@ -140,10 +139,12 @@ def get_hall_of_fame() -> pd.DataFrame:
     return pd.read_csv(HALL_OF_FAME_CSV,index_col=False)
 
 def get_broadcasts_df() -> pd.DataFrame:
+    """Get Broadcasts data (types, names, ids...)"""
     return pd.read_csv(BROADCASTS_CSV,index_col=False)
 
 def get_bbref_data() -> pd.DataFrame:
-    return pd.read_csv(BBREF_DATA_CSV,index_col=False,dtype={'mlb_ID':'int32'})#.reset_index(drop=True)
+    """Reference dataframe for player's 'Baseball-Reference' & MLB Advanced Media IDs"""
+    return pd.read_csv(BBREF_DATA_CSV,index_col=False,dtype={'mlb_ID':'int32'})
 
 def get_bbref_hitting_war_df() -> pd.DataFrame:
     df = pd.read_csv(BBREF_BATTING_DATA_CSV)

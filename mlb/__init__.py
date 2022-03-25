@@ -61,7 +61,6 @@ from .functions import play_search
 from .functions import pitch_search
 from .functions import game_search
 # from .functions import get_matchup_stats
-from .functions import leaderboards
 from .functions import last_game
 from .functions import next_game
 from .functions import find_team

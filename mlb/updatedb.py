@@ -302,7 +302,7 @@ def update_bbref_data(replace_existing=True) -> Union[pd.DataFrame,None]:
     pit = pit.drop_duplicates(subset='mlb_ID',keep='first')[['name_common','mlb_ID','player_ID']].dropna()
     pit = pit.astype({'mlb_ID':'int32'})
     
-    df = pd.concat([hit,pit]).drop_duplicates(subset='mlb_ID',keep='first')
+    df = pd.concat([hit,pit]).drop_duplicates(subset='mlb_ID',keep='first').rename(columns={'name_common':'name','mlb_ID':'mlbam','player_ID':'bbrefID'})
     
     if replace_existing is False:
         return df.reset_index(drop=True)

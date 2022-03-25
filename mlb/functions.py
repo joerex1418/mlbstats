@@ -5,16 +5,16 @@ import pytz
 import requests
 from urllib.parse import unquote
 
-import pandas as pd
-import datetime as dt
 import asyncio
 import aiohttp
 import nest_asyncio
 nest_asyncio.apply()
+import pandas as pd
+import datetime as dt
 from bs4 import BeautifulSoup as bs
 from bs4 import SoupStrainer
 
-from .async_mlb import (fetch,get_leaders,_determine_loop)
+from .async_mlb import (fetch,_determine_loop)
 from .mlbdata import (
     get_people_df,
     get_season_info,
@@ -50,7 +50,6 @@ from .constants import (
     WO_SEASON
 )
 from .helpers import _parse_person
-# from .constants import sitCodes
 
 from typing import Union, Optional, List
 
@@ -4102,32 +4101,6 @@ def find_venue(query):
 
     return df.drop(columns="vname")
   
-def leaderboards(tm_mlbam=None,lg_mlbam=None,season=None,gameTypes=None,sitCodes=None,limit=None,startDate=None,endDate=None,group_by_team=False):
-    """Get Leaderboard stats
-
-    tm_mlbam : str or int
-        Team's official "MLB Advanced Media" ID
-
-    lg_mlbam : str or int
-        League's official "MLB Advanced Media" ID
-
-    season : str or int, optional (the default is the current season or the most recently completed if in the off-season)
-        the specific season to get stats for
-
-    
-    ### Stat Types
-        - season 
-        - statsSingleSeason
-        - byDateRange
-    
-    """
-
-    if season is None:
-        season = default_season()
-
-    data = get_leaders(tm_mlbam,lg_mlbam,season,gameTypes,sitCodes,limit,startDate,endDate,group_by_team)
-    return data
-
 def play_search(mlbam,seasons=None,statGroup=None,opposingTeamId=None,eventTypes=None,pitchTypes=None,gameTypes=None,**kwargs):
     """Search for any individual play 2008 and later
 
