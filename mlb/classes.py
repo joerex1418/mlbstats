@@ -1,12 +1,13 @@
 import requests
-import pandas as pd
 import datetime as dt
+from typing import Union, Optional, Dict, List, Literal
+
+import pandas as pd
 
 from .functions import _team_data
 from .functions import _franchise_data
 from .functions import _player_data
 from .functions import fetch as _fetch
-from .functions import find_player
 
 from .helpers import mlb_date as md
 from .helpers import mlb_wrapper
@@ -19,23 +20,26 @@ from .helpers import roster_wrapper
 from .helpers import edu_wrapper
 from .helpers import player_stats
 from .helpers import team_stats
-from .helpers import stats_roster
-from .helpers import stats_totals
+# from .helpers import stats_roster
+# from .helpers import stats_totals
 
-from .helpers import _teams_data_collection, _people_data_collection
-from .helpers import _parse_team,_parse_league,_parse_division,_parse_person,_parse_venue
-from .helpers import mlb_team, mlb_person
-
+from .helpers import _teams_data_collection
+from .helpers import _people_data_collection
+from .helpers import _parse_team
+from .helpers import _parse_league
+from .helpers import _parse_division
+from .helpers import _parse_person
+from .helpers import _parse_venue
+from .helpers import mlb_team
+from .helpers import mlb_person
 
 from .constants import BASE, POSITION_DICT, ORDINALS
 
-# from .utils import curr_year
 from .utils import iso_format_ms
 from .utils import utc_zone
 from .utils import prettify_time
 from .utils import default_season
 
-from typing import Union, Optional, Dict, List, Literal
 
 
 class Person:
@@ -88,15 +92,6 @@ class Person:
     ```
     
     """
-    
-    @classmethod
-    def from_search(cls,query:str):
-        try:
-            mlbam = int(find_player(query).iloc[0]['mlbam'])
-            return cls(mlbam)
-        except:
-            print(Exception(cls,'Player not found'))
-            return None
     
     def __new__(cls,mlbam:int,**kwargs):
         self = object.__new__(cls)
@@ -2758,40 +2753,40 @@ class api:
         pass
 
             
-            
+    
     class teams:
         def __new__(cls,_mlbam):
             self = object.__new__(cls)
             self._mlbam = _mlbam
         
-        @classmethod
-        def search_by_name(cls,query:str,season:Optional[Union[int,None]]=None,hydrate:Optional[Union[str,None]]=None):
-            if season is None:
-                season = default_season()
-            if hydrate is not None:
-                if type(hydrate) is str:
-                    hydrations = hydrate.replace(', ',',')
-                elif type(hydrate) is list:
-                    hydrations = ','.join(hydrations)
-                hydrations = f'&hydrate={hydrations}'
-            else:
-                hydrations = ''
-            resp = requests.get(f'{BASE}/teams?sportId=1&season={season}{hydrations}')
+        # @classmethod
+        # def search_by_name(cls,query:str,season:Optional[Union[int,None]]=None,hydrate:Optional[Union[str,None]]=None):
+        #     if season is None:
+        #         season = default_season()
+        #     if hydrate is not None:
+        #         if type(hydrate) is str:
+        #             hydrations = hydrate.replace(', ',',')
+        #         elif type(hydrate) is list:
+        #             hydrations = ','.join(hydrations)
+        #         hydrations = f'&hydrate={hydrations}'
+        #     else:
+        #         hydrations = ''
+        #     resp = requests.get(f'{BASE}/teams?sportId=1&season={season}{hydrations}')
             
-            for t in resp.json()['teams']:
-                if query.lower() in t.get('name').lower():
-                    return mlb_team(raw_data=t,**_parse_team(t))
+        #     for t in resp.json()['teams']:
+        #         if query.lower() in t.get('name').lower():
+        #             return mlb_team(raw_data=t,**_parse_team(t))
                 
-        @classmethod
-        def search_by_venue(cls,query:str,season:Optional[int]=None):
-            if season is None:
-                season = default_season()
+        # @classmethod
+        # def search_by_venue(cls,query:str,season:Optional[int]=None):
+        #     if season is None:
+        #         season = default_season()
                 
-            resp = requests.get(f'{BASE}/teams?sportId=1&season={season}')
+        #     resp = requests.get(f'{BASE}/teams?sportId=1&season={season}')
             
-            for t in resp.json()['teams']:
-                if query.lower() in t.get('venue',{}).get('name','').lower():
-                    return mlb_team(**_parse_team(t))
+        #     for t in resp.json()['teams']:
+        #         if query.lower() in t.get('venue',{}).get('name','').lower():
+        #             return mlb_team(**_parse_team(t))
             
             
     class leagues:
@@ -2852,6 +2847,24 @@ class api:
         df = pd.DataFrame(data=parsed_data).reset_index(drop=True)
         return _people_data_collection(df.fillna('-'))
 
+    @classmethod
+    def team_search(cls,query:str,season:Optional[Union[int,None]]=None,hydrate:Optional[Union[str,None]]=None):
+        if season is None:
+            season = default_season()
+        if hydrate is not None:
+            if type(hydrate) is str:
+                hydrations = hydrate.replace(', ',',')
+            elif type(hydrate) is list:
+                hydrations = ','.join(hydrations)
+            hydrations = f'&hydrate={hydrations}'
+        else:
+            hydrations = ''
+        resp = requests.get(f'{BASE}/teams?sportId=1&season={season}{hydrations}')
+        
+        for t in resp.json()['teams']:
+            if query.lower() in t.get('name').lower():
+                return mlb_team(raw_data=t,**_parse_team(t))
+    
     
     def get_teams(start_season:Optional[int]=None,end_season:Optional[int]=None,hydrate_league=False,hydrate_division=False):
         urls = []

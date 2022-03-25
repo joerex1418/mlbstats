@@ -2,7 +2,6 @@ import os
 
 import pandas as pd
 import datetime as dt
-from numpy import NAN
 # from sqlalchemy import create_engine
 
 from .paths import *
@@ -23,19 +22,8 @@ def get_teams_df(year=None) -> pd.DataFrame:
     except Exception as e:
         print(e)
 
-def get_franchise_df(teamID) -> pd.DataFrame:
-    try:
-        teamID = int(teamID)
-        search_by = "mlbam"
-    except:
-        search_by = "bbrefID"
-    df = get_teams_df()
-    if search_by == "mlbam":
-        return df[df["mlbam"]==teamID].sort_values(by="yearID",ascending=False)
-    elif search_by == "bbrefID":
-        return df[df["bbrefID"]==teamID].sort_values(by="yearID",ascending=False)
-
 def get_standings_df() -> pd.DataFrame:
+    """Standings for each season"""
     try:
         df = pd.read_csv(YBY_STANDINGS_CSV,index_col=False)
 
@@ -46,6 +34,7 @@ def get_standings_df() -> pd.DataFrame:
         return None
 
 def get_yby_records(raw=False) -> pd.DataFrame:
+    """Record splits by season for each team"""
     try:
         df = pd.read_csv(YBY_RECORDS_CSV,index_col=False)
         return df
@@ -54,41 +43,8 @@ def get_yby_records(raw=False) -> pd.DataFrame:
         print(e)
 
 def get_people_df() -> pd.DataFrame:
-    try:
-        # engine = create_engine(f"sqlite:///{os.path.abspath('SimpleStatsMLB/baseball.db')}")
-        # engine = create_engine(f"sqlite:///{os.path.abspath('simplestats/baseball.db')}")
-        # engine = create_engine(BASEBALL_DB)
-        # conn = engine.connect()
-        # df = pd.read_sql_table(table_name='people',con=conn,index_col=False,coerce_float=False).drop(columns=['index'])
-        # conn.close()
-        
-        df = pd.read_csv(PEOPLE_CSV,index_col=False)
-
-        return df
-
-    except Exception as e:
-        print(e)
-        try:
-            pass
-            # conn.close()
-        except:
-            pass
-
-def get_bios_df() -> pd.DataFrame:
-    try:
-        df = pd.read_csv(BIOS_CSV,dtype={'isPlayer':'str','isActive':'str','primaryNumber':'str'},index_col=False)
-        df.replace('-',NAN,inplace=True)
-        df['name'] = df['name'].astype('str')
-        df[['birthDate','deathDate','mlbDebutDate','lastGame']] = df[['birthDate','deathDate','mlbDebutDate','lastGame']].apply(pd.to_datetime,format=r"%Y-%m-%d")
-
-        return df
-    except Exception as e:
-        print(e)
-        try:
-            pass
-            # conn.close()
-        except:
-            pass
+    df = pd.read_csv(PEOPLE_CSV,index_col=False,dtype={'mlbam':'int32','year_debut':'int32','year_recent':'int32'})
+    return df
 
 def get_seasons_df() -> pd.DataFrame:
     try:
@@ -102,20 +58,22 @@ def get_seasons_df() -> pd.DataFrame:
         print(e)
 
 
-def get_venues_df(active_only=True) -> pd.DataFrame:
-    try:
-        df = pd.read_csv(VENUES_CSV,index_col=False)
+def get_venues_df(active_only=False) -> pd.DataFrame:
+    """Get Dataframe of Venues
+    
+    Parameters:
+    -----------
+    active_only : bool, default False
+        set to True to retrieve data for only currently active venues
+    
+    """
 
-        if active_only is True:
-            df = df[df["active"]==True].reset_index(drop=True)
-        
-        return df
-    except Exception as e:
-        print(e)
+    df = pd.read_csv(VENUES_CSV,index_col=False,dtype={'mlbam':'int32','tz_offset':'int32'})
 
-def get_playoff_history(mlbam):
-    """Needs work. Use StatsAPI"""
-    return {'do not use':'this function'} # postseason appearance function is WIP
+    if active_only is True:
+        df = df[df["active"]==True].reset_index(drop=True)
+    
+    return df
 
 def get_season_info(date=None) -> tuple:
     """
@@ -178,10 +136,14 @@ def get_season_info(date=None) -> tuple:
         print(e)
 
 def get_hall_of_fame() -> pd.DataFrame:
+    """Get Hall of Fame Data"""
     return pd.read_csv(HALL_OF_FAME_CSV,index_col=False)
 
 def get_broadcasts_df() -> pd.DataFrame:
     return pd.read_csv(BROADCASTS_CSV,index_col=False)
+
+def get_bbref_data() -> pd.DataFrame:
+    return pd.read_csv(BBREF_DATA_CSV,index_col=False,dtype={'mlb_ID':'int32'})#.reset_index(drop=True)
 
 def get_bbref_hitting_war_df() -> pd.DataFrame:
     df = pd.read_csv(BBREF_BATTING_DATA_CSV)
@@ -227,15 +189,6 @@ def save_people():
     except:
         print("ERROR: could not save PEOPLE dataframe")
 
-def save_bios():
-    try:
-        df = get_bios_df()
-        # df.to_csv(os.path.abspath('simplestats/baseball/bios_master.csv'),index=False)
-        df.to_csv(BIOS_CSV,index=False)
-        print("Successfully saved BIOS dataframe")
-    except:
-        print("ERROR: could not save BIOS dataframe")
-
 def save_seasons():
     try:
         df = get_seasons_df()
@@ -264,6 +217,6 @@ def save_standings():
         print("ERROR: could not save STANDINGS dataframe")
 
 def save_all():
-    for s in (save_teams,save_yby_records,save_standings,save_people,save_bios,save_seasons,save_venues):
+    for s in (save_teams,save_yby_records,save_standings,save_people,save_seasons,save_venues):
         s()
 

@@ -1,5 +1,4 @@
-"""
-# SimpleStatsMLB
+"""# SimpleStatsMLB
 
 Python Wrapper for the MLB Stats API - https://statsapi.mlb.com
 
@@ -26,7 +25,7 @@ Highlights
     * `Game` - instances represent LIVE data for a game
         * Available data includes scores, game stats, lineups, pitch logs, play logs, weather, 
         attendance, venue info, and more!
-        
+
 ### Pitch & Play Finder!
     * With the `pitch_search` and `play_search` functions, you'll be able to search for any 
     plays/pitches over recent years with detailed information 
@@ -47,11 +46,11 @@ Highlights
 
 """
 
-from .classes import api
 from .classes import Person
 from .classes import Franchise
 from .classes import Team
 from .classes import Game
+from .classes import api
 franchise = Franchise
 person = Person
 team = Team
@@ -66,7 +65,6 @@ from .functions import leaderboards
 from .functions import last_game
 from .functions import next_game
 from .functions import find_team
-from .functions import find_player
 from .functions import find_venue
 from .functions import schedule
 from .functions import free_agents
@@ -96,10 +94,6 @@ from .functions import league_fielding
 from .functions import league_hitting_advanced
 from .functions import league_pitching_advanced
 from .functions import league_leaders
-
-# from .functions import _player_data
-# from .functions import _franchise_data
-# from .functions import _team_data
 
 player_batting = player_hitting
 team_batting = team_hitting
@@ -131,7 +125,7 @@ from .utils import COLS_HIT
 
 from .mlbdata import get
 from .mlbdata import save_all
-from .mlbdata import save_bios
+# from .mlbdata import save_bios
 from .mlbdata import save_teams
 from .mlbdata import save_venues
 from .mlbdata import save_people
@@ -139,7 +133,7 @@ from .mlbdata import save_seasons
 from .mlbdata import save_standings
 from .mlbdata import save_yby_records
 from .mlbdata import get_season_info
-from .mlbdata import get_bios_df as bios
+# from .mlbdata import get_bios_df as bios
 from .mlbdata import get_teams_df as teams
 from .mlbdata import get_people_df as people
 from .mlbdata import get_venues_df as venues
@@ -149,27 +143,28 @@ from .mlbdata import get_standings_df as standings
 from .mlbdata import get_yby_records as yby_records
 from .mlbdata import get_hall_of_fame as hall_of_fame
 from .mlbdata import get_broadcasts_df as broadcasts
+from .mlbdata import get_bbref_data as bbref_data
 from .mlbdata import get_bbref_hitting_war_df as bbref_war_hit
 from .mlbdata import get_bbref_pitching_war_df as bbref_war_pitch
+legends = hall_of_fame
 
 from .updatedb import update_hof
-from .updatedb import update_bios
 from .updatedb import update_people
 from .updatedb import update_venues
 from .updatedb import update_seasons
 from .updatedb import update_leagues
 from .updatedb import update_yby_records
+from .updatedb import update_bbref_data
 from .updatedb import update_bbref_hitting_war
 from .updatedb import update_bbref_pitching_war
+update_legends = update_hof
 update_bbref_batting_war = update_bbref_hitting_war
-
 
 from .transactions import draft as get_draft
 from .transactions import prospects as get_prospects
 from .transactions import free_agents as get_free_agents
 from .transactions import transactions as get_transactions
 
-# from .utils_team import team_leaders
 
 from .async_mlb import fetch
 from .async_mlb import fetch_text

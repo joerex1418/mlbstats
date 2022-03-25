@@ -19,7 +19,6 @@ from .mlbdata import (
     get_people_df,
     get_season_info,
     get_venues_df,
-    get_bios_df,
     get_teams_df,
     get_yby_records,
     get_standings_df,
@@ -645,8 +644,8 @@ def _team_data(_mlbam,_season,**kwargs) -> Union[dict,list]:
 
     tms_df = tms_df[tms_df['yearID']==int(_season)]
 
-    ssn_start : pd.Timestamp = ssn_row['seasonStartDate']
-    ssn_end   : pd.Timestamp = ssn_row['seasonEndDate']
+    ssn_start : pd.Timestamp = ssn_row['season_start_date']
+    ssn_end   : pd.Timestamp = ssn_row['season_end_date']
     ssn_start = ssn_start.strftime(r"%Y-%m-%d")
     ssn_end   = ssn_end.strftime(r"%Y-%m-%d")
 
@@ -4083,26 +4082,6 @@ def find_team(query,season=None):
 
     return df.drop(columns="fn")
 
-def find_player(query):
-    """Search for players by name
-
-    Paramaters
-    ----------
-    query : str
-        keywords to search for in the 'people' data (e.g. "Jose Abre")
-
-    """
-
-    df = get_bios_df()
-
-    query = query.lower()
-
-    df['nml'] = df['name'].str.lower()
-
-    df = df[df['nml'].str.contains(query)]
-
-    return df.drop(columns="nml").sort_values(by='lastGame',ascending=False)
-
 def find_venue(query):
     """Search for venues by name
 
@@ -4119,7 +4098,7 @@ def find_venue(query):
 
     df['vname'] = df['name'].str.lower()
 
-    df = df[df['vname'].str.contains(query)]
+    df = df[df['vname'].str.contains(query,case=False,regex=False)]
 
     return df.drop(columns="vname")
   
