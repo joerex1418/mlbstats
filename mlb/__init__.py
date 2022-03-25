@@ -56,6 +56,8 @@ person = Person
 team = Team
 game = Game
 
+# FOR CONSIDERATION:
+# https://raw.githubusercontent.com/chadwickbureau/baseballdatabank/master/core/Teams.csv
 
 from .functions import play_search
 from .functions import pitch_search
