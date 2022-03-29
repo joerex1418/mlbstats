@@ -2544,12 +2544,6 @@ class Game:
                     avg = player["seasonStats"]["batting"]["avg"]
                     isCurrentBatter = player["gameStatus"]["isCurrentBatter"]
                     isSubstitute = player["gameStatus"]["isSubstitute"]
-                    # try:bbrefID = self.__people[self.__people["mlbam"]==playerid].bbrefID.item()
-                    # except:
-                    #     search_url = f"https://www.baseball-reference.com/redirect.fcgi?player=1&mlb_ID={playerid}"
-                    #     req = requests.get(search_url)
-                    #     resp = req.url
-                    #     bbrefID = resp[resp.rfind("/")+1:resp.rfind(".")]
 
                     row_data = [
                         name,
@@ -3127,10 +3121,10 @@ class api:
     # @classmethod
     def get(path: str, hydrate=None, **query_parameters):
         """## get
-
+        
         Create your own customized API calls to https://statsapi.mlb.com
 
-        --------------------------------------------------------------------
+        ----------------------------------------------------------------
 
         Parameters:
         -----------
