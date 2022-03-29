@@ -1,4 +1,4 @@
-index,yearID,fullName,lgAbbrv,locationName,clubName,mlbam,franchID,bbrefID,retroID,mlbID,fileCode,venueName,venue_mlbam,firstYear
+index,season,name_full,lg_abbrv,name_location,name_club,mlbam,franchID,bbrefID,retroID,mlbID,file_code,venue_name,venue_mlbam,first_year
 diamondbacks_2022,2022,Arizona Diamondbacks,NL West,Arizona,Diamondbacks,109,ARI,ARI,ARI,ARI,ARI,Chase Field,15,1998
 braves_2022,2022,Atlanta Braves,NL East,Atlanta,Braves,144,ATL,ATL,ATL,ATL,ATL,Truist Park,4705,1876
 orioles_2022,2022,Baltimore Orioles,AL East,Baltimore,Orioles,110,BAL,BAL,BAL,BAL,BAL,Oriole Park at Camden Yards,2,1901
@@ -2375,53 +2375,53 @@ pirates_1916,1916,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,P
 browns_1916,1916,St. Louis Browns,AL,St. Louis,Browns,110,BAL,SLB,SLA,SLB,BAL,Sportsman's Park,3168,1901
 cardinals_1916,1916,St. Louis Cardinals,NL,St. Louis,Cardinals,138,STL,STL,SLN,STL,STL,Robison Field,3141,1882
 senators_1916,1916,Washington Senators,AL,Washington,Senators,142,MIN,WSH,WS1,WAS,MIN,National Park,3126,1901
-terrapins_1915,1915,Baltimore Terrapins,FL,Baltimore,Terrapins,165,BLT,BAL,BLF,BAL,T165,Terrapin Park,--,1914
+terrapins_1915,1915,Baltimore Terrapins,FL,Baltimore,Terrapins,165,BLT,BAL,BLF,BAL,T165,Terrapin Park,0,1914
 braves_1915,1915,Boston Braves,NL,Boston,Braves,144,ATL,BSN,BSN,BSN,ATL,Fenway Park,3,1876
 red_sox_1915,1915,Boston Red Sox,AL,Boston,Red Sox,111,BOS,BOS,BOS,BOS,BOS,Fenway Park,3,1901
 robins_1915,1915,Brooklyn Robins,NL,Brooklyn,Robins,119,LAD,BRO,BRO,BRO,LA,Ebbets Field,3121,1884
 feds_1915,1915,Brooklyn Tip-Tops,FL,Brooklyn,Feds,185,BTT,BTT,BRF,BKF,T185,Washington Park IV,4945,1914
-blues_1915,1915,Buffalo Blues,FL,Buffalo,Blues,189,BFL,BUF,BUF,BUF,T189,Federal League Park,--,1914
+blues_1915,1915,Buffalo Blues,FL,Buffalo,Blues,189,BFL,BUF,BUF,BUF,T189,Federal League Park,0,1914
 cubs_1915,1915,Chicago Cubs,NL,Chicago,Cubs,112,CHC,CHC,CHN,CHC,CHC,West Side Park,3169,1876
-whales_1915,1915,Chicago Whales,FL,Chicago,Whales,191,CHH,CHI,CHF,CWH,T191,Weeghman Park,--,1914
+whales_1915,1915,Chicago Whales,FL,Chicago,Whales,191,CHH,CHI,CHF,CWH,T191,Weeghman Park,0,1914
 white_sox_1915,1915,Chicago White Sox,AL,Chicago,White Sox,145,CHW,CHW,CHA,CWS,CWS,Comiskey Park I,3119,1901
 reds_1915,1915,Cincinnati Reds,NL,Cincinnati,Reds,113,CIN,CIN,CIN,CIN,CIN,Redland Field,3120,1882
 indians_1915,1915,Cleveland Indians,AL,Cleveland,Indians,114,CLE,CLE,CLE,CLE,CLE,League Park,3131,1901
 tigers_1915,1915,Detroit Tigers,AL,Detroit,Tigers,116,DET,DET,DET,DET,DET,Navin Field,6,1901
-packers_1915,1915,Kansas City Packers,FL,Kansas City,Packers,128,KCP,KCP,KCF,KC,T128,Gordon and Koppel Field,--,1914
+packers_1915,1915,Kansas City Packers,FL,Kansas City,Packers,128,KCP,KCP,KCF,KC,T128,Gordon and Koppel Field,0,1914
 giants_1915,1915,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds,3140,1883
 yankees_1915,1915,New York Yankees,AL,New York,Yankees,147,NYY,NYY,NYA,NYY,NYY,Polo Grounds,3140,1903
-peppers_1915,1915,Newark Peppers,FL,Newark,Peppers,153,NEW,NEW,NEW,NWK,T153,Harrison Field,--,1914
+peppers_1915,1915,Newark Peppers,FL,Newark,Peppers,153,NEW,NEW,NEW,NWK,T153,Harrison Field,0,1914
 athletics_1915,1915,Philadelphia Athletics,AL,Philadelphia,Athletics,133,OAK,PHA,PHA,PHA,OAK,Shibe Park,3143,1901
 phillies_1915,1915,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Baker Bowl,3113,1883
 pirates_1915,1915,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Forbes Field,3125,1882
-rebels_1915,1915,Pittsburgh Rebels,FL,Pittsburgh,Rebels,176,PBS,PBS,PTF,PRB,T176,Exposition Park III,--,1914
+rebels_1915,1915,Pittsburgh Rebels,FL,Pittsburgh,Rebels,176,PBS,PBS,PTF,PRB,T176,Exposition Park III,0,1914
 browns_1915,1915,St. Louis Browns,AL,St. Louis,Browns,110,BAL,SLB,SLA,SLB,BAL,Sportsman's Park,3168,1901
 cardinals_1915,1915,St. Louis Cardinals,NL,St. Louis,Cardinals,138,STL,STL,SLN,STL,STL,Robison Field,3141,1882
-terriers_1915,1915,St. Louis Terriers,FL,St. Louis,Terriers,197,SLI,SLM,SLF,SLT,T197,Handlan's Park,--,1914
+terriers_1915,1915,St. Louis Terriers,FL,St. Louis,Terriers,197,SLI,SLM,SLF,SLT,T197,Handlan's Park,0,1914
 senators_1915,1915,Washington Senators,AL,Washington,Senators,142,MIN,WSH,WS1,WAS,MIN,National Park,3126,1901
-terrapins_1914,1914,Baltimore Terrapins,FL,Baltimore,Terrapins,165,BLT,BAL,BLF,BAL,T165,Terrapin Park,--,1914
+terrapins_1914,1914,Baltimore Terrapins,FL,Baltimore,Terrapins,165,BLT,BAL,BLF,BAL,T165,Terrapin Park,0,1914
 braves_1914,1914,Boston Braves,NL,Boston,Braves,144,ATL,BSN,BSN,BSN,ATL,South End Grounds,3147,1876
 red_sox_1914,1914,Boston Red Sox,AL,Boston,Red Sox,111,BOS,BOS,BOS,BOS,BOS,Fenway Park,3,1901
 robins_1914,1914,Brooklyn Robins,NL,Brooklyn,Robins,119,LAD,BRO,BRO,BRO,LA,Ebbets Field,3121,1884
 tip-tops_1914,1914,Brooklyn Tip-Tops,FL,Brooklyn,Tip-Tops,185,BTT,BTT,BRF,BKF,T185,Washington Park IV,4945,1914
-blues_1914,1914,Buffalo Blues,FL,Buffalo,Blues,189,BFL,BUF,BUF,BUF,T189,Federal League Park,--,1914
+blues_1914,1914,Buffalo Blues,FL,Buffalo,Blues,189,BFL,BUF,BUF,BUF,T189,Federal League Park,0,1914
 cubs_1914,1914,Chicago Cubs,NL,Chicago,Cubs,112,CHC,CHC,CHN,CHC,CHC,West Side Park,3169,1876
-whales_1914,1914,Chicago Whales,FL,Chicago,Whales,191,CHH,CHI,CHF,CWH,T191,Weeghman Park,--,1914
+whales_1914,1914,Chicago Whales,FL,Chicago,Whales,191,CHH,CHI,CHF,CWH,T191,Weeghman Park,0,1914
 white_sox_1914,1914,Chicago White Sox,AL,Chicago,White Sox,145,CHW,CHW,CHA,CWS,CWS,Comiskey Park I,3119,1901
 reds_1914,1914,Cincinnati Reds,NL,Cincinnati,Reds,113,CIN,CIN,CIN,CIN,CIN,Redland Field,3120,1882
 naps_1914,1914,Cleveland Naps,AL,Cleveland,Naps,114,CLE,CLE,CLE,CLE,CLE,League Park,3131,1901
 tigers_1914,1914,Detroit Tigers,AL,Detroit,Tigers,116,DET,DET,DET,DET,DET,Navin Field,6,1901
-hoosiers_1914,1914,Indianapolis Hoosiers,FL,Indianapolis,Hoosiers,153,NEW,IND,IND,IND,T153,Federal League Park,--,1914
-packers_1914,1914,Kansas City Packers,FL,Kansas City,Packers,128,KCP,KCP,KCF,KC,T128,Gordon and Koppel Field,--,1914
+hoosiers_1914,1914,Indianapolis Hoosiers,FL,Indianapolis,Hoosiers,153,NEW,IND,IND,IND,T153,Federal League Park,0,1914
+packers_1914,1914,Kansas City Packers,FL,Kansas City,Packers,128,KCP,KCP,KCF,KC,T128,Gordon and Koppel Field,0,1914
 giants_1914,1914,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds,3140,1883
 yankees_1914,1914,New York Yankees,AL,New York,Yankees,147,NYY,NYY,NYA,NYY,NYY,Polo Grounds,3140,1903
 athletics_1914,1914,Philadelphia Athletics,AL,Philadelphia,Athletics,133,OAK,PHA,PHA,PHA,OAK,Shibe Park,3143,1901
 phillies_1914,1914,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Baker Bowl,3113,1883
 pirates_1914,1914,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Forbes Field,3125,1882
-rebels_1914,1914,Pittsburgh Rebels,FL,Pittsburgh,Rebels,176,PBS,PBS,PTF,PRB,T176,Exposition Park III,--,1914
+rebels_1914,1914,Pittsburgh Rebels,FL,Pittsburgh,Rebels,176,PBS,PBS,PTF,PRB,T176,Exposition Park III,0,1914
 browns_1914,1914,St. Louis Browns,AL,St. Louis,Browns,110,BAL,SLB,SLA,SLB,BAL,Sportsman's Park,3168,1901
 cardinals_1914,1914,St. Louis Cardinals,NL,St. Louis,Cardinals,138,STL,STL,SLN,STL,STL,Robison Field,3141,1882
-terriers_1914,1914,St. Louis Terriers,FL,St. Louis,Terriers,197,SLI,SLM,SLF,SLT,T197,Handlan's Park,--,1914
+terriers_1914,1914,St. Louis Terriers,FL,St. Louis,Terriers,197,SLI,SLM,SLF,SLT,T197,Handlan's Park,0,1914
 senators_1914,1914,Washington Senators,AL,Washington,Senators,142,MIN,WSH,WS1,WAS,MIN,National Park,3126,1901
 braves_1913,1913,Boston Braves,NL,Boston,Braves,144,ATL,BSN,BSN,BSN,ATL,South End Grounds,3147,1876
 red_sox_1913,1913,Boston Red Sox,AL,Boston,Red Sox,111,BOS,BOS,BOS,BOS,BOS,Fenway Park,3,1901
@@ -2637,7 +2637,7 @@ orphans_1900,1900,Chicago Orphans,NL,Chicago,Orphans,112,CHC,CHC,CHN,CHI,CHC,Wes
 reds_1900,1900,Cincinnati Reds,NL,Cincinnati,Reds,113,CIN,CIN,CIN,CIN,CIN,League Park II,3160,1882
 giants_1900,1900,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds IV,3140,1883
 phillies_1900,1900,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Baker Bowl,3113,1883
-pirates_1900,1900,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,--,1882
+pirates_1900,1900,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,0,1882
 cardinals_1900,1900,St. Louis Cardinals,NL,St. Louis,Cardinals,138,STL,STL,SLN,STL,STL,Robison Field,3149,1882
 orioles_1899,1899,Baltimore Orioles,NL,Baltimore,Orioles,166,BLO,BLN,BLN,BAL,T166,Oriole Park III,2,1882
 beaneaters_1899,1899,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds III,3147,1876
@@ -2645,202 +2645,202 @@ superbas_1899,1899,Brooklyn Superbas,NL,Brooklyn,Superbas,119,LAD,BRO,BRO,BRO,LA
 orphans_1899,1899,Chicago Orphans,NL,Chicago,Orphans,112,CHC,CHC,CHN,CHI,CHC,West Side Grounds,3169,1876
 reds_1899,1899,Cincinnati Reds,NL,Cincinnati,Reds,113,CIN,CIN,CIN,CIN,CIN,League Park II,3160,1882
 spiders_1899,1899,Cleveland Spiders,NL,Cleveland,Spiders,209,CLV,CLV,CL4,CLE,T209,League Park I,3159,1887
-colonels_1899,1899,Louisville Colonels,NL,Louisville,Colonels,148,LOU,LOU,LS3,LOU,T148,Eclipse Park II,--,1882
+colonels_1899,1899,Louisville Colonels,NL,Louisville,Colonels,148,LOU,LOU,LS3,LOU,T148,Eclipse Park II,0,1882
 giants_1899,1899,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds IV,3140,1883
 phillies_1899,1899,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Baker Bowl,3113,1883
-pirates_1899,1899,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,--,1882
+pirates_1899,1899,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,0,1882
 perfectos_1899,1899,St. Louis Perfectos,NL,St. Louis,Perfectos,138,STL,STL,SLN,STL,STL,Robison Field,3149,1882
-senators_1899,1899,Washington Senators,NL,Washington,Senators,221,WAS,WHS,WSN,WAS,T221,Boundary Field,--,1891
+senators_1899,1899,Washington Senators,NL,Washington,Senators,221,WAS,WHS,WSN,WAS,T221,Boundary Field,0,1891
 orioles_1898,1898,Baltimore Orioles,NL,Baltimore,Orioles,166,BLO,BLN,BLN,BAL,T166,Oriole Park III,2,1882
 beaneaters_1898,1898,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds III,3147,1876
 bridegrooms_1898,1898,Brooklyn Bridegrooms,NL,Brooklyn,Bridegrooms,119,LAD,BRO,BRO,BRO,LA,Washington Park III,4945,1884
 orphans_1898,1898,Chicago Orphans,NL,Chicago,Orphans,112,CHC,CHC,CHN,CHI,CHC,West Side Grounds,3169,1876
 reds_1898,1898,Cincinnati Reds,NL,Cincinnati,Reds,113,CIN,CIN,CIN,CIN,CIN,League Park II,3160,1882
 spiders_1898,1898,Cleveland Spiders,NL,Cleveland,Spiders,209,CLV,CLV,CL4,CLE,T209,West Side Grounds,3169,1887
-colonels_1898,1898,Louisville Colonels,NL,Louisville,Colonels,148,LOU,LOU,LS3,LOU,T148,Eclipse Park II,--,1882
+colonels_1898,1898,Louisville Colonels,NL,Louisville,Colonels,148,LOU,LOU,LS3,LOU,T148,Eclipse Park II,0,1882
 giants_1898,1898,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds IV,3140,1883
 phillies_1898,1898,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Baker Bowl,3113,1883
-pirates_1898,1898,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,--,1882
+pirates_1898,1898,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,0,1882
 browns_1898,1898,St. Louis Browns,NL,St. Louis,Browns,138,STL,STL,SLN,STL,STL,Robison Field,3149,1882
-senators_1898,1898,Washington Senators,NL,Washington,Senators,221,WAS,WHS,WSN,WAS,T221,Boundary Field,--,1891
+senators_1898,1898,Washington Senators,NL,Washington,Senators,221,WAS,WHS,WSN,WAS,T221,Boundary Field,0,1891
 orioles_1897,1897,Baltimore Orioles,NL,Baltimore,Orioles,166,BLO,BLN,BLN,BAL,T166,Oriole Park III,2,1882
 beaneaters_1897,1897,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds III,3147,1876
-bridegrooms_1897,1897,Brooklyn Bridegrooms,NL,Brooklyn,Bridegrooms,119,LAD,BRO,BRO,BRO,LA,Eastern Park,--,1884
+bridegrooms_1897,1897,Brooklyn Bridegrooms,NL,Brooklyn,Bridegrooms,119,LAD,BRO,BRO,BRO,LA,Eastern Park,0,1884
 colts_1897,1897,Chicago Colts,NL,Chicago,Colts,112,CHC,CHC,CHN,CHI,CHC,West Side Grounds,3169,1876
 reds_1897,1897,Cincinnati Reds,NL,Cincinnati,Reds,113,CIN,CIN,CIN,CIN,CIN,League Park II,3160,1882
 spiders_1897,1897,Cleveland Spiders,NL,Cleveland,Spiders,209,CLV,CLV,CL4,CLE,T209,League Park I,3159,1887
-colonels_1897,1897,Louisville Colonels,NL,Louisville,Colonels,148,LOU,LOU,LS3,LOU,T148,Eclipse Park II,--,1882
+colonels_1897,1897,Louisville Colonels,NL,Louisville,Colonels,148,LOU,LOU,LS3,LOU,T148,Eclipse Park II,0,1882
 giants_1897,1897,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds IV,3140,1883
 phillies_1897,1897,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Baker Bowl,3113,1883
-pirates_1897,1897,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,--,1882
+pirates_1897,1897,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,0,1882
 browns_1897,1897,St. Louis Browns,NL,St. Louis,Browns,138,STL,STL,SLN,STL,STL,Robison Field,3149,1882
-senators_1897,1897,Washington Senators,NL,Washington,Senators,221,WAS,WHS,WSN,WAS,T221,Boundary Field,--,1891
+senators_1897,1897,Washington Senators,NL,Washington,Senators,221,WAS,WHS,WSN,WAS,T221,Boundary Field,0,1891
 orioles_1896,1896,Baltimore Orioles,NL,Baltimore,Orioles,166,BLO,BLN,BLN,BAL,T166,Oriole Park III,2,1882
 beaneaters_1896,1896,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds III,3147,1876
-bridegrooms_1896,1896,Brooklyn Bridegrooms,NL,Brooklyn,Bridegrooms,119,LAD,BRO,BRO,BRO,LA,Eastern Park,--,1884
+bridegrooms_1896,1896,Brooklyn Bridegrooms,NL,Brooklyn,Bridegrooms,119,LAD,BRO,BRO,BRO,LA,Eastern Park,0,1884
 colts_1896,1896,Chicago Colts,NL,Chicago,Colts,112,CHC,CHC,CHN,CHI,CHC,West Side Grounds,3169,1876
 reds_1896,1896,Cincinnati Reds,NL,Cincinnati,Reds,113,CIN,CIN,CIN,CIN,CIN,League Park II,3160,1882
 spiders_1896,1896,Cleveland Spiders,NL,Cleveland,Spiders,209,CLV,CLV,CL4,CLE,T209,League Park I,3159,1887
-colonels_1896,1896,Louisville Colonels,NL,Louisville,Colonels,148,LOU,LOU,LS3,LOU,T148,Eclipse Park II,--,1882
+colonels_1896,1896,Louisville Colonels,NL,Louisville,Colonels,148,LOU,LOU,LS3,LOU,T148,Eclipse Park II,0,1882
 giants_1896,1896,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds IV,3140,1883
 phillies_1896,1896,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Baker Bowl,3113,1883
-pirates_1896,1896,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,--,1882
+pirates_1896,1896,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,0,1882
 browns_1896,1896,St. Louis Browns,NL,St. Louis,Browns,138,STL,STL,SLN,STL,STL,Robison Field,3149,1882
-senators_1896,1896,Washington Senators,NL,Washington,Senators,221,WAS,WHS,WSN,WAS,T221,Boundary Field,--,1891
+senators_1896,1896,Washington Senators,NL,Washington,Senators,221,WAS,WHS,WSN,WAS,T221,Boundary Field,0,1891
 orioles_1895,1895,Baltimore Orioles,NL,Baltimore,Orioles,166,BLO,BLN,BLN,BAL,T166,Oriole Park III,2,1882
 beaneaters_1895,1895,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds III,3147,1876
-grooms_1895,1895,Brooklyn Grooms,NL,Brooklyn,Grooms,119,LAD,BRO,BRO,BRO,LA,Eastern Park,--,1884
+grooms_1895,1895,Brooklyn Grooms,NL,Brooklyn,Grooms,119,LAD,BRO,BRO,BRO,LA,Eastern Park,0,1884
 colts_1895,1895,Chicago Colts,NL,Chicago,Colts,112,CHC,CHC,CHN,CHI,CHC,West Side Grounds,3169,1876
 reds_1895,1895,Cincinnati Reds,NL,Cincinnati,Reds,113,CIN,CIN,CIN,CIN,CIN,League Park II,3160,1882
 spiders_1895,1895,Cleveland Spiders,NL,Cleveland,Spiders,209,CLV,CLV,CL4,CLE,T209,League Park I,3159,1887
-colonels_1895,1895,Louisville Colonels,NL,Louisville,Colonels,148,LOU,LOU,LS3,LOU,T148,Eclipse Park II,--,1882
+colonels_1895,1895,Louisville Colonels,NL,Louisville,Colonels,148,LOU,LOU,LS3,LOU,T148,Eclipse Park II,0,1882
 giants_1895,1895,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds IV,3140,1883
 phillies_1895,1895,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Baker Bowl,3113,1883
-pirates_1895,1895,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,--,1882
+pirates_1895,1895,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,0,1882
 browns_1895,1895,St. Louis Browns,NL,St. Louis,Browns,138,STL,STL,SLN,STL,STL,Robison Field,3149,1882
-senators_1895,1895,Washington Senators,NL,Washington,Senators,221,WAS,WHS,WSN,WAS,T221,Boundary Field,--,1891
+senators_1895,1895,Washington Senators,NL,Washington,Senators,221,WAS,WHS,WSN,WAS,T221,Boundary Field,0,1891
 orioles_1894,1894,Baltimore Orioles,NL,Baltimore,Orioles,166,BLO,BLN,BLN,BAL,T166,Oriole Park III,2,1882
 beaneaters_1894,1894,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds II,3147,1876
-grooms_1894,1894,Brooklyn Grooms,NL,Brooklyn,Grooms,119,LAD,BRO,BRO,BRO,LA,Eastern Park,--,1884
+grooms_1894,1894,Brooklyn Grooms,NL,Brooklyn,Grooms,119,LAD,BRO,BRO,BRO,LA,Eastern Park,0,1884
 colts_1894,1894,Chicago Colts,NL,Chicago,Colts,112,CHC,CHC,CHN,CHI,CHC,West Side Grounds,3169,1876
 reds_1894,1894,Cincinnati Reds,NL,Cincinnati,Reds,113,CIN,CIN,CIN,CIN,CIN,League Park II,3160,1882
 spiders_1894,1894,Cleveland Spiders,NL,Cleveland,Spiders,209,CLV,CLV,CL4,CLE,T209,League Park I,3159,1887
-colonels_1894,1894,Louisville Colonels,NL,Louisville,Colonels,148,LOU,LOU,LS3,LOU,T148,Eclipse Park II,--,1882
+colonels_1894,1894,Louisville Colonels,NL,Louisville,Colonels,148,LOU,LOU,LS3,LOU,T148,Eclipse Park II,0,1882
 giants_1894,1894,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds IV,3140,1883
-phillies_1894,1894,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Philadelphia Baseball Grounds,--,1883
-pirates_1894,1894,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,--,1882
+phillies_1894,1894,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Philadelphia Baseball Grounds,0,1883
+pirates_1894,1894,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,0,1882
 browns_1894,1894,St. Louis Browns,NL,St. Louis,Browns,138,STL,STL,SLN,STL,STL,Robison Field,3149,1882
-senators_1894,1894,Washington Senators,NL,Washington,Senators,221,WAS,WHS,WSN,WAS,T221,Boundary Field,--,1891
+senators_1894,1894,Washington Senators,NL,Washington,Senators,221,WAS,WHS,WSN,WAS,T221,Boundary Field,0,1891
 orioles_1893,1893,Baltimore Orioles,NL,Baltimore,Orioles,166,BLO,BLN,BLN,BAL,T166,Oriole Park III,2,1882
 beaneaters_1893,1893,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds II,3147,1876
-grooms_1893,1893,Brooklyn Grooms,NL,Brooklyn,Grooms,119,LAD,BRO,BRO,BRO,LA,Eastern Park,--,1884
+grooms_1893,1893,Brooklyn Grooms,NL,Brooklyn,Grooms,119,LAD,BRO,BRO,BRO,LA,Eastern Park,0,1884
 colts_1893,1893,Chicago Colts,NL,Chicago,Colts,112,CHC,CHC,CHN,CHI,CHC,South Side Park II,3148,1876
 reds_1893,1893,Cincinnati Reds,NL,Cincinnati,Reds,113,CIN,CIN,CIN,CIN,CIN,League Park I,3159,1882
 spiders_1893,1893,Cleveland Spiders,NL,Cleveland,Spiders,209,CLV,CLV,CL4,CLE,T209,League Park I,3159,1887
-colonels_1893,1893,Louisville Colonels,NL,Louisville,Colonels,148,LOU,LOU,LS3,LOU,T148,Eclipse Park I,--,1882
+colonels_1893,1893,Louisville Colonels,NL,Louisville,Colonels,148,LOU,LOU,LS3,LOU,T148,Eclipse Park I,0,1882
 giants_1893,1893,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds IV,3140,1883
-phillies_1893,1893,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Philadelphia Baseball Grounds,--,1883
-pirates_1893,1893,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,--,1882
+phillies_1893,1893,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Philadelphia Baseball Grounds,0,1883
+pirates_1893,1893,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,0,1882
 browns_1893,1893,St. Louis Browns,NL,St. Louis,Browns,138,STL,STL,SLN,STL,STL,Robison Field,3149,1882
-senators_1893,1893,Washington Senators,NL,Washington,Senators,221,WAS,WHS,WSN,WAS,T221,Boundary Field,--,1891
+senators_1893,1893,Washington Senators,NL,Washington,Senators,221,WAS,WHS,WSN,WAS,T221,Boundary Field,0,1891
 orioles_1892,1892,Baltimore Orioles,NL,Baltimore,Orioles,166,BLO,BLN,BLN,BAL,T166,Oriole Park III,2,1882
 beaneaters_1892,1892,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds II,3147,1876
-grooms_1892,1892,Brooklyn Grooms,NL,Brooklyn,Grooms,119,LAD,BRO,BRO,BRO,LA,Eastern Park,--,1884
+grooms_1892,1892,Brooklyn Grooms,NL,Brooklyn,Grooms,119,LAD,BRO,BRO,BRO,LA,Eastern Park,0,1884
 colts_1892,1892,Chicago Colts,NL,Chicago,Colts,112,CHC,CHC,CHN,CHI,CHC,South Side Park II,3148,1876
 reds_1892,1892,Cincinnati Reds,NL,Cincinnati,Reds,113,CIN,CIN,CIN,CIN,CIN,League Park I,3159,1882
 spiders_1892,1892,Cleveland Spiders,NL,Cleveland,Spiders,209,CLV,CLV,CL4,CLE,T209,League Park I,3159,1887
-colonels_1892,1892,Louisville Colonels,NL,Louisville,Colonels,148,LOU,LOU,LS3,LOU,T148,Eclipse Park I,--,1882
+colonels_1892,1892,Louisville Colonels,NL,Louisville,Colonels,148,LOU,LOU,LS3,LOU,T148,Eclipse Park I,0,1882
 giants_1892,1892,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds IV,3140,1883
-phillies_1892,1892,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Philadelphia Baseball Grounds,--,1883
-pirates_1892,1892,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,--,1882
-browns_1892,1892,St. Louis Browns,NL,St. Louis,Browns,138,STL,STL,SLN,STL,STL,Association Park,--,1882
-senators_1892,1892,Washington Senators,NL,Washington,Senators,221,WAS,WHS,WSN,WAS,T221,Boundary Field,--,1891
+phillies_1892,1892,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Philadelphia Baseball Grounds,0,1883
+pirates_1892,1892,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,0,1882
+browns_1892,1892,St. Louis Browns,NL,St. Louis,Browns,138,STL,STL,SLN,STL,STL,Association Park,0,1882
+senators_1892,1892,Washington Senators,NL,Washington,Senators,221,WAS,WHS,WSN,WAS,T221,Boundary Field,0,1891
 orioles_1891,1891,Baltimore Orioles,AA,Baltimore,Orioles,166,BLO,BAL,BL3,BAL,T166,Oriole Park II and Oriole Park III,2,1882
 beaneaters_1891,1891,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds II,3147,1876
-reds_1891,1891,Boston Reds,AA,Boston,Reds,168,BRS,BOS,BS2,BSR,T168,Congress Street Grounds,--,1890
-grooms_1891,1891,Brooklyn Grooms,NL,Brooklyn,Grooms,119,LAD,BRO,BRO,BRO,LA,Eastern Park,--,1884
+reds_1891,1891,Boston Reds,AA,Boston,Reds,168,BRS,BOS,BS2,BSR,T168,Congress Street Grounds,0,1890
+grooms_1891,1891,Brooklyn Grooms,NL,Brooklyn,Grooms,119,LAD,BRO,BRO,BRO,LA,Eastern Park,0,1884
 colts_1891,1891,Chicago Colts,NL,Chicago,Colts,112,CHC,CHC,CHN,CHI,CHC,West Side Park I,3169,1876
-kelly's_killers_1891,1891,Cincinnati Kelly's Killers,AA,Cincinnati,Kelly's Killers,205,CKK,CKK,CN3,CKE,T205,Pendleton Park,--,1891
+kelly's_killers_1891,1891,Cincinnati Kelly's Killers,AA,Cincinnati,Kelly's Killers,205,CKK,CKK,CN3,CKE,T205,Pendleton Park,0,1891
 reds_1891,1891,Cincinnati Reds,NL,Cincinnati,Reds,113,CIN,CIN,CIN,CIN,CIN,League Park I,3159,1882
 spiders_1891,1891,Cleveland Spiders,NL,Cleveland,Spiders,209,CLV,CLV,CL4,CLE,T209,League Park I,3159,1887
 colts_1891,1891,Columbus Colts,AA,Columbus,Colts,211,CLS,COL,CL6,COL,T211,Recreation Park II,4900,1889
-colonels_1891,1891,Louisville Colonels,AA,Louisville,Colonels,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,--,1882
-brewers_1891,1891,Milwaukee Brewers,AA,Milwaukee,Brewers,151,MLA,MIL,ML3,MIL,T151,Borchert Field,--,1891
+colonels_1891,1891,Louisville Colonels,AA,Louisville,Colonels,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,0,1882
+brewers_1891,1891,Milwaukee Brewers,AA,Milwaukee,Brewers,151,MLA,MIL,ML3,MIL,T151,Borchert Field,0,1891
 giants_1891,1891,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds IV,3140,1883
-athletics_1891,1891,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHQ,PHA,PH4,PHA,T172,Forepaugh Park,--,1890
-phillies_1891,1891,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Philadelphia Baseball Grounds,--,1883
-pirates_1891,1891,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,--,1882
+athletics_1891,1891,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHQ,PHA,PH4,PHA,T172,Forepaugh Park,0,1890
+phillies_1891,1891,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Philadelphia Baseball Grounds,0,1883
+pirates_1891,1891,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Exposition Park III,0,1882
 browns_1891,1891,St. Louis Browns,AA,St. Louis,Browns,178,STL,STL,SL4,STL,T178,Sportsman's Park I,3149,1882
-statesmen_1891,1891,Washington Statesmen,AA,Washington,Statesmen,221,WAS,WAS,WS9,WAS,T221,Boundary Field,--,1891
+statesmen_1891,1891,Washington Statesmen,AA,Washington,Statesmen,221,WAS,WAS,WS9,WAS,T221,Boundary Field,0,1891
 orioles_1890,1890,Baltimore Orioles,AA,Baltimore,Orioles,166,BLO,BAL,BL3,BAL,T166,Oriole Park II,2,1882
 beaneaters_1890,1890,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds II,3147,1876
-reds_1890,1890,Boston Reds,PL,Boston,Reds,168,BRS,BOS,BSP,BSR,T168,Congress Street Grounds,--,1890
+reds_1890,1890,Boston Reds,PL,Boston,Reds,168,BRS,BOS,BSP,BSR,T168,Congress Street Grounds,0,1890
 bridegrooms_1890,1890,Brooklyn Bridegrooms,NL,Brooklyn,Bridegrooms,119,LAD,BRO,BRO,BRO,LA,Washington Park II,3150,1884
-gladiators_1890,1890,Brooklyn Gladiators,AA,Brooklyn,Gladiators,184,BRG,BRG,BR4,BKG,T184,Long Island Grounds,--,1890
-wonders_1890,1890,Brooklyn Wonders,PL,Brooklyn,Wonders,186,BWW,BWW,BRP,BKW,T186,Eastern Park,--,1890
+gladiators_1890,1890,Brooklyn Gladiators,AA,Brooklyn,Gladiators,184,BRG,BRG,BR4,BKG,T184,Long Island Grounds,0,1890
+wonders_1890,1890,Brooklyn Wonders,PL,Brooklyn,Wonders,186,BWW,BWW,BRP,BKW,T186,Eastern Park,0,1890
 bisons_1890,1890,Buffalo Bisons,PL,Buffalo,Bisons,188,BFB,BUF,BFP,BUF,T188,Olympic Park II,4877,1890
 colts_1890,1890,Chicago Colts,NL,Chicago,Colts,112,CHC,CHC,CHN,CHI,CHC,West Side Park I,3169,1876
-pirates_1890,1890,Chicago Pirates,PL,Chicago,Pirates,192,CHP,CHI,CHP,CPI,T192,Belair Lot,--,1890
+pirates_1890,1890,Chicago Pirates,PL,Chicago,Pirates,192,CHP,CHI,CHP,CPI,T192,Belair Lot,0,1890
 reds_1890,1890,Cincinnati Reds,NL,Cincinnati,Reds,113,CIN,CIN,CIN,CIN,CIN,League Park I,3159,1882
-infants_1890,1890,Cleveland Infants,PL,Cleveland,Infants,212,CLI,CLE,CLP,CLI,T212,Brotherhood Park,--,1890
-spiders_1890,1890,Cleveland Spiders,NL,Cleveland,Spiders,209,CLV,CLV,CL4,CLE,T209,National League Park II,--,1887
+infants_1890,1890,Cleveland Infants,PL,Cleveland,Infants,212,CLI,CLE,CLP,CLI,T212,Brotherhood Park,0,1890
+spiders_1890,1890,Cleveland Spiders,NL,Cleveland,Spiders,209,CLV,CLV,CL4,CLE,T209,National League Park II,0,1887
 colts_1890,1890,Columbus Colts,AA,Columbus,Colts,211,CLS,COL,CL6,COL,T211,Recreation Park II,4900,1889
-colonels_1890,1890,Louisville Colonels,AA,Louisville,Colonels,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,--,1882
+colonels_1890,1890,Louisville Colonels,AA,Louisville,Colonels,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,0,1882
 giants_1890,1890,New York Giants,PL,New York,Giants,157,NYI,NYI,NYP,NYK,T157,Polo Grounds IV,3140,1890
 giants_1890,1890,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds III,3140,1883
-athletics_1890,1890,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Gloucester Point Grounds,--,1882
-phillies_1890,1890,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Philadelphia Baseball Grounds,--,1883
-quakers_1890,1890,Philadelphia Quakers,PL,Philadelphia,Quakers,174,PHQ,PHQ,PHP,PHQ,T174,Forepaugh Park,--,1890
-burghers_1890,1890,Pittsburgh Burghers,PL,Pittsburgh,Burghers,177,PBB,PBB,PTP,PBU,T177,Exposition Park III,--,1890
-pirates_1890,1890,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Mahaffey Park,--,1882
-hop_bitters_1890,1890,Rochester Hop Bitters,AA,Rochester,Hop Bitters,180,ROC,ROC,RC2,RCH,T180,Windsor Beach,--,1890
+athletics_1890,1890,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Gloucester Point Grounds,0,1882
+phillies_1890,1890,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Philadelphia Baseball Grounds,0,1883
+quakers_1890,1890,Philadelphia Quakers,PL,Philadelphia,Quakers,174,PHQ,PHQ,PHP,PHQ,T174,Forepaugh Park,0,1890
+burghers_1890,1890,Pittsburgh Burghers,PL,Pittsburgh,Burghers,177,PBB,PBB,PTP,PBU,T177,Exposition Park III,0,1890
+pirates_1890,1890,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Mahaffey Park,0,1882
+hop_bitters_1890,1890,Rochester Hop Bitters,AA,Rochester,Hop Bitters,180,ROC,ROC,RC2,RCH,T180,Windsor Beach,0,1890
 browns_1890,1890,St. Louis Browns,AA,St. Louis,Browns,178,STL,STL,SL4,STL,T178,Sportsman's Park I,3149,1882
-stars_1890,1890,Syracuse Stars,AA,Syracuse,Stars,200,SYS,SYR,SR2,SYR,T200,Star Park II,--,1890
-maumees_1890,1890,Toledo Maumees,AA,Toledo,Maumees,202,TLM,TOL,TL2,TOL,T202,Speranza Park,--,1890
+stars_1890,1890,Syracuse Stars,AA,Syracuse,Stars,200,SYS,SYR,SR2,SYR,T200,Star Park II,0,1890
+maumees_1890,1890,Toledo Maumees,AA,Toledo,Maumees,202,TLM,TOL,TL2,TOL,T202,Speranza Park,0,1890
 orioles_1889,1889,Baltimore Orioles,AA,Baltimore,Orioles,163,BLO,BAL,BL2,BAL,T163,Oriole Park I,3164,1882
 beaneaters_1889,1889,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds II,3147,1876
 bridegrooms_1889,1889,Brooklyn Bridegrooms,AA,Brooklyn,Bridegrooms,119,LAD,BRO,BR4,BRO,LA,Washington Park I,3150,1884
 white_stockings_1889,1889,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,West Side Park I,3169,1876
 red_stockings_1889,1889,Cincinnati Red Stockings,AA,Cincinnati,Red Stockings,113,CIN,CIN,CN2,CIN,CIN,League Park I,3159,1882
-spiders_1889,1889,Cleveland Spiders,NL,Cleveland,Spiders,209,CLV,CLV,CL4,CLE,T209,National League Park II,--,1887
+spiders_1889,1889,Cleveland Spiders,NL,Cleveland,Spiders,209,CLV,CLV,CL4,CLE,T209,National League Park II,0,1887
 colts_1889,1889,Columbus Colts,AA,Columbus,Colts,211,CLS,COL,CL6,COL,T211,Recreation Park II,4900,1889
-hoosiers_1889,1889,Indianapolis Hoosiers,NL,Indianapolis,Hoosiers,126,IND,IND,IN3,IND,T126,Seventh Street Park III,--,1887
+hoosiers_1889,1889,Indianapolis Hoosiers,NL,Indianapolis,Hoosiers,126,IND,IND,IN3,IND,T126,Seventh Street Park III,0,1887
 cowboys_1889,1889,Kansas City Cowboys,AA,Kansas City,Cowboys,127,KCC,KCC,KC2,KC,T127,Exposition Park,3124,1888
-colonels_1889,1889,Louisville Colonels,AA,Louisville,Colonels,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,--,1882
-giants_1889,1889,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Oakdale Park,--,1883
-athletics_1889,1889,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Gloucester Point Grounds,--,1882
-phillies_1889,1889,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Philadelphia Baseball Grounds,--,1883
+colonels_1889,1889,Louisville Colonels,AA,Louisville,Colonels,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,0,1882
+giants_1889,1889,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Oakdale Park,0,1883
+athletics_1889,1889,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Gloucester Point Grounds,0,1882
+phillies_1889,1889,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Philadelphia Baseball Grounds,0,1883
 pirates_1889,1889,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Recreation Park,4900,1882
 browns_1889,1889,St. Louis Browns,AA,St. Louis,Browns,178,STL,STL,SL4,STL,T178,Sportsman's Park I,3149,1882
-nationals_1889,1889,Washington Nationals,NL,Washington,Nationals,220,WNL,WHS,WS8,WAS,T220,Swampoodle Grounds,--,1886
+nationals_1889,1889,Washington Nationals,NL,Washington,Nationals,220,WNL,WHS,WS8,WAS,T220,Swampoodle Grounds,0,1886
 orioles_1888,1888,Baltimore Orioles,AA,Baltimore,Orioles,163,BLO,BAL,BL2,BAL,T163,Oriole Park I,3164,1882
 beaneaters_1888,1888,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds II,3147,1876
 bridegrooms_1888,1888,Brooklyn Bridegrooms,AA,Brooklyn,Bridegrooms,119,LAD,BRO,BR4,BRO,LA,Washington Park I,3150,1884
 white_stockings_1888,1888,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,West Side Park I,3169,1876
 red_stockings_1888,1888,Cincinnati Red Stockings,AA,Cincinnati,Red Stockings,113,CIN,CIN,CN2,CIN,CIN,League Park I,3159,1882
-spiders_1888,1888,Cleveland Spiders,AA,Cleveland,Spiders,209,CLV,CLE,CL3,CLE,T209,National League Park II,--,1887
+spiders_1888,1888,Cleveland Spiders,AA,Cleveland,Spiders,209,CLV,CLE,CL3,CLE,T209,National League Park II,0,1887
 wolverines_1888,1888,Detroit Wolverines,NL,Detroit,Wolverines,213,DTN,DTN,DTN,DET,T213,Recreation Park,4900,1881
-hoosiers_1888,1888,Indianapolis Hoosiers,NL,Indianapolis,Hoosiers,126,IND,IND,IN3,IND,T126,Seventh Street Park III,--,1887
-cowboys_1888,1888,Kansas City Cowboys,AA,Kansas City,Cowboys,127,KCC,KCC,KC2,KC,T127,Association Park,--,1888
-colonels_1888,1888,Louisville Colonels,AA,Louisville,Colonels,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,--,1882
+hoosiers_1888,1888,Indianapolis Hoosiers,NL,Indianapolis,Hoosiers,126,IND,IND,IN3,IND,T126,Seventh Street Park III,0,1887
+cowboys_1888,1888,Kansas City Cowboys,AA,Kansas City,Cowboys,127,KCC,KCC,KC2,KC,T127,Association Park,0,1888
+colonels_1888,1888,Louisville Colonels,AA,Louisville,Colonels,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,0,1882
 giants_1888,1888,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds I,3139,1883
-athletics_1888,1888,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Gloucester Point Grounds,--,1882
-phillies_1888,1888,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Philadelphia Baseball Grounds,--,1883
+athletics_1888,1888,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Gloucester Point Grounds,0,1882
+phillies_1888,1888,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Philadelphia Baseball Grounds,0,1883
 pirates_1888,1888,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Recreation Park,4900,1882
 browns_1888,1888,St. Louis Browns,AA,St. Louis,Browns,178,STL,STL,SL4,STL,T178,Sportsman's Park I,3149,1882
-nationals_1888,1888,Washington Nationals,NL,Washington,Nationals,220,WNL,WHS,WS8,WAS,T220,Swampoodle Grounds,--,1886
+nationals_1888,1888,Washington Nationals,NL,Washington,Nationals,220,WNL,WHS,WS8,WAS,T220,Swampoodle Grounds,0,1886
 orioles_1887,1887,Baltimore Orioles,AA,Baltimore,Orioles,163,BLO,BAL,BL2,BAL,T163,Oriole Park I,3164,1882
 beaneaters_1887,1887,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds I,3144,1876
 grays_1887,1887,Brooklyn Grays,AA,Brooklyn,Grays,119,LAD,BRO,BR3,BRO,LA,Washington Park I,3150,1884
 white_stockings_1887,1887,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,West Side Park I,3169,1876
 red_stockings_1887,1887,Cincinnati Red Stockings,AA,Cincinnati,Red Stockings,113,CIN,CIN,CN2,CIN,CIN,League Park I,3159,1882
-spiders_1887,1887,Cleveland Spiders,AA,Cleveland,Spiders,209,CLV,CLE,CL3,CLE,T209,National League Park II,--,1887
+spiders_1887,1887,Cleveland Spiders,AA,Cleveland,Spiders,209,CLV,CLE,CL3,CLE,T209,National League Park II,0,1887
 wolverines_1887,1887,Detroit Wolverines,NL,Detroit,Wolverines,213,DTN,DTN,DTN,DET,T213,Recreation Park,4900,1881
-hoosiers_1887,1887,Indianapolis Hoosiers,NL,Indianapolis,Hoosiers,126,IND,IND,IN3,IND,T126,Seventh Street Park II,--,1887
-colonels_1887,1887,Louisville Colonels,AA,Louisville,Colonels,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,--,1882
+hoosiers_1887,1887,Indianapolis Hoosiers,NL,Indianapolis,Hoosiers,126,IND,IND,IN3,IND,T126,Seventh Street Park II,0,1887
+colonels_1887,1887,Louisville Colonels,AA,Louisville,Colonels,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,0,1882
 giants_1887,1887,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds I,3139,1883
-metropolitans_1887,1887,New York Metropolitans,AA,New York,Metropolitans,156,NYP,NYP,NY4,NYM,T156,St. George Cricket Grounds,--,1883
-athletics_1887,1887,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Jefferson Street Grounds,--,1882
-phillies_1887,1887,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Philadelphia Baseball Grounds,--,1883
+metropolitans_1887,1887,New York Metropolitans,AA,New York,Metropolitans,156,NYP,NYP,NY4,NYM,T156,St. George Cricket Grounds,0,1883
+athletics_1887,1887,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Jefferson Street Grounds,0,1882
+phillies_1887,1887,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Philadelphia Baseball Grounds,0,1883
 pirates_1887,1887,Pittsburgh Pirates,NL,Pittsburgh,Pirates,134,PIT,PIT,PIT,PIT,PIT,Recreation Park,4900,1882
 browns_1887,1887,St. Louis Browns,AA,St. Louis,Browns,178,STL,STL,SL4,STL,T178,Sportsman's Park I,3149,1882
-nationals_1887,1887,Washington Nationals,NL,Washington,Nationals,220,WNL,WHS,WS8,WAS,T220,Swampoodle Grounds,--,1886
+nationals_1887,1887,Washington Nationals,NL,Washington,Nationals,220,WNL,WHS,WS8,WAS,T220,Swampoodle Grounds,0,1886
 orioles_1886,1886,Baltimore Orioles,AA,Baltimore,Orioles,163,BLO,BAL,BL2,BAL,T163,Oriole Park I,3164,1882
 beaneaters_1886,1886,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds I,3144,1876
 grays_1886,1886,Brooklyn Grays,AA,Brooklyn,Grays,119,LAD,BRO,BR3,BRO,LA,Washington Park I,3150,1884
 white_stockings_1886,1886,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,West Side Park I,3169,1876
 red_stockings_1886,1886,Cincinnati Red Stockings,AA,Cincinnati,Red Stockings,113,CIN,CIN,CN2,CIN,CIN,League Park I,3159,1882
 wolverines_1886,1886,Detroit Wolverines,NL,Detroit,Wolverines,213,DTN,DTN,DTN,DET,T213,Recreation Park,4900,1881
-cowboys_1886,1886,Kansas City Cowboys,NL,Kansas City,Cowboys,129,KCN,KCN,KCN,KC,T129,Association Park,--,1886
-colonels_1886,1886,Louisville Colonels,AA,Louisville,Colonels,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,--,1882
+cowboys_1886,1886,Kansas City Cowboys,NL,Kansas City,Cowboys,129,KCN,KCN,KCN,KC,T129,Association Park,0,1886
+colonels_1886,1886,Louisville Colonels,AA,Louisville,Colonels,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,0,1882
 giants_1886,1886,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds I,3139,1883
-metropolitans_1886,1886,New York Metropolitans,AA,New York,Metropolitans,156,NYP,NYP,NY4,NYM,T156,St. George Cricket Grounds,--,1883
-athletics_1886,1886,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Jefferson Street Grounds,--,1882
+metropolitans_1886,1886,New York Metropolitans,AA,New York,Metropolitans,156,NYP,NYP,NY4,NYM,T156,St. George Cricket Grounds,0,1883
+athletics_1886,1886,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Jefferson Street Grounds,0,1882
 phillies_1886,1886,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Recreation Park,4900,1883
 pirates_1886,1886,Pittsburgh Pirates,AA,Pittsburgh,Pirates,134,PIT,PIT,PT1,PIT,PIT,Recreation Park,4900,1882
 browns_1886,1886,St. Louis Browns,AA,St. Louis,Browns,178,STL,STL,SL4,STL,T178,Sportsman's Park I,3149,1882
 maroons_1886,1886,St. Louis Maroons,NL,St. Louis,Maroons,196,SLM,SLM,SL5,STL,T196,Sportsman's Park I,3149,1882
-nationals_1886,1886,Washington Nationals,NL,Washington,Nationals,220,WNL,WHS,WS8,WAS,T220,Swampoodle Grounds,--,1886
+nationals_1886,1886,Washington Nationals,NL,Washington,Nationals,220,WNL,WHS,WS8,WAS,T220,Swampoodle Grounds,0,1886
 orioles_1885,1885,Baltimore Orioles,AA,Baltimore,Orioles,163,BLO,BAL,BL2,BAL,T163,Oriole Park I,3164,1882
 beaneaters_1885,1885,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds I,3144,1876
 grays_1885,1885,Brooklyn Grays,AA,Brooklyn,Grays,119,LAD,BRO,BR3,BRO,LA,Washington Park I,3150,1884
@@ -2848,119 +2848,119 @@ bisons_1885,1885,Buffalo Bisons,NL,Buffalo,Bisons,187,BUF,BUF,BFN,BUF,T187,Olymp
 white_stockings_1885,1885,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,West Side Park I,3169,1876
 red_stockings_1885,1885,Cincinnati Red Stockings,AA,Cincinnati,Red Stockings,113,CIN,CIN,CN2,CIN,CIN,League Park I,3159,1882
 wolverines_1885,1885,Detroit Wolverines,NL,Detroit,Wolverines,213,DTN,DTN,DTN,DET,T213,Recreation Park,4900,1881
-colonels_1885,1885,Louisville Colonels,AA,Louisville,Colonels,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,--,1882
+colonels_1885,1885,Louisville Colonels,AA,Louisville,Colonels,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,0,1882
 giants_1885,1885,New York Giants,NL,New York,Giants,137,SFG,NYG,NY1,NYG,SF,Polo Grounds I,3139,1883
 metropolitans_1885,1885,New York Metropolitans,AA,New York,Metropolitans,156,NYP,NYP,NY4,NYM,T156,Polo Grounds I,3139,1883
-athletics_1885,1885,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Jefferson Street Grounds,--,1882
+athletics_1885,1885,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Jefferson Street Grounds,0,1882
 phillies_1885,1885,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Recreation Park,4900,1883
 pirates_1885,1885,Pittsburgh Pirates,AA,Pittsburgh,Pirates,134,PIT,PIT,PT1,PIT,PIT,Recreation Park,4900,1882
-grays_1885,1885,Providence Grays,NL,Providence,Grays,224,PRO,PRO,PRO,PRO,T224,Wright Street Grounds,--,1878
+grays_1885,1885,Providence Grays,NL,Providence,Grays,224,PRO,PRO,PRO,PRO,T224,Wright Street Grounds,0,1878
 browns_1885,1885,St. Louis Browns,AA,St. Louis,Browns,178,STL,STL,SL4,STL,T178,Sportsman's Park I,3149,1882
 maroons_1885,1885,St. Louis Maroons,NL,St. Louis,Maroons,196,SLM,SLM,SL5,STL,T196,Sportsman's Park I,3149,1882
 pride_1884,1884,Altoona Pride,UA,Altoona,Pride,161,ALT,ALT,ALT,ALT,T161,Columbia Park,3118,1884
-unions_1884,1884,Baltimore Monumentals,UA,Baltimore,Unions,167,BLU,BLU,BLU,BAL,T167,Belair Lot,--,1884
+unions_1884,1884,Baltimore Monumentals,UA,Baltimore,Unions,167,BLU,BLU,BLU,BAL,T167,Belair Lot,0,1884
 orioles_1884,1884,Baltimore Orioles,AA,Baltimore,Orioles,163,BLO,BAL,BL2,BAL,T163,Oriole Park I,3164,1882
 beaneaters_1884,1884,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds I,3144,1876
-reds_1884,1884,Boston Reds,UA,Boston,Reds,169,BRD,BOS,BSU,BSU,T169,Dartmouth Grounds,--,1884
+reds_1884,1884,Boston Reds,UA,Boston,Reds,169,BRD,BOS,BSU,BSU,T169,Dartmouth Grounds,0,1884
 atlantics_1884,1884,Brooklyn Atlantics,AA,Brooklyn,Atlantics,119,LAD,BRO,BR3,BRO,LA,Washington Park I,3150,1884
 bisons_1884,1884,Buffalo Bisons,NL,Buffalo,Bisons,187,BUF,BUF,BFN,BUF,T187,Olympic Park I,4877,1879
-browns-stogies_1884,1884,Chicago Browns/Pittsburgh Stogies,UA,Chicago/Pittsburgh,Browns-Stogies,193,CPI,CPI,CHU,CUN,T193,South Side Park I,--,1884
-white_stockings_1884,1884,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,Lake Front Park I,--,1876
-outlaw_reds_1884,1884,Cincinnati Outlaw Reds,UA,Cincinnati,Outlaw Reds,206,COR,COR,CNU,COR,T206,Bank Street Grounds,--,1884
+browns-stogies_1884,1884,Chicago Browns/Pittsburgh Stogies,UA,Chicago/Pittsburgh,Browns-Stogies,193,CPI,CPI,CHU,CUN,T193,South Side Park I,0,1884
+white_stockings_1884,1884,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,Lake Front Park I,0,1876
+outlaw_reds_1884,1884,Cincinnati Outlaw Reds,UA,Cincinnati,Outlaw Reds,206,COR,COR,CNU,COR,T206,Bank Street Grounds,0,1884
 red_stockings_1884,1884,Cincinnati Red Stockings,AA,Cincinnati,Red Stockings,113,CIN,CIN,CN2,CIN,CIN,League Park I,3159,1882
-blues_1884,1884,Cleveland Blues,NL,Cleveland,Blues,208,CBL,CLV,CL2,CLE,T208,National League Park I,--,1879
+blues_1884,1884,Cleveland Blues,NL,Cleveland,Blues,208,CBL,CLV,CL2,CLE,T208,National League Park I,0,1879
 colts_1884,1884,Columbus Colts,AA,Columbus,Colts,210,CBK,COL,CL5,COL,T210,Recreation Park I,4900,1883
 wolverines_1884,1884,Detroit Wolverines,NL,Detroit,Wolverines,213,DTN,DTN,DTN,DET,T213,Recreation Park,4900,1881
-blues_1884,1884,Indianapolis Blues,AA,Indianapolis,Blues,125,IHO,IND,IN2,IND,T125,Seventh Street Park I,--,1884
+blues_1884,1884,Indianapolis Blues,AA,Indianapolis,Blues,125,IHO,IND,IN2,IND,T125,Seventh Street Park I,0,1884
 cowboys_1884,1884,Kansas City Cowboys,UA,Kansas City,Cowboys,130,KCU,KCC,KCU,KC,T130,Athletic Park,4721,1884
-eclipse_1884,1884,Louisville Eclipse,AA,Louisville,Eclipse,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,--,1882
-brewers_1884,1884,Milwaukee Brewers,UA,Milwaukee,Brewers,152,MLU,MIL,MLU,MIL,T152,Wright Street Grounds,--,1884
+eclipse_1884,1884,Louisville Eclipse,AA,Louisville,Eclipse,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,0,1882
+brewers_1884,1884,Milwaukee Brewers,UA,Milwaukee,Brewers,152,MLU,MIL,MLU,MIL,T152,Wright Street Grounds,0,1884
 gothams_1884,1884,New York Gothams,NL,New York,Gothams,137,SFG,NYG,NY1,NYG,SF,Polo Grounds I,3139,1883
 metropolitans_1884,1884,New York Metropolitans,AA,New York,Metropolitans,156,NYP,NYP,NY4,NYM,T156,Polo Grounds I,3139,1883
-athletics_1884,1884,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Jefferson Street Grounds,--,1882
-keystones_1884,1884,Philadelphia Keystones,UA,Philadelphia,Keystones,175,PHK,PHK,PHU,PHK,T175,Keystone Park,--,1884
+athletics_1884,1884,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Jefferson Street Grounds,0,1882
+keystones_1884,1884,Philadelphia Keystones,UA,Philadelphia,Keystones,175,PHK,PHK,PHU,PHK,T175,Keystone Park,0,1884
 phillies_1884,1884,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Recreation Park,4900,1883
 pirates_1884,1884,Pittsburgh Pirates,AA,Pittsburgh,Pirates,134,PIT,PIT,PT1,PIT,PIT,Exposition Park I,3124,1882
-grays_1884,1884,Providence Grays,NL,Providence,Grays,224,PRO,PRO,PRO,PRO,T224,Messer Street Grounds,--,1878
-virginias_1884,1884,Richmond Virginias,AA,Richmond,Virginias,181,RIC,RIC,RIC,RIC,T181,Virginia Base-Ball Park,--,1884
+grays_1884,1884,Providence Grays,NL,Providence,Grays,224,PRO,PRO,PRO,PRO,T224,Messer Street Grounds,0,1878
+virginias_1884,1884,Richmond Virginias,AA,Richmond,Virginias,181,RIC,RIC,RIC,RIC,T181,Virginia Base-Ball Park,0,1884
 browns_1884,1884,St. Louis Browns,AA,St. Louis,Browns,178,STL,STL,SL4,STL,T178,Sportsman's Park I,3149,1882
 maroons_1884,1884,St. Louis Maroons,UA,St. Louis,Maroons,196,SLM,SLM,SLU,STL,T196,Sportsman's Park I,3149,1882
-saints_1884,1884,St. Paul Saints,UA,St. Paul,Saints,198,STP,STP,SPU,SPS,T198,--,--,1884
+saints_1884,1884,St. Paul Saints,UA,St. Paul,Saints,198,STP,STP,SPU,SPS,T198,0,0,1884
 blue_stockings_1884,1884,Toledo Blue Stockings,AA,Toledo,Blue Stockings,201,TOL,TOL,TL1,TOL,T201,League Park,3159,1884
-nationals_1884,1884,Washington Nationals,UA,Washington,Nationals,222,WNA,WHS,WSU,WST,T222,Capitol Grounds,--,1884
+nationals_1884,1884,Washington Nationals,UA,Washington,Nationals,222,WNA,WHS,WSU,WST,T222,Capitol Grounds,0,1884
 statesmen_1884,1884,Washington Statesmen,AA,Washington,Statesmen,219,WST,WAS,WS7,WSN,T219,Athletic Park,4721,1884
-quicksteps_1884,1884,Wilmington Quicksteps,UA,Wilmington,Quicksteps,223,WIL,WIL,WIL,WIL,T223,Wilmington Grounds,--,1884
+quicksteps_1884,1884,Wilmington Quicksteps,UA,Wilmington,Quicksteps,223,WIL,WIL,WIL,WIL,T223,Wilmington Grounds,0,1884
 orioles_1883,1883,Baltimore Orioles,AA,Baltimore,Orioles,163,BLO,BAL,BL2,BAL,T163,Oriole Park I,3164,1882
 beaneaters_1883,1883,Boston Beaneaters,NL,Boston,Beaneaters,144,ATL,BSN,BSN,BSN,ATL,South End Grounds I,3144,1876
 bisons_1883,1883,Buffalo Bisons,NL,Buffalo,Bisons,187,BUF,BUF,BFN,BUF,T187,Riverside Grounds,1903,1879
-white_stockings_1883,1883,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,Lake Front Park I,--,1876
-red_stockings_1883,1883,Cincinnati Red Stockings,AA,Cincinnati,Red Stockings,113,CIN,CIN,CN2,CIN,CIN,Bank Street Grounds,--,1882
-blues_1883,1883,Cleveland Blues,NL,Cleveland,Blues,208,CBL,CLV,CL2,CLE,T208,National League Park I,--,1879
+white_stockings_1883,1883,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,Lake Front Park I,0,1876
+red_stockings_1883,1883,Cincinnati Red Stockings,AA,Cincinnati,Red Stockings,113,CIN,CIN,CN2,CIN,CIN,Bank Street Grounds,0,1882
+blues_1883,1883,Cleveland Blues,NL,Cleveland,Blues,208,CBL,CLV,CL2,CLE,T208,National League Park I,0,1879
 colts_1883,1883,Columbus Colts,AA,Columbus,Colts,210,CBK,COL,CL5,COL,T210,Recreation Park I,4900,1883
 wolverines_1883,1883,Detroit Wolverines,NL,Detroit,Wolverines,213,DTN,DTN,DTN,DET,T213,Recreation Park,4900,1881
-eclipse_1883,1883,Louisville Eclipse,AA,Louisville,Eclipse,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,--,1882
+eclipse_1883,1883,Louisville Eclipse,AA,Louisville,Eclipse,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,0,1882
 gothams_1883,1883,New York Gothams,NL,New York,Gothams,137,SFG,NYG,NY1,NYG,SF,Polo Grounds I,3139,1883
 metropolitans_1883,1883,New York Metropolitans,AA,New York,Metropolitans,156,NYP,NYP,NY4,NYM,T156,Polo Grounds I,3139,1883
-athletics_1883,1883,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Jefferson Street Grounds,--,1882
+athletics_1883,1883,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Jefferson Street Grounds,0,1882
 phillies_1883,1883,Philadelphia Phillies,NL,Philadelphia,Phillies,143,PHI,PHI,PHI,PHI,PHI,Recreation Park,4900,1883
 pirates_1883,1883,Pittsburgh Pirates,AA,Pittsburgh,Pirates,134,PIT,PIT,PT1,PIT,PIT,Exposition Park I,3124,1882
-grays_1883,1883,Providence Grays,NL,Providence,Grays,224,PRO,PRO,PRO,PRO,T224,Messer Street Grounds,--,1878
+grays_1883,1883,Providence Grays,NL,Providence,Grays,224,PRO,PRO,PRO,PRO,T224,Messer Street Grounds,0,1878
 browns_1883,1883,St. Louis Browns,AA,St. Louis,Browns,178,STL,STL,SL4,STL,T178,Sportsman's Park I,3149,1882
-orioles_1882,1882,Baltimore Orioles,AA,Baltimore,Orioles,163,BLO,BAL,BL5,BAL,T163,Newington Park,--,1882
+orioles_1882,1882,Baltimore Orioles,AA,Baltimore,Orioles,163,BLO,BAL,BL5,BAL,T163,Newington Park,0,1882
 red_caps_1882,1882,Boston Red Caps,NL,Boston,Red Caps,144,ATL,BSN,BSN,BSN,ATL,South End Grounds I,3144,1876
 bisons_1882,1882,Buffalo Bisons,NL,Buffalo,Bisons,187,BUF,BUF,BFN,BUF,T187,Riverside Grounds,1903,1879
-white_stockings_1882,1882,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,Lake Front Park I,--,1876
-red_stockings_1882,1882,Cincinnati Red Stockings,AA,Cincinnati,Red Stockings,113,CIN,CIN,CN2,CIN,CIN,Bank Street Grounds,--,1882
-blues_1882,1882,Cleveland Blues,NL,Cleveland,Blues,208,CBL,CLV,CL2,CLE,T208,National League Park I,--,1879
+white_stockings_1882,1882,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,Lake Front Park I,0,1876
+red_stockings_1882,1882,Cincinnati Red Stockings,AA,Cincinnati,Red Stockings,113,CIN,CIN,CN2,CIN,CIN,Bank Street Grounds,0,1882
+blues_1882,1882,Cleveland Blues,NL,Cleveland,Blues,208,CBL,CLV,CL2,CLE,T208,National League Park I,0,1879
 wolverines_1882,1882,Detroit Wolverines,NL,Detroit,Wolverines,213,DTN,DTN,DTN,DET,T213,Recreation Park,4900,1881
-eclipse_1882,1882,Louisville Eclipse,AA,Louisville,Eclipse,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,--,1882
-athletics_1882,1882,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Oakdale Park,--,1882
+eclipse_1882,1882,Louisville Eclipse,AA,Louisville,Eclipse,148,LOU,LOU,LS2,LOU,T148,Eclipse Park I,0,1882
+athletics_1882,1882,Philadelphia Athletics,AA,Philadelphia,Athletics,172,PHA,PHA,PH4,PHA,T172,Oakdale Park,0,1882
 pirates_1882,1882,Pittsburgh Pirates,AA,Pittsburgh,Pirates,134,PIT,PIT,PT1,PIT,PIT,Exposition Park I,3124,1882
-grays_1882,1882,Providence Grays,NL,Providence,Grays,224,PRO,PRO,PRO,PRO,T224,Messer Street Grounds,--,1878
+grays_1882,1882,Providence Grays,NL,Providence,Grays,224,PRO,PRO,PRO,PRO,T224,Messer Street Grounds,0,1878
 brown_stockings_1882,1882,St. Louis Brown Stockings,AA,St. Louis,Brown Stockings,178,STL,STL,SL4,STL,T178,Sportsman's Park I,3149,1882
-trojans_1882,1882,Troy Trojans,NL,Troy,Trojans,299,TRT,TRO,TRN,TRO,T299,Riverside Park,--,1879
-brown_stockings_1882,1882,Worcester Brown Stockings,NL,Worcester,Brown Stockings,297,WOR,WOR,WOR,WOR,WRC,Agricultural County Fair Grounds I,--,1880
+trojans_1882,1882,Troy Trojans,NL,Troy,Trojans,299,TRT,TRO,TRN,TRO,T299,Riverside Park,0,1879
+brown_stockings_1882,1882,Worcester Brown Stockings,NL,Worcester,Brown Stockings,297,WOR,WOR,WOR,WOR,WRC,Agricultural County Fair Grounds I,0,1880
 red_caps_1881,1881,Boston Red Caps,NL,Boston,Red Caps,144,ATL,BSN,BSN,BSN,ATL,South End Grounds I,3144,1876
 bisons_1881,1881,Buffalo Bisons,NL,Buffalo,Bisons,187,BUF,BUF,BFN,BUF,T187,Riverside Grounds,1903,1879
-white_stockings_1881,1881,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,Lake Front Park I,--,1876
-blues_1881,1881,Cleveland Blues,NL,Cleveland,Blues,208,CBL,CLV,CL2,CLE,T208,National League Park I,--,1879
+white_stockings_1881,1881,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,Lake Front Park I,0,1876
+blues_1881,1881,Cleveland Blues,NL,Cleveland,Blues,208,CBL,CLV,CL2,CLE,T208,National League Park I,0,1879
 wolverines_1881,1881,Detroit Wolverines,NL,Detroit,Wolverines,213,DTN,DTN,DTN,DET,T213,Recreation Park,4900,1881
-grays_1881,1881,Providence Grays,NL,Providence,Grays,224,PRO,PRO,PRO,PRO,T224,Messer Street Grounds,--,1878
-trojans_1881,1881,Troy Trojans,NL,Troy,Trojans,299,TRT,TRO,TRN,TRO,T299,Riverside Park,--,1879
-brown_stockings_1881,1881,Worcester Brown Stockings,NL,Worcester,Brown Stockings,297,WOR,WOR,WOR,WOR,WRC,Agricultural County Fair Grounds I,--,1880
+grays_1881,1881,Providence Grays,NL,Providence,Grays,224,PRO,PRO,PRO,PRO,T224,Messer Street Grounds,0,1878
+trojans_1881,1881,Troy Trojans,NL,Troy,Trojans,299,TRT,TRO,TRN,TRO,T299,Riverside Park,0,1879
+brown_stockings_1881,1881,Worcester Brown Stockings,NL,Worcester,Brown Stockings,297,WOR,WOR,WOR,WOR,WRC,Agricultural County Fair Grounds I,0,1880
 red_caps_1880,1880,Boston Red Caps,NL,Boston,Red Caps,144,ATL,BSN,BSN,BSN,ATL,South End Grounds I,3144,1876
 bisons_1880,1880,Buffalo Bisons,NL,Buffalo,Bisons,187,BUF,BUF,BFN,BUF,T187,Riverside Grounds,1903,1879
-white_stockings_1880,1880,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,Lake Front Park I,--,1876
-stars_1880,1880,Cincinnati Stars,NL,Cincinnati,Stars,204,CNS,CIN,CN4,CIN,T204,Bank Street Grounds,--,1880
-blues_1880,1880,Cleveland Blues,NL,Cleveland,Blues,208,CBL,CLV,CL2,CLE,T208,National League Park I,--,1879
-grays_1880,1880,Providence Grays,NL,Providence,Grays,224,PRO,PRO,PRO,PRO,T224,Messer Street Grounds,--,1878
-trojans_1880,1880,Troy Trojans,NL,Troy,Trojans,299,TRT,TRO,TRN,TRO,T299,Riverside Park,--,1879
-brown_stockings_1880,1880,Worcester Brown Stockings,NL,Worcester,Brown Stockings,297,WOR,WOR,WOR,WOR,WRC,Agricultural County Fair Grounds I,--,1880
+white_stockings_1880,1880,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,Lake Front Park I,0,1876
+stars_1880,1880,Cincinnati Stars,NL,Cincinnati,Stars,204,CNS,CIN,CN4,CIN,T204,Bank Street Grounds,0,1880
+blues_1880,1880,Cleveland Blues,NL,Cleveland,Blues,208,CBL,CLV,CL2,CLE,T208,National League Park I,0,1879
+grays_1880,1880,Providence Grays,NL,Providence,Grays,224,PRO,PRO,PRO,PRO,T224,Messer Street Grounds,0,1878
+trojans_1880,1880,Troy Trojans,NL,Troy,Trojans,299,TRT,TRO,TRN,TRO,T299,Riverside Park,0,1879
+brown_stockings_1880,1880,Worcester Brown Stockings,NL,Worcester,Brown Stockings,297,WOR,WOR,WOR,WOR,WRC,Agricultural County Fair Grounds I,0,1880
 red_caps_1879,1879,Boston Red Caps,NL,Boston,Red Caps,144,ATL,BSN,BSN,BSN,ATL,South End Grounds I,3144,1876
 bisons_1879,1879,Buffalo Bisons,NL,Buffalo,Bisons,187,BUF,BUF,BFN,BUF,T187,Riverside Grounds,1903,1879
-white_stockings_1879,1879,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,Lake Front Park I,--,1876
-reds_1879,1879,Cincinnati Reds,NL,Cincinnati,Reds,204,CNR,CIN,CN1,CIN,T204,Avenue Grounds,,1876
-blues_1879,1879,Cleveland Blues,NL,Cleveland,Blues,208,CBL,CLV,CL2,CLE,T208,National League Park I,--,1879
-grays_1879,1879,Providence Grays,NL,Providence,Grays,224,PRO,PRO,PRO,PRO,T224,Messer Street Grounds,--,1878
-stars_1879,1879,Syracuse Stars,NL,Syracuse,Stars,199,SYR,SYR,SR1,SYR,T199,Star Park I,--,1879
-trojans_1879,1879,Troy Trojans,NL,Troy,Trojans,299,TRT,TRO,TRN,TRO,T299,Putnam Grounds,--,1879
+white_stockings_1879,1879,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,Lake Front Park I,0,1876
+reds_1879,1879,Cincinnati Reds,NL,Cincinnati,Reds,204,CNR,CIN,CN1,CIN,T204,Avenue Grounds,0,1876
+blues_1879,1879,Cleveland Blues,NL,Cleveland,Blues,208,CBL,CLV,CL2,CLE,T208,National League Park I,0,1879
+grays_1879,1879,Providence Grays,NL,Providence,Grays,224,PRO,PRO,PRO,PRO,T224,Messer Street Grounds,0,1878
+stars_1879,1879,Syracuse Stars,NL,Syracuse,Stars,199,SYR,SYR,SR1,SYR,T199,Star Park I,0,1879
+trojans_1879,1879,Troy Trojans,NL,Troy,Trojans,299,TRT,TRO,TRN,TRO,T299,Putnam Grounds,0,1879
 red_caps_1878,1878,Boston Red Caps,NL,Boston,Red Caps,144,ATL,BSN,BSN,BSN,ATL,South End Grounds I,3144,1876
-white_stockings_1878,1878,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,Lake Front Park I,--,1876
-reds_1878,1878,Cincinnati Reds,NL,Cincinnati,Reds,204,CNR,CIN,CN1,CIN,T204,Avenue Grounds,,1876
-blues_1878,1878,Indianapolis Blues,NL,Indianapolis,Blues,124,IBL,IND,IN1,IND,T124,South Street Park,--,1878
-grays_1878,1878,Milwaukee Grays,NL,Milwaukee,Grays,150,MLG,MLG,ML2,MIL,T150,Milwaukee Base-Ball Grounds,--,1878
-grays_1878,1878,Providence Grays,NL,Providence,Grays,224,PRO,PRO,PRO,PRO,T224,Union Grounds,--,1878
+white_stockings_1878,1878,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,Lake Front Park I,0,1876
+reds_1878,1878,Cincinnati Reds,NL,Cincinnati,Reds,204,CNR,CIN,CN1,CIN,T204,Avenue Grounds,0,1876
+blues_1878,1878,Indianapolis Blues,NL,Indianapolis,Blues,124,IBL,IND,IN1,IND,T124,South Street Park,0,1878
+grays_1878,1878,Milwaukee Grays,NL,Milwaukee,Grays,150,MLG,MLG,ML2,MIL,T150,Milwaukee Base-Ball Grounds,0,1878
+grays_1878,1878,Providence Grays,NL,Providence,Grays,224,PRO,PRO,PRO,PRO,T224,Union Grounds,0,1878
 red_caps_1877,1877,Boston Red Caps,NL,Boston,Red Caps,144,ATL,BSN,BSN,BSN,ATL,South End Grounds I,3144,1876
-white_stockings_1877,1877,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,23rd Street Park,--,1876
-reds_1877,1877,Cincinnati Reds,NL,Cincinnati,Reds,204,CNR,CIN,CN1,CIN,T204,Avenue Grounds,,1876
-dark_blues_1877,1877,Hartford Dark Blues,NL,Hartford,Dark Blues,123,HAR,HAR,HAR,HAR,T123,Howard Avenue Grounds,--,1876
-grays_1877,1877,Louisville Grays,NL,Louisville,Grays,132,LGR,LOU,LS1,LOU,T132,Louisville Baseball Park,--,1876
-brown_stockings_1877,1877,St. Louis Brown Stockings,NL,St. Louis,Brown Stockings,195,SBS,STL,SL3,STL,T195,Grand Avenue Park,--,1876
+white_stockings_1877,1877,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,23rd Street Park,0,1876
+reds_1877,1877,Cincinnati Reds,NL,Cincinnati,Reds,204,CNR,CIN,CN1,CIN,T204,Avenue Grounds,0,1876
+dark_blues_1877,1877,Hartford Dark Blues,NL,Hartford,Dark Blues,123,HAR,HAR,HAR,HAR,T123,Howard Avenue Grounds,0,1876
+grays_1877,1877,Louisville Grays,NL,Louisville,Grays,132,LGR,LOU,LS1,LOU,T132,Louisville Baseball Park,0,1876
+brown_stockings_1877,1877,St. Louis Brown Stockings,NL,St. Louis,Brown Stockings,195,SBS,STL,SL3,STL,T195,Grand Avenue Park,0,1876
 red_caps_1876,1876,Boston Red Caps,NL,Boston,Red Caps,144,ATL,BSN,BSN,BSN,ATL,South End Grounds I,3144,1876
-white_stockings_1876,1876,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,23rd Street Park,--,1876
-reds_1876,1876,Cincinnati Reds,NL,Cincinnati,Reds,204,CNR,CIN,CN1,CIN,T204,Avenue Grounds,,1876
-dark_blues_1876,1876,Hartford Dark Blues,NL,Hartford,Dark Blues,123,HAR,HAR,HAR,HAR,T123,Hartford Ball Club Grounds,--,1876
-grays_1876,1876,Louisville Grays,NL,Louisville,Grays,132,LGR,LOU,LS1,LOU,T132,Louisville Baseball Park,--,1876
-mutuals_1876,1876,New York Mutuals,NL,New York,Mutuals,155,NYU,NYU,NY3,NYM,T155,Union Grounds,--,1876
-athletics_1876,1876,Philadelphia Athletics,NL,Philadelphia,Athletics,173,ATH,ATH,PHN,PHN,T173,Jefferson Street Grounds,--,1876
-brown_stockings_1876,1876,St. Louis Brown Stockings,NL,St. Louis,Brown Stockings,195,SBS,STL,SL3,STL,T195,Grand Avenue Park,--,1876
+white_stockings_1876,1876,Chicago White Stockings,NL,Chicago,White Stockings,112,CHC,CHC,CHN,CHI,CHC,23rd Street Park,0,1876
+reds_1876,1876,Cincinnati Reds,NL,Cincinnati,Reds,204,CNR,CIN,CN1,CIN,T204,Avenue Grounds,0,1876
+dark_blues_1876,1876,Hartford Dark Blues,NL,Hartford,Dark Blues,123,HAR,HAR,HAR,HAR,T123,Hartford Ball Club Grounds,0,1876
+grays_1876,1876,Louisville Grays,NL,Louisville,Grays,132,LGR,LOU,LS1,LOU,T132,Louisville Baseball Park,0,1876
+mutuals_1876,1876,New York Mutuals,NL,New York,Mutuals,155,NYU,NYU,NY3,NYM,T155,Union Grounds,0,1876
+athletics_1876,1876,Philadelphia Athletics,NL,Philadelphia,Athletics,173,ATH,ATH,PHN,PHN,T173,Jefferson Street Grounds,0,1876
+brown_stockings_1876,1876,St. Louis Brown Stockings,NL,St. Louis,Brown Stockings,195,SBS,STL,SL3,STL,T195,Grand Avenue Park,0,1876

@@ -449,9 +449,6 @@ LEADERS_TEAM_ALLTIME_SINGLE_SEASON = "/stats/leaders?statType=statsSingleSeason&
 
 LEADERS_TEAM_ALLTIME_CAREER = "/stats/leaders?statType=career&leaderCategories={statCategories}&leaderGameTypes={gameTypes}&statGroup={statGroups}&playerPool={playerPool}&teamId={teamId}&limit=1000"
 
-# teams_cols = 'yearID,fullName,lgAbbrv,locationName,clubName,mlbam,franchID,bbrefID,retroID,mlbID,fileCode,venueName,venue_mlbam,firstYear'
-
-# people_cols = 'yearID,fullName,lgAbbrv,locationName,clubName,mlbam,franchID,bbrefID,retroID,mlbID,fileCode,venueName,venue_mlbam,firstYear'
 
 POSITION_DICT = {
     1:"P",

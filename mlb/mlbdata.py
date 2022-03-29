@@ -10,17 +10,16 @@ def get(df_title) -> pd.DataFrame:
     return pd.read_csv(DATA_DIR + f"{df_title}.csv",index_col=False)
 
 def get_teams_df(year=None) -> pd.DataFrame:
-    try:
-        teams_df = pd.read_csv(TEAMS_CSV,index_col=False)
-        
-        if year is None:
-            return teams_df
-        else:
-            df = teams_df
-            df = df[df["yearID"]==year]
-            return df
-    except Exception as e:
-        print(e)
+    teams_df = pd.read_csv(
+        TEAMS_CSV,
+        index_col=False,
+        dtype={'mlbam':'int32','season':'int32','venue_mlbam':'int32'})
+    if year is None:
+        return teams_df
+    else:
+        df = teams_df
+        df = df[df["season"]==year]
+        return df
 
 def get_standings_df() -> pd.DataFrame:
     """Standings for each season"""
@@ -43,7 +42,10 @@ def get_yby_records(raw=False) -> pd.DataFrame:
         print(e)
 
 def get_people_df() -> pd.DataFrame:
-    df = pd.read_csv(PEOPLE_CSV,index_col=False,dtype={'mlbam':'int32','year_debut':'int32','year_recent':'int32'})
+    df = pd.read_csv(
+        PEOPLE_CSV,
+        index_col=False,
+        dtype={'mlbam':'int32','year_debut':'int32','year_recent':'int32'})
     return df
 
 def get_seasons_df() -> pd.DataFrame:
@@ -67,7 +69,10 @@ def get_venues_df(active_only=False) -> pd.DataFrame:
     
     """
 
-    df = pd.read_csv(VENUES_CSV,index_col=False,dtype={'mlbam':'int32','tz_offset':'int32'})
+    df = pd.read_csv(
+        VENUES_CSV,
+        index_col=False,
+        dtype={'mlbam':'int32','tz_offset':'int32'})
 
     if active_only is True:
         df = df[df["active"]==True].reset_index(drop=True)
@@ -76,12 +81,16 @@ def get_venues_df(active_only=False) -> pd.DataFrame:
 
 def get_season_info(date=None) -> tuple:
     """
-    Get current season in-progress and most recently completed season, given a specified date
+    Get current season in-progress and most recently completed season, 
+    given a specified date
 
     Parameters:
     -------------
-    date: date string, (format: `mm/dd/yyyy`)\n\t\tDefault: current date
+    date: str, 
+        format - `mm/dd/yyyy`\n\t\tDefault: current date
+    
     """
+    
     if date is None:
         current_date = dt.datetime.today()
         using_pretend = False
@@ -95,7 +104,8 @@ def get_season_info(date=None) -> tuple:
         if using_pretend is False:
             df = df.head(4)
 
-        df = df.rename(columns={'seasonStartDate':'start','seasonEndDate':'end'})
+        df = df.rename(columns={'seasonStartDate':'start',
+                                'seasonEndDate':'end'})
 
         df_dates = df
         # return df_dates
@@ -105,7 +115,8 @@ def get_season_info(date=None) -> tuple:
                 seasonInProgress = current_date.year
                 seasonCompleted = seasonInProgress - 1
 
-                season_info = {'in_progress':seasonInProgress,'last_completed':seasonCompleted}
+                season_info = {'in_progress':seasonInProgress,
+                               'last_completed':seasonCompleted}
                 return season_info
                 # return seasonInProgress, seasonCompleted
 
@@ -118,13 +129,15 @@ def get_season_info(date=None) -> tuple:
                 # if current_date < curr_year_row.start.date():
                 if current_date < curr_year_row.start:
                     seasonCompleted = current_date.year - 1
-                    season_info = {'in_progress':seasonInProgress,'last_completed':seasonCompleted}
+                    season_info = {'in_progress':seasonInProgress,
+                                   'last_completed':seasonCompleted}
                     return season_info
 
                 # elif current_date > curr_year_row.end.date():
                 elif current_date > curr_year_row.end:
                     seasonCompleted = current_date.year
-                    season_info = {'in_progress':seasonInProgress,'last_completed':seasonCompleted}
+                    season_info = {'in_progress':seasonInProgress,
+                                   'last_completed':seasonCompleted}
                     return season_info
 
                 else:
@@ -143,7 +156,11 @@ def get_broadcasts_df() -> pd.DataFrame:
     return pd.read_csv(BROADCASTS_CSV,index_col=False)
 
 def get_bbref_data() -> pd.DataFrame:
-    """Reference dataframe for player's 'Baseball-Reference' & MLB Advanced Media IDs"""
+    """Reference dataframe for player's 'Baseball-Reference' & 
+    MLB Advanced Media IDs
+    
+    """
+    
     return pd.read_csv(BBREF_DATA_CSV,index_col=False,dtype={'mlb_ID':'int32'})
 
 def get_bbref_hitting_war_df() -> pd.DataFrame:
@@ -162,62 +179,26 @@ def get_leagues_df() -> pd.DataFrame:
 
     except Exception as e:
         print(e)
+        
+def get_teams_from_register_df(match_columns=False) -> pd.DataFrame:
+    """Periodically updated dataset of team ids (similar to the 'mlb.teams()' 
+    output. This is purely a convenience function if additional 
+    cross-referencing is needed. It may or may not match the rest of the data 
+    retrieved using the other functions.
+    
+    Paramaters:
+    -----------
+    match_columns : bool, default = False
+        If set to 'True', the column labels will be changed to best match 
+        the labels used in the rest of the library. Otherwise, the data will 
+        be returned unaltered.
+        
+    """
+    
+    url = "https://raw.githubusercontent.com/chadwickbureau/baseballdatabank/master/core/Teams.csv"
+    df = pd.read_csv(url,index_col=False)
+    if match_columns is True:
+        df = df.rename(columns={'lgID'})
+    return df
 
-def save_teams():
-    try:
-        df = get_teams_df()
-        # df.to_csv(os.path.abspath('simplestats/baseball/teams_master.csv'),index=False)
-        df.to_csv(TEAMS_CSV,index=False)
-        print("Successfully saved TEAMS dataframe")
-    except:
-        print("ERROR: could not save TEAMS dataframe")
-
-def save_yby_records():
-    try:
-        df = get_yby_records()
-        # df.to_csv(os.path.abspath('simplestats/baseball/yby_records_master.csv'),index=False)
-        df.to_csv(YBY_RECORDS_CSV,index=False)
-        print("Successfully saved RECORDS dataframe")
-    except:
-        print("ERROR: could not save RECORDS dataframe")
-
-def save_people():
-    try:
-        df = get_people_df()
-        # df.to_csv(os.path.abspath('simplestats/baseball/people_master.csv'),index=False)
-        df.to_csv(PEOPLE_CSV,index=False)
-        print("Successfully saved PEOPLE dataframe")
-    except:
-        print("ERROR: could not save PEOPLE dataframe")
-
-def save_seasons():
-    try:
-        df = get_seasons_df()
-        # df.to_csv(os.path.abspath('simplestats/baseball/seasons_master.csv'),index=False)
-        df.to_csv(SEASONS_CSV,index=False)
-        print("Successfully saved SEASONS dataframe")
-    except:
-        print("ERROR: could not save SEASONS dataframe")
-
-def save_venues():
-    try:
-        df = get_venues_df()
-        # df.to_csv(os.path.abspath('simplestats/baseball/venues_master.csv'),index=False)
-        df.to_csv(VENUES_CSV,index=False)
-        print("Successfully saved VENUES dataframe")
-    except:
-        print("ERROR: could not save VENUES dataframe")
-
-def save_standings():
-    try:
-        df = get_standings_df()
-        # df.to_csv(os.path.abspath('simplestats/baseball/yby_standings_master.csv'),index=False)
-        df.to_csv(YBY_STANDINGS_CSV,index=False)
-        print("Successfully saved STANDINGS dataframe")
-    except:
-        print("ERROR: could not save STANDINGS dataframe")
-
-def save_all():
-    for s in (save_teams,save_yby_records,save_standings,save_people,save_seasons,save_venues):
-        s()
-
+    

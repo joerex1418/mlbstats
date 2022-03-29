@@ -19,8 +19,8 @@ async def parse_data(response,teams_df):
         for team in league["teamRecords"]:
         # SEASON RECORDS FOR EACH TEAM
             tm_mlbam = team["team"]["id"]
-            tm_name = teams_df[(teams_df["mlbam"]==tm_mlbam) & (teams_df["yearID"]==year)].fullName.item()
-            tm_bbrefID = teams_df[(teams_df["mlbam"]==tm_mlbam) & (teams_df["yearID"]==year)].bbrefID.item()
+            tm_name = teams_df[(teams_df["mlbam"]==tm_mlbam) & (teams_df["season"]==year)].fullName.item()
+            tm_bbrefID = teams_df[(teams_df["mlbam"]==tm_mlbam) & (teams_df["season"]==year)].bbrefID.item()
             div_mlbam = team.get("team",{}).get("division",{}).get("id","")
             div_short = LEAGUE_IDS_SHORT.get(div_mlbam,"-")
             v_mlbam = team.get("team",{}).get("venue",{}).get("id")

@@ -1092,31 +1092,31 @@ class Franchise:
         if year is None:
             return self.fullName
         else:
-            return self.__franchise_df[self.__franchise_df["yearID"]==year]["fullName"].item()
+            return self.__franchise_df[self.__franchise_df["season"]==year]["fullName"].item()
 
     def locationName(self,year=None):
         if year is None:
             return self.locationName
         else:
-            return self.__franchise_df[self.__franchise_df["yearID"]==year]["locationName"].item()
+            return self.__franchise_df[self.__franchise_df["season"]==year]["locationName"].item()
 
     def clubName(self,year=None):
         if year is None:
             return self.clubName
         else:
-            return self.__franchise_df[self.__franchise_df["yearID"]==year]["clubName"].item()
+            return self.__franchise_df[self.__franchise_df["season"]==year]["clubName"].item()
 
     def bbrefID(self,year=None):
         if year is None:
             return self.bbrefID
         else:
-            return self.__franchise_df[self.__franchise_df["yearID"]==year]["bbrefID"].item()
+            return self.__franchise_df[self.__franchise_df["season"]==year]["bbrefID"].item()
 
     def retroID(self,year=None):
         if year is None:
             return self.retroID
         else:
-            return self.__franchise_df[self.__franchise_df["yearID"]==year]["retroID"].item()
+            return self.__franchise_df[self.__franchise_df["season"]==year]["retroID"].item()
 
 
 

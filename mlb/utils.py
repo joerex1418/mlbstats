@@ -2,16 +2,9 @@ import requests
 import pandas as pd
 import datetime as dt
 from dateutil import tz
-# from tabulate import tabulate
 
 from .constants import (
     STATDICT,
-    # BAT_FIELDS,
-    # BAT_FIELDS_ADV,
-    # PITCH_FIELDS,
-    # PITCH_FIELDS_ADV,
-    # FIELD_FIELDS,
-    # LEAGUE_IDS,
     COLS_HIT,
     COLS_HIT_ADV,
     COLS_PIT,
@@ -20,8 +13,8 @@ from .constants import (
     W_SEASON,
     WO_SEASON,
     ZONE_TOP_STANDARD,
-    ZONE_BOTTOM_STANDARD
-    )
+    ZONE_BOTTOM_STANDARD,
+)
 
 from .mlbdata import get_season_info
 from typing import Union, Optional, List, Dict
@@ -42,38 +35,42 @@ iso_format_ms = r"%Y-%m-%dT%H:%M:%S.%fZ"
 curr_year = today_date.year
 curr_date = today_date
 
-def make_dt_obj(_dt_str:str,_date_only=False):
+
+def make_dt_obj(_dt_str: str, _date_only=False):
     if _date_only is False:
         try:
-            return dt.datetime.strptime(_dt_str,r"%Y-%m-%d")
+            return dt.datetime.strptime(_dt_str, r"%Y-%m-%d")
         except:
-            return dt.datetime.strptime(_dt_str,r"%m/%d/%Y")
+            return dt.datetime.strptime(_dt_str, r"%m/%d/%Y")
     else:
         try:
-            return dt.datetime.strptime(_dt_str,r"%Y-%m-%d").date()
+            return dt.datetime.strptime(_dt_str, r"%Y-%m-%d").date()
         except:
-            return dt.datetime.strptime(_dt_str,r"%m/%d/%Y").date()
+            return dt.datetime.strptime(_dt_str, r"%m/%d/%Y").date()
+
 
 def default_season() -> int:
     """Returns the most recent season with data available.
-    
+
     (Typically either the one that is currently in progress or the last complete season)
-    
+
     """
     season_info = get_season_info()
-    if season_info['in_progress'] is None:
-        season = season_info['last_completed']
+    if season_info["in_progress"] is None:
+        season = season_info["last_completed"]
     else:
-        season = season_info['in_progress']
+        season = season_info["in_progress"]
     return season
 
-def compile_codes(*code_lists,output_list=False) -> str:
+
+def compile_codes(*code_lists, output_list=False) -> str:
     all_codes = []
     for code_list in code_lists:
         all_codes += code_list
     if output_list is False:
         return ",".join(all_codes)
     return all_codes
+
 
 def draw_strikezone(matchup):
     player_zoneTop = matchup[0]["zone_top"]
@@ -85,19 +82,21 @@ def draw_strikezone(matchup):
     pitches = []
     pitch_info = []
     for i in matchup:
-        pitch_info.append((i["pX"],i["pZ"],i["pitch_code"]))
-        pitches.append({
-            "count":i["count"],
-            "call":i["call"],
-            "pitchType":i["pitch_type"],
-            "releaseVelocity":i["release_velocity"],
-            "endVelocity":i["end_velocity"],
-            "spinRate":i["spin_rate"],
-            "zone":i["zone"],
-            "zoneTop":i["zone_top"],
-            "zoneBottom":i["zone_bot"],
-            "distance":i["distance"]
-        })
+        pitch_info.append((i["pX"], i["pZ"], i["pitch_code"]))
+        pitches.append(
+            {
+                "count": i["count"],
+                "call": i["call"],
+                "pitchType": i["pitch_type"],
+                "releaseVelocity": i["release_velocity"],
+                "endVelocity": i["end_velocity"],
+                "spinRate": i["spin_rate"],
+                "zone": i["zone"],
+                "zoneTop": i["zone_top"],
+                "zoneBottom": i["zone_bot"],
+                "distance": i["distance"],
+            }
+        )
 
     zoneTop = ZONE_TOP_STANDARD * 12
     zoneBot = ZONE_BOTTOM_STANDARD * 12
@@ -108,22 +107,22 @@ def draw_strikezone(matchup):
     elif bat_side == "L":
         batter_img = "lefty"
         img_pos = "345"
-    
+
     sZone_h = zoneTop - zoneBot
-    zBox_h = sZone_h/3
-    zBox_h_x2 = zBox_h*2
+    zBox_h = sZone_h / 3
+    zBox_h_x2 = zBox_h * 2
 
     circle_radius = 1.2
-    
+
     drawn_circles = []
-    for idx,tup in enumerate(pitch_info):
+    for idx, tup in enumerate(pitch_info):
         pX = tup[0]
         pZ = tup[1]
-        try: # TRY/EXCEPT because sometimes pX and/or pZ are not identified
-            x = (pX*12) + 8.5
-            y = zoneTop - (pZ*12)
-            x = round(x,2)
-            y = round(y,2)
+        try:  # TRY/EXCEPT because sometimes pX and/or pZ are not identified
+            x = (pX * 12) + 8.5
+            y = zoneTop - (pZ * 12)
+            x = round(x, 2)
+            y = round(y, 2)
             pitchCode = tup[2].lower()
             circle_html = f"""
                     <circle id="p{idx+1}" class="{pitchCode}" cx="{x}" cy="{y}" r="{circle_radius}" />
@@ -132,9 +131,9 @@ def draw_strikezone(matchup):
             drawn_circles.append(circle_html)
         except:
             pass
-    
+
     circles = "\n".join(drawn_circles)
-    
+
     # <div style="border: 2px solid rgb(0, 0, 0);width:max-content; height:fit-content;">
 
     batters_box_html = f"""
@@ -183,20 +182,21 @@ def draw_strikezone(matchup):
         """
     return batters_box_html
 
-def draw_pitches(pCoordinates:list,zoneTop,pitchCodes=[],ab=""):
+
+def draw_pitches(pCoordinates: list, zoneTop, pitchCodes=[], ab=""):
     # still need to determine correct 'zoneTop' and 'zoneBottom' values since they may be different for each pitch
-    
+
     c_radius = 1.2
-    
+
     drawn_circles = []
     # pitchTypes = ""
-    for idx,tup in enumerate(pCoordinates):
+    for idx, tup in enumerate(pCoordinates):
         pX = tup[0]
         pZ = tup[1]
-        x = (pX*12) + 8.5
-        y = (zoneTop*12) - (pZ*12)
-        x = round(x,2)
-        y = round(y,2)
+        x = (pX * 12) + 8.5
+        y = (zoneTop * 12) - (pZ * 12)
+        x = round(x, 2)
+        y = round(y, 2)
         try:
             pitchCode = pitchCodes[idx]
         except:
@@ -207,21 +207,28 @@ def draw_pitches(pCoordinates:list,zoneTop,pitchCodes=[],ab=""):
                 """
 
         drawn_circles.append(circle_html)
-    
+
     return "\n".join(drawn_circles)
+
 
 def simplify_time(iso_time) -> str:
     """Converts ISO formatted datetime string to a timestamp
-    
+
     `2021-11-03T00:34:53Z` -> `20211003_003453`
     """
     # 20211003_003453
     t = iso_time
-    date = t[0:10].replace("-","")
-    time = t[11:19].replace(":","")
+    date = t[0:10].replace("-", "")
+    time = t[11:19].replace(":", "")
     return f"{date}_{time}"
 
-def prettify_time(t=dt.datetime.strftime(dt.datetime.utcnow(),iso_format),fmt="twelve",tz="ct",show_output=False) -> str:
+
+def prettify_time(
+    t=dt.datetime.strftime(dt.datetime.utcnow(), iso_format),
+    fmt="twelve",
+    tz="ct",
+    show_output=False,
+) -> str:
     """Converts Timestamp or ISO Format to standard 12-Hour or 24-Hour format
 
     (Timestamp: `20211003_083453`)
@@ -242,7 +249,7 @@ def prettify_time(t=dt.datetime.strftime(dt.datetime.utcnow(),iso_format),fmt="t
         pt = t[start:end]
         return pt
     elif type(t) is dt.datetime:
-        t = dt.datetime.strftime(t,iso_format)
+        t = dt.datetime.strftime(t, iso_format)
 
     raw = t
     if "_" in t:
@@ -262,34 +269,35 @@ def prettify_time(t=dt.datetime.strftime(dt.datetime.utcnow(),iso_format),fmt="t
             stamp = simplify_time(t)
             print(f"Timestamp format: {stamp}")
     try:
-        dt_obj = dt.datetime.strptime(t,iso_format)
+        dt_obj = dt.datetime.strptime(t, iso_format)
     except:
         try:
-            dt_obj = dt.datetime.strptime(t,iso_format_ms)
+            dt_obj = dt.datetime.strptime(t, iso_format_ms)
         except:
             # dt_obj = dt.datetime.strftime(dt.datetime.utcnow(),iso_format)
             dt_obj = dt.datetime.utcnow()
 
-    utc_time_obj = dt_obj.replace(tzinfo=utc_zone) # tells the date object that it should be UTC
+    utc_time_obj = dt_obj.replace(
+        tzinfo=utc_zone
+    )  # tells the date object that it should be UTC
 
     utc_time_obj = utc_time_obj
-    utc_time_iso = dt.datetime.strftime(utc_time_obj,iso_format)
+    utc_time_iso = dt.datetime.strftime(utc_time_obj, iso_format)
     utc_time_stmp = simplify_time(utc_time_iso)
-    utc_time_12 = dt.datetime.strftime(utc_time_obj,standard_format)
-    utc_time_24 = dt.datetime.strftime(utc_time_obj,military_format)
+    utc_time_12 = dt.datetime.strftime(utc_time_obj, standard_format)
+    utc_time_24 = dt.datetime.strftime(utc_time_obj, military_format)
 
     ct_time_obj = utc_time_obj.astimezone(ct_zone)
-    ct_time_iso = dt.datetime.strftime(ct_time_obj,iso_format)
+    ct_time_iso = dt.datetime.strftime(ct_time_obj, iso_format)
     ct_time_stmp = simplify_time(ct_time_iso)
-    ct_time_12 = dt.datetime.strftime(ct_time_obj,standard_format)
-    ct_time_24 = dt.datetime.strftime(ct_time_obj,military_format)
+    ct_time_12 = dt.datetime.strftime(ct_time_obj, standard_format)
+    ct_time_24 = dt.datetime.strftime(ct_time_obj, military_format)
 
     et_time_obj = utc_time_obj.astimezone(et_zone)
-    et_time_iso = dt.datetime.strftime(et_time_obj,iso_format)
+    et_time_iso = dt.datetime.strftime(et_time_obj, iso_format)
     et_time_stmp = simplify_time(et_time_iso)
-    et_time_12 = dt.datetime.strftime(et_time_obj,standard_format)
-    et_time_24 = dt.datetime.strftime(et_time_obj,military_format)
-
+    et_time_12 = dt.datetime.strftime(et_time_obj, standard_format)
+    et_time_24 = dt.datetime.strftime(et_time_obj, military_format)
 
     shitty_table = """
     \tUSER INPUT: {}
@@ -303,23 +311,24 @@ def prettify_time(t=dt.datetime.strftime(dt.datetime.utcnow(),iso_format),fmt="t
     
     """
     if show_output is True:
-        print(shitty_table.format(
-            raw,
-            utc_time_iso,
-            utc_time_stmp,
-            utc_time_12,
-            utc_time_24,
+        print(
+            shitty_table.format(
+                raw,
+                utc_time_iso,
+                utc_time_stmp,
+                utc_time_12,
+                utc_time_24,
+                ct_time_iso,
+                ct_time_stmp,
+                ct_time_12,
+                ct_time_24,
+                et_time_iso,
+                et_time_stmp,
+                et_time_12,
+                et_time_24,
+            )
+        )
 
-            ct_time_iso,
-            ct_time_stmp,
-            ct_time_12,
-            ct_time_24,
-            
-            et_time_iso,
-            et_time_stmp,
-            et_time_12,
-            et_time_24))
-    
     if tz == "ct":
         if fmt == "twelve":
             return ct_time_12
@@ -336,13 +345,14 @@ def prettify_time(t=dt.datetime.strftime(dt.datetime.utcnow(),iso_format),fmt="t
         elif fmt == "military":
             return utc_time_24
 
-def prepare_game_data(gm,**params):
+
+def prepare_game_data(gm, **params):
     matchup_df = gm.matchup_event_log()
     pas_df = gm.pa_results_log()
     # scoring_pas_df = gm.scoring_pa_log()
     events_df = gm.game_event_log()
     scoring_events_df = gm.scoring_event_log()
-    linescore = gm.linescore() 
+    linescore = gm.linescore()
     boxscore = gm.boxscore()
 
     players = gm.players_
@@ -355,48 +365,56 @@ def prepare_game_data(gm,**params):
     home_fielding = gm.home_fielding_stats()
 
     data_dict = {
-        "linescore":linescore,
-        "boxscore":boxscore,
-        "currentMatchupLog":matchup_df.to_dict("records"),          # Events for the current matchup
-        "atBats":pas_df.to_dict("records"),                         # Information for each plate appearance
-        # "atBatsScoring":scoring_pas_df.to_dict("records"),          # Information for each scoring plate appearance 
-        "events":events_df.to_dict("records"),                      # All game events (pitches, actions, player change, etc)
-        "eventsByAb":[],                                            # All game events grouped by plate appearance
-        "eventsScoring":scoring_events_df.to_dict("records"),       # All events where PA resulted in run(s) scored
-        "ref":gm.all_plays,                                         # Raw data from Game instance's "all_plays" attribute
-        "venue":gm.venue(),
-        "players":players,
-        "strikezones":[]
+        "linescore": linescore,
+        "boxscore": boxscore,
+        "currentMatchupLog": matchup_df.to_dict(
+            "records"
+        ),  # Events for the current matchup
+        "atBats": pas_df.to_dict("records"),  
+        "events": events_df.to_dict(
+            "records"
+        ),
+        "eventsByAb": [],
+        "eventsScoring": scoring_events_df.to_dict(
+            "records"
+        ),
+        "ref": gm.all_plays,
+        "venue": gm.venue(),
+        "players": players,
+        "strikezones": [],
     }
     # 2021-10-03T00:34:53.888Z  - example timestamp
     # https://statsapi.mlb.com/api/v1.1/game/632265/feed/live/timestamps (all game timestamps)
 
     for idx in range(len(pas_df)):
-        pa_events_df = events_df[events_df["pa"]==idx+1]
-        pa_events_df = pa_events_df[(pa_events_df["category"] == "pitch") | (pa_events_df["category"] == "atBat")]
-        pa_events_df.sort_values(by="pitch_num",ascending=True,inplace=True)
+        pa_events_df = events_df[events_df["pa"] == idx + 1]
+        pa_events_df = pa_events_df[
+            (pa_events_df["category"] == "pitch")
+            | (pa_events_df["category"] == "atBat")
+        ]
+        pa_events_df.sort_values(by="pitch_num", ascending=True, inplace=True)
         data_dict["eventsByAb"].append(pa_events_df.to_dict("records"))
 
-    for ab in data_dict["eventsByAb"]: # Iterates through each PA (and each PA's pitch/event)
-        strikezone = draw_strikezone(ab) # Draws SVG strikezone for each PA
+    for ab in data_dict[
+        "eventsByAb"
+    ]:  # Iterates through each PA (and each PA's pitch/event)
+        strikezone = draw_strikezone(ab)  # Draws SVG strikezone for each PA
         data_dict["strikezones"].append(strikezone)
 
     data_dict["stats"] = {
-        "away":{
-            "batting":away_batting.to_dict("records"),
-            "pitching":away_pitching.to_dict("records"),
-            "fielding":away_fielding.to_dict("records")
+        "away": {
+            "batting": away_batting.to_dict("records"),
+            "pitching": away_pitching.to_dict("records"),
+            "fielding": away_fielding.to_dict("records"),
         },
-        "home":{
-            "batting":home_batting.to_dict("records"),
-            "pitching":home_pitching.to_dict("records"),
-            "fielding":home_fielding.to_dict("records")
-        }
+        "home": {
+            "batting": home_batting.to_dict("records"),
+            "pitching": home_pitching.to_dict("records"),
+            "fielding": home_fielding.to_dict("records"),
+        },
     }
 
-    
-    
-   # ######### Code may or may not be for testing purposes ###################################################
+    # ######### Code may or may not be for testing purposes ###################
     # if params["at_bat"] is None:
     #     pass
     # else:
@@ -408,14 +426,15 @@ def prepare_game_data(gm,**params):
     #         "zoneBottomInitial":zoneBottomInitial,
     #         "events":matchup_events.to_dict("records")
     #     }
-   # #########################################################################################################
+    # #########################################################################
 
     return data_dict
+
 
 def game_str_display(game_obj):
     to_print = []
     gm = game_obj
-    bat_cols = ["Player","Pos","AVG","AB","H","R","SO","BB"]
+    bat_cols = ["Player", "Pos", "AVG", "AB", "H", "R", "SO", "BB"]
     hm = gm.home_batting_stats()
     aw = gm.away_batting_stats()
     max_batters = len(hm) if len(hm) > len(aw) else len(aw)
@@ -425,43 +444,43 @@ def game_str_display(game_obj):
     balls = gm.balls
     strikes = gm.strikes
 
-    ol  = "\u203e"
-    vl  = "\u2503"
-    ld  = "\u2571"
-    rd  = "\u2572"
-    x   = "\u2573"
+    ol = "\u203e"
+    vl = "\u2503"
+    ld = "\u2571"
+    rd = "\u2572"
+    x = "\u2573"
     dot = "\u25C9 "
     cir = "\u25cc "
 
-    top_border = f'|{ol*143}|'
+    top_border = f"|{ol*143}|"
     bot_border = f'|{"_"*143}|'
 
-    blank_row = "|{:143}|".format("")                   # blank row
-    blank_row_sep = "|{:71}|{:71}|".format("","")       # blank row with VERTICAL separator
+    blank_row = "|{:143}|".format("")  # blank row
+    blank_row_sep = "|{:71}|{:71}|".format("", "")
 
-    dyn_row_mid   = "|{:^143.143}|"
-    dyn_row_left  = "|{:<143.143}|"
+    dyn_row_mid = "|{:^143.143}|"
+    dyn_row_left = "|{:<143.143}|"
     dyn_row_right = "|{:>143.143}|"
 
-    midalign_col   = "{:^66.66}"
-    leftalign_col  = "{:<66.66}"
+    midalign_col = "{:^66.66}"
+    leftalign_col = "{:<66.66}"
     rightalign_col = "{:>66.66}"
 
     ls = gm.linescore()
 
     ls_tot_fmt = " {:^3}"
     ls_fmt = "{:^3}"
-    head_ls = ["     ","   "]
-    away_ls = ["     ",ls_fmt.format(gm.away_abbrv)]
-    home_ls = ["     ",ls_fmt.format(gm.home_abbrv)]
-    for inn in ls['innings']:
+    head_ls = ["     ", "   "]
+    away_ls = ["     ", ls_fmt.format(gm.away_abbrv)]
+    home_ls = ["     ", ls_fmt.format(gm.home_abbrv)]
+    for inn in ls["innings"]:
         inning_ord = inn["inningOrdinal"]
         head_ls.append(ls_fmt.format(inning_ord))
 
-        aw_runs = str(inn.get("away",{}).get("runs","-"))
+        aw_runs = str(inn.get("away", {}).get("runs", "-"))
         away_ls.append(ls_fmt.format(aw_runs))
 
-        hm_runs = str(inn.get("home",{}).get("runs","-"))
+        hm_runs = str(inn.get("home", {}).get("runs", "-"))
         home_ls.append(ls_fmt.format(hm_runs))
 
     aw_runs_total = str(ls["total"]["away"]["runs"])
@@ -471,100 +490,128 @@ def game_str_display(game_obj):
     hm_hits_total = str(ls["total"]["home"]["hits"])
     hm_errs_total = str(ls["total"]["home"]["errors"])
 
+    head_ls.append(
+        f'|{ls_tot_fmt.format("R")}{ls_tot_fmt.format("H")}{ls_tot_fmt.format("E")}'
+    )
 
-    head_ls.append(f'|{ls_tot_fmt.format("R")}{ls_tot_fmt.format("H")}{ls_tot_fmt.format("E")}')
-
-    away_ls.append(f'|{ls_tot_fmt.format(aw_runs_total)}{ls_tot_fmt.format(aw_hits_total)}{ls_tot_fmt.format(aw_errs_total)}')
-    home_ls.append(f'|{ls_tot_fmt.format(hm_runs_total)}{ls_tot_fmt.format(hm_hits_total)}{ls_tot_fmt.format(hm_errs_total)}')
+    away_ls.append(
+        f"|{ls_tot_fmt.format(aw_runs_total)}{ls_tot_fmt.format(aw_hits_total)}{ls_tot_fmt.format(aw_errs_total)}"
+    )
+    home_ls.append(
+        f"|{ls_tot_fmt.format(hm_runs_total)}{ls_tot_fmt.format(hm_hits_total)}{ls_tot_fmt.format(hm_errs_total)}"
+    )
 
     # some_txt = f'{"x"*40} sda;dfj {"8"*80} asd;lfkjasldfjalsdfjas;dlfkj{"Q"*90}'
-    l_txt = "l"*20
-    r_txt = "r"*20
-    # to_print.append("|     {:<66.61}     {:<61.62}     |".format(l_txt,r_txt)) 
+    l_txt = "l" * 20
+    r_txt = "r" * 20
+    # to_print.append("|     {:<66.61}     {:<61.62}     |".format(l_txt,r_txt))
 
     ls_head_row = " ".join(head_ls)
     ls_away_row = " ".join(away_ls)
     ls_home_row = " ".join(home_ls)
 
     team_name_row = "|      {:60}     |      {:60}     |"
-    bat_row  = "|     {:4} {:23.23}   {:>4}{:>6.4}{:>4}{:>4}{:>4}{:>4}{:>4}     |     {:4} {:23.23}   {:>4}{:>6.4}{:>4}{:>4}{:>4}{:>4}{:>4}     |"
-    bat_header_str = ("#","Player Name","Pos","AVG","AB","H","R","SO","BB","#","Player Name","Pos","AVG","AB","H","R","SO","BB")
-    bat_header_ul = "\u203e"*61
+    bat_row = "|     {:4} {:23.23}   {:>4}{:>6.4}{:>4}{:>4}{:>4}{:>4}{:>4}     |     {:4} {:23.23}   {:>4}{:>6.4}{:>4}{:>4}{:>4}{:>4}{:>4}     |"
+    bat_header_str = (
+        "#",
+        "Player Name",
+        "Pos",
+        "AVG",
+        "AB",
+        "H",
+        "R",
+        "SO",
+        "BB",
+        "#",
+        "Player Name",
+        "Pos",
+        "AVG",
+        "AB",
+        "H",
+        "R",
+        "SO",
+        "BB",
+    )
+    bat_header_ul = "\u203e" * 61
 
-    to_print.append(top_border) # TOP =============================================================== TOP
+    to_print.append(
+        top_border
+    )  # TOP =============================================================== TOP
     title = f"{gm.away_full}  vs  {gm.home_full}"
     to_print.append("|{:^143}|".format(title))
-    to_print.append("|{:^143}|".format('-'*(len(title)+2)))
-    
+    to_print.append("|{:^143}|".format("-" * (len(title) + 2)))
+
     gm_date = gm.game_date
-    gm_date_obj = dt.datetime.strptime(gm_date,r"%Y-%m-%d")
-    gm_date_str = gm_date_obj.strftime(r"%A, %B ") + f'{int(gm_date_obj.day)} ' + gm_date_obj.strftime('%Y')
+    gm_date_obj = dt.datetime.strptime(gm_date, r"%Y-%m-%d")
+    gm_date_str = (
+        gm_date_obj.strftime(r"%A, %B ")
+        + f"{int(gm_date_obj.day)} "
+        + gm_date_obj.strftime("%Y")
+    )
     to_print.append("|{:^143}|".format(gm_date_str))
     to_print.append(blank_row)
     # -------------------------- GAME INFO --------------------------
-    venue = "{:<10} {:25}".format("Venue:",gm.venue()['name'])
+    venue = "{:<10} {:25}".format("Venue:", gm.venue()["name"])
     venue = leftalign_col.format(venue)
     ls_header = rightalign_col.format(ls_head_row)
 
-    weather = "{:<10} {:25}".format("Weather:",gm.sky)
+    weather = "{:<10} {:25}".format("Weather:", gm.sky)
     weather = leftalign_col.format(weather)
     ls_away = rightalign_col.format(ls_away_row)
 
-    wind = "{:<10} {:25}".format("Wind:",gm.wind)
+    wind = "{:<10} {:25}".format("Wind:", gm.wind)
     wind = leftalign_col.format(wind)
     ls_home = rightalign_col.format(ls_home_row)
 
-    to_print.append("|     {:<66.66} {:>66.66}     |".format(venue,ls_header))
-    to_print.append("|     {:<66.66} {:>66.66}     |".format(weather,ls_away))
-    to_print.append("|     {:<66.66} {:>66.66}     |".format(wind,ls_home))
-
+    to_print.append("|     {:<66.66} {:>66.66}     |".format(venue, ls_header))
+    to_print.append("|     {:<66.66} {:>66.66}     |".format(weather, ls_away))
+    to_print.append("|     {:<66.66} {:>66.66}     |".format(wind, ls_home))
 
     to_print.append("|{:_^143}|".format("_"))
     to_print.append(blank_row)
     # --------------------------------------------------------------------- #
 
-
     # -------------------------- CURRENT MATCHUP -------------------------- #
     # to_print.append("|     {:<133.133}     |".format("Current MATCHUP"))
-    now_batting = matchup.get("atBat",{})
-    now_pitching = matchup.get("pitching",{})
+    now_batting = matchup.get("atBat", {})
+    now_pitching = matchup.get("pitching", {})
 
-    now_batting_id = now_batting.get("id","-")
-    now_batting_name = now_batting.get("name","-")
+    now_batting_id = now_batting.get("id", "-")
+    now_batting_name = now_batting.get("name", "-")
 
-    now_pitching_id = now_pitching.get("id","-")
-    now_pitching_name = now_pitching.get("name","-")
+    now_pitching_id = now_pitching.get("id", "-")
+    now_pitching_name = now_pitching.get("name", "-")
 
     ball_ct = str(gm.balls)
     strike_ct = str(gm.strikes)
     out_ct = str(gm.outs)
 
-    situation    = gm.situation()
-    runnersOn    = situation["runnersOn"]
-    queue        = situation["queue"]
-    on_deck      = queue.get("onDeck",{})
-    in_hole      = queue.get("inHole",{})
-    on_deck_name = on_deck.get("name","-")
-    in_hole_name = in_hole.get("name","-")
+    situation = gm.situation()
+    runnersOn = situation["runnersOn"]
+    queue = situation["queue"]
+    on_deck = queue.get("onDeck", {})
+    in_hole = queue.get("inHole", {})
+    on_deck_name = on_deck.get("name", "-")
+    in_hole_name = in_hole.get("name", "-")
 
-    onFirst     = x if runnersOn.get("first",{}).get("isOccuppied") is True else " "
-    onSecond    = x if runnersOn.get("second",{}).get("isOccuppied") is True else " "
-    onThird     = x if runnersOn.get("third",{}).get("isOccuppied") is True else " "
+    onFirst = x if runnersOn.get("first", {}).get("isOccuppied") is True else " "
+    onSecond = x if runnersOn.get("second", {}).get("isOccuppied") is True else " "
+    onThird = x if runnersOn.get("third", {}).get("isOccuppied") is True else " "
 
-    ball_ct     = int(ball_ct)
-    strike_ct   = int(strike_ct)
-    out_ct      = int(out_ct)
+    ball_ct = int(ball_ct)
+    strike_ct = int(strike_ct)
+    out_ct = int(out_ct)
 
-    b_rep = dot*ball_ct
-    b_emp = cir*(4 - ball_ct)
+    b_rep = dot * ball_ct
+    b_emp = cir * (4 - ball_ct)
     b_rep = b_rep + b_emp
-    
-    s_rep = dot*strike_ct
-    s_emp = cir*(3 - strike_ct)
+
+    s_rep = dot * strike_ct
+    s_emp = cir * (3 - strike_ct)
     s_rep = s_rep + s_emp
 
-    o_rep = dot*out_ct
-    o_emp = cir*(3 - out_ct)
+    o_rep = dot * out_ct
+    o_emp = cir * (3 - out_ct)
     o_rep = o_rep + o_emp
 
     diamond1 = f"     ┌───┐"
@@ -576,17 +623,36 @@ def game_str_display(game_obj):
 
     # print(f"{c.YELLOW}AT BAT{c.END}")
 
-    mid_sec_r01 = "{:<45.45}     {:>89}     |".format("|     {:<66}".format(diamond1),"{:<60}".format(""))
+    mid_sec_r01 = "{:<45.45}     {:>89}     |".format(
+        "|     {:<66}".format(diamond1), "{:<60}".format("")
+    )
 
-    mid_sec_r02 = "{:<45.45}     {:>89}     |".format("|     {:<66}".format(diamond2),"{:<60}".format(""))
+    mid_sec_r02 = "{:<45.45}     {:>89}     |".format(
+        "|     {:<66}".format(diamond2), "{:<60}".format("")
+    )
 
-    mid_sec_r03 = "{:<45.45}     {:<89}     |".format("|     {:<25}{:<2}{:<15.15}".format(diamond3,"B",b_rep),"{:<11.11}{:<23.23}{:<11.11}{:<25.25}".format("AT BAT:",now_batting_name,"ON DECK:",on_deck_name))
+    mid_sec_r03 = "{:<45.45}     {:<89}     |".format(
+        "|     {:<25}{:<2}{:<15.15}".format(diamond3, "B", b_rep),
+        "{:<11.11}{:<23.23}{:<11.11}{:<25.25}".format(
+            "AT BAT:", now_batting_name, "ON DECK:", on_deck_name
+        ),
+    )
 
-    mid_sec_r04 = "{:<45.45}     {:<89}     |".format("|     {:<25}{:<2}{:<15.15}".format(diamond4,"S",s_rep),"{:<11.11}{:<23.23}{:<11.11}{:<25.25}".format("ON MOUND:",now_pitching_name,"HOLE",in_hole_name))
+    mid_sec_r04 = "{:<45.45}     {:<89}     |".format(
+        "|     {:<25}{:<2}{:<15.15}".format(diamond4, "S", s_rep),
+        "{:<11.11}{:<23.23}{:<11.11}{:<25.25}".format(
+            "ON MOUND:", now_pitching_name, "HOLE", in_hole_name
+        ),
+    )
 
-    mid_sec_r05 = "{:<45.45}     {:<89}     |".format("|     {:<25}{:<2}{:<15.15}".format(diamond5,"O",o_rep),"{:<70.70}".format(""))
+    mid_sec_r05 = "{:<45.45}     {:<89}     |".format(
+        "|     {:<25}{:<2}{:<15.15}".format(diamond5, "O", o_rep),
+        "{:<70.70}".format(""),
+    )
 
-    mid_sec_r06 = "{:<45.45}     {:>89}     |".format("|     {:<66}".format(diamond6),"{:<60}".format(""))
+    mid_sec_r06 = "{:<45.45}     {:>89}     |".format(
+        "|     {:<66}".format(diamond6), "{:<60}".format("")
+    )
 
     to_print.append(mid_sec_r01)
     to_print.append(mid_sec_r02)
@@ -602,15 +668,43 @@ def game_str_display(game_obj):
 
     to_print.append(blank_row)
 
-    to_print.append(team_name_row.format(gm.away_full,gm.home_full))
+    to_print.append(team_name_row.format(gm.away_full, gm.home_full))
 
     to_print.append(blank_row_sep)
     to_print.append(blank_row_sep)
 
-    bat_head = bat_row.format("#","Player Name","Pos","AVG","AB","H","R","SO","BB","#","Player Name","Pos","AVG","AB","H","R","SO","BB")
+    bat_head = bat_row.format(
+        "#",
+        "Player Name",
+        "Pos",
+        "AVG",
+        "AB",
+        "H",
+        "R",
+        "SO",
+        "BB",
+        "#",
+        "Player Name",
+        "Pos",
+        "AVG",
+        "AB",
+        "H",
+        "R",
+        "SO",
+        "BB",
+    )
     to_print.append(bat_head)
     to_print.append(f"|     {bat_header_ul}     |     {bat_header_ul}     |")
-    empty_row = {"Player":"","Pos":"","AVG":"","AB":"","H":"","R":"","SO":"","BB":""}
+    empty_row = {
+        "Player": "",
+        "Pos": "",
+        "AVG": "",
+        "AB": "",
+        "H": "",
+        "R": "",
+        "SO": "",
+        "BB": "",
+    }
 
     aw_ct = 1
     hm_ct = 1
@@ -629,7 +723,7 @@ def game_str_display(game_obj):
         except:
             aw_row = empty_row
             aw_idx = ""
-        
+
         try:
             hm_row = hm.iloc[idx].copy()
             if hm_row["Player"] != "Summary":
@@ -637,25 +731,45 @@ def game_str_display(game_obj):
                     hm_row["Player"] = "  -- " + hm_row["Player"]
                     hm_idx = ""
                 else:
-                    hm_idx = f'{hm_ct}.'
+                    hm_idx = f"{hm_ct}."
                     hm_ct += 1
             else:
                 hm_idx = ""
         except:
             hm_row = empty_row
             hm_idx = ""
-        
 
-        to_print.append(bat_row.format(
-            aw_idx,aw_row["Player"],aw_row["Pos"],aw_row["AVG"],aw_row["AB"],aw_row["H"],aw_row["R"],aw_row["SO"],aw_row["BB"],
-            hm_idx,hm_row["Player"],hm_row["Pos"],hm_row["AVG"],hm_row["AB"],hm_row["H"],hm_row["R"],hm_row["SO"],hm_row["BB"]
-            ))
+        to_print.append(
+            bat_row.format(
+                aw_idx,
+                aw_row["Player"],
+                aw_row["Pos"],
+                aw_row["AVG"],
+                aw_row["AB"],
+                aw_row["H"],
+                aw_row["R"],
+                aw_row["SO"],
+                aw_row["BB"],
+                hm_idx,
+                hm_row["Player"],
+                hm_row["Pos"],
+                hm_row["AVG"],
+                hm_row["AB"],
+                hm_row["H"],
+                hm_row["R"],
+                hm_row["SO"],
+                hm_row["BB"],
+            )
+        )
 
     to_print.append(blank_row)
-    to_print.append(bot_border) # BOTTOM ============================================================ BOTTOM
+    to_print.append(
+        bot_border
+    )  # BOTTOM ============================================================ BOTTOM
 
     final_output = "\n".join(to_print)
-    return final_output.replace("|",vl)
+    return final_output.replace("|", vl)
+
 
 class timeutils:
     utc_zone = utc_zone
@@ -663,12 +777,13 @@ class timeutils:
     ct_zone = ct_zone
     mt_zone = mt_zone
     pt_zone = pt_zone
-    
+
     class fmt:
         standard = standard_format
         military = military_format
         iso = iso_format
         isoms = iso_format_ms
+
 
 class keys:
     stats = STATDICT
@@ -680,74 +795,84 @@ class keys:
     other_cols_with_season = W_SEASON
     other_cols_wo_season = WO_SEASON
 
+
 class metadata:
     def __call__(self) -> list:
         meta_list = [
-            'statGroups',
-            'statTypes',
-            'leagueLeaderTypes',
-            'baseballStats'
-        ]
+            "statGroups",
+            "statTypes", 
+            "leagueLeaderTypes",
+            "baseballStats"]
         meta_list.sort()
         return meta_list
 
-    def baseballStats(df=False) -> Union[List[Dict],pd.DataFrame]:
+    def baseballStats(df=False) -> Union[List[Dict], pd.DataFrame]:
         url = "https://statsapi.mlb.com/api/v1/baseballStats"
         data = []
         resp = requests.get(url)
         if df is True:
             for d in resp.json():
                 stat_groups = []
-                for sg in d.get('statGroups',[{}]):
-                    stat_groups.append(sg.get('displayName'))
-                data.append([
-                    d.get('name','-'),
-                    d.get('lookupParam','-'),
-                    d.get('isCounting','-'),
-                    d.get('label','-'),
-                    True if 'hitting' in stat_groups else False,
-                    True if 'pitching' in stat_groups else False,
-                    True if 'fielding' in stat_groups else False,
-                    True if 'catching' in stat_groups else False,
-                    True if 'game' in stat_groups else False,
-                    d.get('orgTypes','-'),
-                    d.get('highLowTypes','-'),
-                    d.get('streakLevels','-'),
-                ])
-            return pd.DataFrame(data=data,columns=['name','lookupParam','isCounting','label','hitting','pitching','fielding','catching','game','orgTypes','highLowTypes','streakLevels'])
+                for sg in d.get("statGroups", [{}]):
+                    stat_groups.append(sg.get("displayName"))
+                data.append(
+                    [
+                        d.get("name", "-"),
+                        d.get("lookupParam", "-"),
+                        d.get("isCounting", "-"),
+                        d.get("label", "-"),
+                        True if "hitting" in stat_groups else False,
+                        True if "pitching" in stat_groups else False,
+                        True if "fielding" in stat_groups else False,
+                        True if "catching" in stat_groups else False,
+                        True if "game" in stat_groups else False,
+                        d.get("orgTypes", "-"),
+                        d.get("highLowTypes", "-"),
+                        d.get("streakLevels", "-"),
+                    ]
+                )
+            return pd.DataFrame(
+                data=data,
+                columns=[
+                    "name",
+                    "lookupParam",
+                    "isCounting",
+                    "label",
+                    "hitting",
+                    "pitching",
+                    "fielding",
+                    "catching",
+                    "game",
+                    "orgTypes",
+                    "highLowTypes",
+                    "streakLevels",
+                ],
+            )
         else:
             return resp.json()
 
-    def leagueLeaderTypes(df=False) -> Union[list,pd.DataFrame]:
+    def leagueLeaderTypes(df=False) -> Union[list, pd.DataFrame]:
         url = "https://statsapi.mlb.com/api/v1/leagueLeaderTypes"
         data = []
         resp = requests.get(url)
         for i in resp.json():
-            data.append(i['displayName'])
+            data.append(i["displayName"])
         return data
 
-    def statGroups(df=False) -> Union[list,pd.DataFrame]:
+    def statGroups(df=False) -> Union[list, pd.DataFrame]:
         url = "https://statsapi.mlb.com/api/v1/statGroups"
         data = []
         resp = requests.get(url)
         for i in resp.json():
-            data.append(i['displayName'])
+            data.append(i["displayName"])
         if df is True:
             return pd.DataFrame(data=data)
         return data
 
-    def statTypes(df=False) -> Union[list,pd.DataFrame]:
+    def statTypes(df=False) -> Union[list, pd.DataFrame]:
         url = "https://statsapi.mlb.com/api/v1/statTypes"
         data = []
         resp = requests.get(url)
         for i in resp.json():
-            data.append(i['displayName'])
+            data.append(i["displayName"])
         return data
-
-
-
-        
-
-
-
-

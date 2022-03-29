@@ -26,13 +26,13 @@ from .constants import LEADERS_ALLTIME_CAREER
 
 
 def team_stats(season,sesh=None):
-    # teams_df = get_teams_df(season)[["yearID","fullName","lgAbbrv","locationName","clubName","mlbam","bbrefID"]].set_index("mlbam")
+    # teams_df = get_teams_df(season)[["season","fullName","lgAbbrv","locationName","clubName","mlbam","bbrefID"]].set_index("mlbam")
     # url = BASE + f"/teams/stats?stats=season,seasonAdvanced&group=hitting,pitching,fielding&season={season}&leagueIds=103,104&hydrate=team(division)"
 
     # retrieving from ybyRecords table because it has division and league IDs
     yby_df = get_yby_records()
     yby_df = yby_df[yby_df["season"]==season]
-    teams_df = get_teams_df(season)[["yearID","fullName","lgAbbrv","locationName","clubName","mlbam","bbrefID"]].set_index("mlbam")
+    teams_df = get_teams_df(season)[["season","fullName","lgAbbrv","locationName","clubName","mlbam","bbrefID"]].set_index("mlbam")
     url = BASE + f"/teams/stats?stats=season,seasonAdvanced&group=hitting,pitching,fielding&season={season}&leagueIds=103,104"
     
     if sesh is None:
@@ -512,7 +512,7 @@ def standings(season,sesh=None):
     return df
 
 def stats_and_standings(season,sesh=None):
-    teams_df = get_teams_df(season)[["yearID","fullName","lgAbbrv","locationName","clubName","mlbam","bbrefID"]].set_index("mlbam")
+    teams_df = get_teams_df(season)[["season","fullName","lgAbbrv","locationName","clubName","mlbam","bbrefID"]].set_index("mlbam")
     hydrate = "team(division,standings)"
     
     url = BASE + f"/teams/stats?stats=season,seasonAdvanced&group=hitting,pitching,fielding&season={season}&leagueIds=100,101,102,103,104,105,106&hydrate=team(division,standings)"

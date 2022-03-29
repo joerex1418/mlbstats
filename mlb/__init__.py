@@ -6,40 +6,47 @@ Python Wrapper for the MLB Stats API - https://statsapi.mlb.com
 - GitHub Profile: https://github.com/joerex1418
 
 ### Copyright Notice
-This repository and its author are not affiliated with the MLB in any way. Use of MLB data is subject to the notice posted at http://gdx.mlb.com/components/copyright.txt.
+This repository and its author are not affiliated with the MLB in any way. 
+Use of MLB data is subject to the notice posted at 
+http://gdx.mlb.com/components/copyright.txt.
 
 Overview
 --------
-SimpleStatsMLB is designed to make retrieving and visualizing MLB data as easy & intuitive as possible.
+SimpleStatsMLB is designed to make retrieving and visualizing MLB data as easy 
+& intuitive as possible.
     
-With a variety of data tables, 4 primary classes, and almost 40 functions, getting the baseball information you need should be a "can-o-corn".
+With a variety of data tables, 4 primary classes, and almost 40 functions, 
+getting the baseball information you need should be a "can-o-corn".
 
--------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 Highlights
 ----------
 ### 4 Primary Classes designed to quickly make hundreds of API calls at once
     * `Person` - instances represent a specific person affiliated with the MLB
         * Primary usage is for the retrieval of player bios and stats
-    * `Franchise` - instances represent an MLB franchise (i.e. the parent org for specific team)
+    * `Franchise` - instances represent an MLB franchise (i.e. the parent org 
+    for specific team)
     * `Team` - instances represent a specific team for a specified season
     * `Game` - instances represent LIVE data for a game
-        * Available data includes scores, game stats, lineups, pitch logs, play logs, weather, 
-        attendance, venue info, and more!
+        * Available data includes scores, game stats, lineups, pitch logs, play
+        logs, weather, attendance, venue info, and more!
 
 ### Pitch & Play Finder!
-    * With the `pitch_search` and `play_search` functions, you'll be able to search for any 
-    plays/pitches over recent years with detailed information 
+    * With the `pitch_search` and `play_search` functions, you'll be able to 
+    search for any plays/pitches over recent years with detailed information 
 
 ### Schedule
-    * Need the entire 2021 schedule? Or just the 2005 schedule for the Chicago White Sox?
-    Either way, getting the dates that you need is easy with the `schedule` function
-    
+    * Need the entire 2021 schedule? Or just the 2005 schedule for the Chicago 
+    White Sox?
 ### Just need to know when your team is playing next? 
-    * Use the `next_game` function to get the 'when', 'who', and 'where' for your favorite team's next matchup
+    Getting the dates that you need is easy with the `schedule` function
+    
+    * Use the `next_game` function to get the 'when', 'who', and 'where' for 
+    your favorite team's next matchup
 
 
 ### Find out more by clicking the links below!
--------------------------------------------------------------------------------------------------------    
+-------------------------------------------------------------------------------
 - Source: https://github.com/joerex1418/simplestats-mlb
 - Issues: https://github.com/joerex1418/simplestats-mlb/issues
 - License: https://raw.githubusercontent.com/joerex1418/simplestats-mlb/master/LICENSE
@@ -56,8 +63,6 @@ person = Person
 team = Team
 game = Game
 
-# FOR CONSIDERATION:
-# https://raw.githubusercontent.com/chadwickbureau/baseballdatabank/master/core/Teams.csv
 
 from .functions import play_search
 from .functions import pitch_search
@@ -95,20 +100,18 @@ from .functions import league_fielding
 from .functions import league_hitting_advanced
 from .functions import league_pitching_advanced
 from .functions import league_leaders
-
-player_batting = player_hitting
-team_batting = team_hitting
-
 from .functions import game_highlights
 from .functions import get_video_link
 
+player_batting = player_hitting
+team_batting = team_hitting
 
 from .utils import keys
 from .utils import timeutils
 from .utils import default_season
 from .utils import metadata
-
 from .utils import COLS_HIT
+
 # from .utils import utc_zone
 # from .utils import et_zone
 # from .utils import ct_zone
@@ -124,15 +127,6 @@ from .utils import COLS_HIT
 # from .utils import prepare_game_data
 # from .utils import curr_year as current_year
 
-from .mlbdata import get
-from .mlbdata import save_all
-from .mlbdata import save_teams
-from .mlbdata import save_venues
-from .mlbdata import save_people
-from .mlbdata import save_seasons
-from .mlbdata import save_standings
-from .mlbdata import save_yby_records
-from .mlbdata import get_season_info
 from .mlbdata import get_teams_df as teams
 from .mlbdata import get_people_df as people
 from .mlbdata import get_venues_df as venues
@@ -145,6 +139,7 @@ from .mlbdata import get_broadcasts_df as broadcasts
 from .mlbdata import get_bbref_data as bbref_data
 from .mlbdata import get_bbref_hitting_war_df as bbref_war_hit
 from .mlbdata import get_bbref_pitching_war_df as bbref_war_pitch
+from .mlbdata import get_teams_from_register_df as chadwick_teams
 legends = hall_of_fame
 
 from .updatedb import update_hof
@@ -159,27 +154,24 @@ from .updatedb import update_bbref_pitching_war
 update_legends = update_hof
 update_bbref_batting_war = update_bbref_hitting_war
 
-
 from .async_mlb import fetch
 from .async_mlb import fetch_text
 
 from .paths import *
 
-from .constants import (
-    BASE,
-    GAME_TYPES_ALL,
-    BAT_FIELDS,
-    BAT_FIELDS_ADV,
-    PITCH_FIELDS,
-    PITCH_FIELDS_ADV,
-    FIELD_FIELDS,
-    STATDICT,
-    LEAGUE_IDS,
-    COLS_HIT,
-    COLS_HIT_ADV,
-    COLS_PIT,
-    COLS_PIT_ADV,
-    COLS_FLD,
-    W_SEASON,
-    WO_SEASON
-)
+from .constants import BASE
+from .constants import GAME_TYPES_ALL
+from .constants import BAT_FIELDS
+from .constants import BAT_FIELDS_ADV
+from .constants import PITCH_FIELDS
+from .constants import PITCH_FIELDS_ADV
+from .constants import FIELD_FIELDS
+from .constants import STATDICT
+from .constants import LEAGUE_IDS
+from .constants import COLS_HIT
+from .constants import COLS_HIT_ADV
+from .constants import COLS_PIT
+from .constants import COLS_PIT_ADV
+from .constants import COLS_FLD
+from .constants import W_SEASON
+from .constants import WO_SEASON

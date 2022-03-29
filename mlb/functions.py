@@ -57,7 +57,11 @@ from typing import Union, Optional, List
 # ASYNC
 # ===============================================================
 
-async def _parse_player_data(data,session:aiohttp.ClientSession,_url,_mlbam=None):
+async def _parse_player_data(
+    data,
+    session:aiohttp.ClientSession,
+    _url,
+    _mlbam=None):
     if "hydrate=currentTeam" in _url:
         data = data["people"][0]
         debut = data["mlbDebutDate"]
@@ -80,7 +84,10 @@ async def _parse_player_data(data,session:aiohttp.ClientSession,_url,_mlbam=None
 
         return all_ps
 
-async def _fetch_player_data(urls,_get_bio=None,_mlbam=None):
+async def _fetch_player_data(
+    urls,
+    _get_bio=None,
+    _mlbam=None):
     retrieved_responses = []
     async with aiohttp.ClientSession() as session:
         tasks = []
@@ -103,7 +110,12 @@ async def _fetch_player_data(urls,_get_bio=None,_mlbam=None):
     
     return retrieved_responses
 
-async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.DataFrame,_mlbam,**kwargs):
+async def _parse_team_data(
+    data,session:aiohttp.ClientSession,
+    _url,
+    lgs_df:pd.DataFrame,
+    _mlbam,
+    **kwargs):
     start = time.time()
     if f"/teams/{_mlbam}?season=" in _url:
         team_info_parsed = {}
@@ -357,7 +369,8 @@ async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.Dat
         else:
             reordered_cols  = added_cols + COLS_PIT
 
-        combined_df = pd.DataFrame(stat_data).rename(columns=STATDICT).reindex(columns=reordered_cols)
+        combined_df = pd.DataFrame(stat_data).rename(
+            columns=STATDICT).reindex(columns=reordered_cols)
 
         if kwargs.get('_logtime') is True:
             print(f"\n{unquote(_url).replace(BASE,'')}")
@@ -389,7 +402,9 @@ async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.Dat
                 p.get('mlbDebutDate','-'),
                 p.get('lastPlayedDate','-'),
             ])
-        df = pd.DataFrame(data=coach_data,columns=['job','job_title','job_id','jersey_number_coach','jersey_number_primary','name','birth_date','age','pos','mlb_debut','last_played'])
+        df = pd.DataFrame(
+            data=coach_data,
+            columns=['job','job_title','job_id','jersey_number_coach','jersey_number_primary','name','birth_date','age','pos','mlb_debut','last_played'])
 
         if kwargs.get('_logtime') is True:
             print(f"\n{unquote(_url).replace(BASE,'')}")
@@ -497,7 +512,8 @@ async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.Dat
                         elif 'fielding' in _url:
                             reordered_cols = COLS_FLD
 
-                df = pd.DataFrame(data=stat_data).rename(columns=STATDICT).reindex(columns=reordered_cols)
+                df = pd.DataFrame(data=stat_data).rename(
+                    columns=STATDICT).reindex(columns=reordered_cols)
                 df['game_type'] = gt
 
                 stat_dict[add_to] = df
@@ -561,7 +577,9 @@ async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.Dat
                     draft_type.get('description','-')
                 ])
 
-        df = pd.DataFrame(data=draft_data,columns=['season','bisID','mlbam','name','birth_date','birth_city','birth_state','birth_country','height','weight','pos','bats','throws','rank','round','pick_number','round_pick_number','value','signing_bonus','home_city','home_state','home_country','school_name','school_class','school_state','school_country','scouting_report','headshot_url','blurb','is_drafted','is_pass','draft_code','draft_description'])
+        df = pd.DataFrame(
+            data=draft_data,
+            columns=['season','bisID','mlbam','name','birth_date','birth_city','birth_state','birth_country','height','weight','pos','bats','throws','rank','round','pick_number','round_pick_number','value','signing_bonus','home_city','home_state','home_country','school_name','school_class','school_state','school_country','scouting_report','headshot_url','blurb','is_drafted','is_pass','draft_code','draft_description'])
         return df
 
     elif "/transactions" in _url:
@@ -610,7 +628,11 @@ async def _parse_team_data(data,session:aiohttp.ClientSession,_url,lgs_df:pd.Dat
 
     return data
 
-async def _fetch_team_data(urls:list,lgs_df:pd.DataFrame,_mlbam,_logtime=None):
+async def _fetch_team_data(
+    urls:list,
+    lgs_df:pd.DataFrame,
+    _mlbam,
+    _logtime=None):
     retrieved_responses = []
     async with aiohttp.ClientSession() as session:
         tasks = []
@@ -622,7 +644,13 @@ async def _fetch_team_data(urls:list,lgs_df:pd.DataFrame,_mlbam,_logtime=None):
         for response in responses:
             resp = await response.json()
             
-            parsed_data = await _parse_team_data(data=resp,session=session,_url=str(response.url),lgs_df=lgs_df,_mlbam=_mlbam,_logtime=_logtime)
+            parsed_data = await _parse_team_data(
+                data=resp,
+                session=session,
+                _url=str(response.url),
+                lgs_df=lgs_df,
+                _mlbam=_mlbam,
+                _logtime=_logtime)
 
             retrieved_responses.append(parsed_data)
         
@@ -641,7 +669,7 @@ def _team_data(_mlbam,_season,**kwargs) -> Union[dict,list]:
     ssn_df = get_seasons_df().set_index('season')
     ssn_row = ssn_df.loc[int(_season)]
 
-    tms_df = tms_df[tms_df['yearID']==int(_season)]
+    tms_df = tms_df[tms_df['season']==int(_season)]
 
     ssn_start : pd.Timestamp = ssn_row['season_start_date']
     ssn_end   : pd.Timestamp = ssn_row['season_end_date']
@@ -713,8 +741,9 @@ def _team_data(_mlbam,_season,**kwargs) -> Union[dict,list]:
             ssn = ssn + 1
             date_obj_2 = dt.date(year=ssn,month=1,day=1)
         date_obj_2 = date_obj_2 - dt.timedelta(days = 1)
-        
-        date_range_query = f"startDate={date_obj_1.strftime(r'%Y-%m-%d')}&endDate={date_obj_2.strftime(r'%Y-%m-%d')}"
+        start_date_query = f"startDate={date_obj_1.strftime(r'%Y-%m-%d')}"
+        end_date_query = f"endDate={date_obj_2.strftime(r'%Y-%m-%d')}"
+        date_range_query = f"{start_date_query}&{end_date_query}"
         url_to_add = f"{BASE}/schedule?sportId=1&teamId={_mlbam}&season={_season}&{date_range_query}&gameType={GAME_TYPES_ALL}&hydrate={sched_hydrations}"
 
         url_list.append(url_to_add)
@@ -738,7 +767,10 @@ def _team_data(_mlbam,_season,**kwargs) -> Union[dict,list]:
     total_pitching_P = team_data_dict[15]
     total_fielding_P = team_data_dict[16]
     
-    total_hitting  = {'regular':pd.concat([total_hitting_S['regular'],total_hitting_R['regular'],total_hitting_P['regular']]).reset_index(drop=True),
+    total_hitting  = {'regular':pd.concat(
+                                    [total_hitting_S['regular'],
+                                    total_hitting_R['regular'],
+                                    total_hitting_P['regular']]).reset_index(drop=True),
                       'advanced':pd.concat([total_hitting_S['advanced'],total_hitting_R['advanced'],total_hitting_P['advanced']]).reset_index(drop=True)
                       }
     total_pitching = {'regular':pd.concat([total_pitching_S['regular'],total_pitching_R['regular'],total_pitching_P['regular']]).reset_index(drop=True),
@@ -4050,14 +4082,19 @@ def find_team(query,season=None):
     Paramaters
     ----------
     query : str
-        keywords to search for in the 'teams' data (e.g. "white sox" or "Philadelphia")
+        keywords to search for in the 'teams' data (e.g. "white sox" or 
+        "Philadelphia")
 
     season : int or str, optional
         filter results by season
 
-    season = 2005 -> return results from 2005
-    season = None -> return results from the season in progress or the last one completed (Default)
-    season = "all" -> return results from all seasons (season filter not applied)
+    `season=2005` -> return results from 2005
+    
+    `season=None` -> return results from the season in progress or the 
+    last one completed (Default)
+    
+    `season='all'` -> return results from all seasons 
+    (season filter not applied)
     
     """
 
@@ -4065,11 +4102,11 @@ def find_team(query,season=None):
 
     if season is None:
         season = default_season()
-        df = df[df["yearID"]==int(season)]
+        df = df[df["season"]==int(season)]
     elif season == 'all':
         pass
     else:
-        df = df[df["yearID"]==int(season)]
+        df = df[df["season"]==int(season)]
 
 
 
@@ -4101,7 +4138,15 @@ def find_venue(query):
 
     return df.drop(columns="vname")
   
-def play_search(mlbam,seasons=None,statGroup=None,opposingTeamId=None,eventTypes=None,pitchTypes=None,gameTypes=None,**kwargs):
+def play_search(
+    mlbam,
+    seasons=None,
+    statGroup=None,
+    opposingTeamId=None,
+    eventTypes=None,
+    pitchTypes=None,
+    gameTypes=None,
+    **kwargs):
     """Search for any individual play 2008 and later
 
     Parameters
@@ -4682,7 +4727,13 @@ def pitch_search(mlbam,seasons=None,statGroup=None,opposingTeamId=None,eventType
     
     return df
 
-def game_search(mlbam:int=None,date=None,startDate=None,endDate=None,season=None,gameType=None) -> pd.DataFrame:
+def game_search(
+    mlbam:int=None,
+    date=None,
+    startDate=None,
+    endDate=None,
+    season=None,
+    gameType=None) -> pd.DataFrame:
     """Search for a games
     
     Paramaters:
@@ -4693,7 +4744,8 @@ def game_search(mlbam:int=None,date=None,startDate=None,endDate=None,season=None
     date : str
         Search for games by date (fmt: YYYY-mm-dd)
 
-    NOTE: "date" will be ignored if "startDate" and "endDate" are used. If only "startDate" is used, "endDate" will default to today's date
+    NOTE: "date" will be ignored if "startDate" and "endDate" are used. 
+    If only "startDate" is used, "endDate" will default to today's date
     
     NEED TO ADD PARAMETER FOR 'OPPONENT TEAM'
     
@@ -4794,7 +4846,9 @@ def last_game(mlbam):
     elif str(home_mlbam) == str(teamID):
         opp = f"vs {away}"
         opp_mlbam = away_mlbam
-    df = pd.DataFrame(data=[[gamePk,opp,opp_mlbam,gameDate,gameType]],columns=("gamePk","opponent","opp_mlbam","date","gameType"))
+    df = pd.DataFrame(
+        data=[[gamePk,opp,opp_mlbam,gameDate,gameType]],
+        columns=("gamePk","opponent","opp_mlbam","date","gameType"))
 
     return df
 
@@ -4836,11 +4890,21 @@ def next_game(mlbam):
     elif str(home_mlbam) == str(teamID):
         opp = f"vs {away}"
         opp_mlbam = away_mlbam
-    df = pd.DataFrame(data=[[gamePk,opp,opp_mlbam,gameDate,gameType]],columns=("gamePk","opponent","opp_mlbam","date","gameType"))
+    df = pd.DataFrame(
+        data=[[gamePk,opp,opp_mlbam,gameDate,gameType]],
+        columns=("gamePk","opponent","opp_mlbam","date","gameType"))
     
     return df
 
-def schedule(mlbam=None,season=None,date=None,startDate=None,endDate=None,gameType=None,opponentId=None,**kwargs) -> pd.DataFrame:
+def schedule(
+    mlbam=None,
+    season=None,
+    date=None,
+    startDate=None,
+    endDate=None,
+    gameType=None,
+    opponentId=None,
+    **kwargs) -> pd.DataFrame:
     """Get game schedule data.
 
     Parameters
@@ -5163,9 +5227,16 @@ def schedule(mlbam=None,season=None,date=None,startDate=None,endDate=None,gameTy
 
     return df
 
-def game_highlights(mlbam=None,date=None,startDate=None,endDate=None,season=None,month=None) -> pd.DataFrame:
+def game_highlights(
+    mlbam=None,
+    date=None,
+    startDate=None,
+    endDate=None,
+    season=None,
+    month=None) -> pd.DataFrame:
     """
-    Get video urls of team highlights for a specific date during the regular season.
+    Get video urls of team highlights for a specific date during the regular 
+    season.
 
     Parameters:
     -----------
@@ -5340,11 +5411,16 @@ def player_bio(mlbam:int):
 
         soup = bs(resp.text,'lxml')
 
-        bio_p_tags = soup.find("span",id="Biographical_Information").findParent('h2').find_next_siblings('p')
+        bio_p_tags = soup.find("span",id="Biographical_Information"
+                               ).findParent('h2').find_next_siblings('p')
 
         return bio_p_tags
 
-def free_agents(season:Optional[int]=None,hydrate_person:Optional[bool]=None,sort_by=None,sort_asc=False) -> pd.DataFrame:
+def free_agents(
+    season:Optional[int]=None,
+    hydrate_person:Optional[bool]=None,
+    sort_by=None,
+    sort_asc=False) -> pd.DataFrame:
     """Get data for free agents
     
     Parameters:
