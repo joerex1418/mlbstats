@@ -56,7 +56,7 @@ Highlights
 from .classes import Person
 from .classes import Franchise
 from .classes import Team
-from .classes import Game
+from .game import Game
 from .classes import api
 franchise = Franchise
 person = Person
@@ -73,6 +73,8 @@ from .functions import next_game
 from .functions import find_team
 from .functions import find_venue
 from .functions import schedule
+from .functions import scores
+from .functions import games_today
 from .functions import free_agents
 from .functions import player_bio
 from .functions import player_stats
@@ -175,3 +177,7 @@ from .constants import COLS_PIT_ADV
 from .constants import COLS_FLD
 from .constants import W_SEASON
 from .constants import WO_SEASON
+
+from .helpers import mlb_wrapper
+from .helpers import mlb_date
+from .helpers import mlb_datetime

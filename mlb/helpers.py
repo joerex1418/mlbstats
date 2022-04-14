@@ -1,10 +1,11 @@
+import pytz
+from dateutil.parser import parse
+from tabulate import tabulate as tab
+from typing import Union, Optional, Literal
+
 from .utils import dt
 from .utils import pd
 from .utils import keys
-from tabulate import tabulate as tab
-
-from typing import Union, Optional, Literal
-
 
 class standings_wrapper:
     def __new__(cls, records, splits=None):
@@ -159,9 +160,13 @@ class mlb_date:
     - 'short'
     """
 
-    def __init__(self, _date_string: str):
+    def __init__(self, _date_string: str,tz=None):
         if _date_string != "-":
-            d = dt.datetime.strptime(_date_string, r"%Y-%m-%d").date()
+            self.dt_obj = parse(_date_string)
+            self.__tz = tz
+            if tz is not None:
+                self.dt_obj = self.dt_obj.astimezone(tz=tz)
+            d = self.dt_obj.date()
             self.__date_obj = d
             self.__date_str = self.__date_obj.strftime(r"%Y-%m-%d")
             self.__month_name = d.strftime(r"%B")
@@ -193,10 +198,21 @@ class mlb_date:
     def __str__(self):
         return self.__date_str
 
-    def __call__(self) -> Union[dt.date, None]:
-        """Returns datetime.date object from built-in datetime module"""
-        return self.__date_obj
-
+    def __call__(self,fmt=None) -> Union[dt.date,str]:
+        """Returns `date` object from built-in datetime module.
+        Alternatively, a string format can be specified instead
+        
+        Paramaters:
+        -----------
+        fmt : str
+            Date string format to return
+        """
+        dt_obj = self.__dt_obj
+        if fmt is None:
+            return dt_obj
+        else:
+            return dt_obj.strftime(fmt)
+        
     @property
     def month(self) -> int:
         """Returns month as integer (1-12)"""
@@ -264,6 +280,50 @@ class mlb_date:
     def short(self) -> str:
         """Returns short date string (Example: "Feb 3, 2021")"""
         return self.__short_date
+    
+    @property
+    def timezone(self) -> pytz.timezone:
+        return self.__tz
+
+
+class mlb_datetime(mlb_date):
+    def __init__(self, _datetime_string: str,tz=None):
+        super().__init__(_datetime_string,tz=tz)
+        dt_obj = self.dt_obj
+        self.__dt_obj = dt_obj
+        self.__time_obj = dt_obj.time()
+        self.__time_str = self.__time_obj.strftime(r'%I:%M %p %Z')
+
+    def __repr__(self):
+        return self.__dt_obj.strftime(r'%Y-%m-%dT%H:%M:%SZ')
+
+    def __str__(self):
+        return self.__dt_obj.strftime(r'%Y-%m-%dT%H:%M:%SZ')
+
+    def __call__(self,fmt=None) -> Union[dt.datetime,str]:
+        """Returns `datetime` object from built-in datetime module.
+        Alternatively, a string format can be specified instead
+        
+        Paramaters:
+        -----------
+        fmt : str
+            Datetime string format to return
+        """
+        dt_obj = self.__dt_obj
+        if fmt is None:
+            return dt_obj
+        else:
+            return dt_obj.strftime(fmt)
+
+    @property
+    def time_obj(self):
+        """Returns `time` object from built-in datetime module"""
+        return self.__time_obj
+    
+    @property
+    def time_str(self):
+        """Returns ISO-formatted string representation of object"""
+        return self.__time_str
 
 
 class mlb_wrapper:
@@ -1149,6 +1209,24 @@ class mlb_person(mlb_wrapper):
         return self.__repr
 
 
+class umpires(mlb_wrapper):
+    def __init__(self,first,second,third,home):
+        self.first  = first
+        self.second = second
+        self.third  = third
+        self.home   = home
+        
+        ump_list = [f'First: {self.first}',f'Second: {self.second}',
+                    f'Third: {self.third}',f'Home: {self.home}']
+        self.__strep = '\n'.join(ump_list)
+    
+    def __str__(self):
+        return self.__strep
+    
+    def __repr__(self):
+        return self.__strep
+
+
 def _parse_league(_obj: dict):
     d = _obj
 
@@ -1266,3 +1344,18 @@ def _parse_person(_obj: dict):
         "pos_abbreviation": pos.get("abbreviation", "-"),
     }
     return data
+
+
+def get_tz(tz):
+    if type(tz) is str:
+        tz = tz.lower()
+        if tz == 'pt':
+            return pytz.timezone('US/Pacific')
+        elif tz == 'mt':
+            return pytz.timezone('US/Mountain')
+        elif tz == 'ct':
+            return pytz.timezone('US/Central')
+        elif tz == 'et':
+            return pytz.timezone('US/Eastern')
+    else:
+        return tz

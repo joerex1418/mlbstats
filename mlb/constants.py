@@ -1072,7 +1072,6 @@ BAT_FIELDS = [
     'sacFlies',
     'catchersInterference',
     'atBatsPerHomeRun']
-
 BAT_FIELDS_ADV = [
     "totalSwings",
     "swingAndMisses",
@@ -1097,7 +1096,6 @@ BAT_FIELDS_ADV = [
     "popHits",
     "lineHits"
 ]
-
 PITCH_FIELDS = [
     'gamesPitched',
     'gamesStarted',
@@ -1216,7 +1214,6 @@ YBY_BAT_FIELDS = [
     'ops',
     'sacBunts',
     'sacFlies']
-
 YBY_BAT_FIELDS_ADV = [
     'totalSwings',
     'swingAndMisses',
@@ -1232,7 +1229,6 @@ YBY_BAT_FIELDS_ADV = [
     'flyHits',
     'popHits',
     'lineHits']
-
 YBY_PITCH_FIELDS = [
     'gamesPitched',
     'wins',
@@ -1261,7 +1257,6 @@ YBY_PITCH_FIELDS = [
     'strikes',
     'strikePercentage',
     'wildPitches']
-
 YBY_PITCH_FIELDS_ADV = [
     'totalSwings',
     'swingAndMisses',
@@ -1273,7 +1268,6 @@ YBY_PITCH_FIELDS_ADV = [
     'flyHits',
     'popHits',
     'lineHits']
-
 YBY_FIELD_FIELDS = [
     "games",
     "gamesStarted",
@@ -1289,6 +1283,8 @@ YBY_FIELD_FIELDS = [
     "triplePlays",
     "fielding"]
   
+YBY_REC_COLS = ['season','mlbam','abbrv','name_full','lg_short','GP','W','L','W%','R','RA','RunDiff','GB','wcGB','divGB','lgGB','spGB']
+YBY_REC_SPLIT_COLS = ['season','tm_mlbam','tm_name','lg_mlbam','lg_abbrv','div_mlbam','div_short','GP','W','L','W%','R','RA','RunDiff','val','vnl','veast','vcentral','vwest','home','away','vrhp','vlhp','last10','exinns','onerun','winners','day','night','grass','turf']
 
 LEAGUE_IDS_SHORT = {
     200:"West",

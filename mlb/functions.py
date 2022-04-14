@@ -47,7 +47,9 @@ from .constants import (
     COLS_PIT_ADV,
     COLS_FLD,
     W_SEASON,
-    WO_SEASON
+    WO_SEASON,
+    YBY_REC_COLS,
+    YBY_REC_SPLIT_COLS
 )
 from .helpers import _parse_person
 
@@ -1404,6 +1406,148 @@ def _player_data(_mlbam,**kwargs) -> dict:
 
     return fetched_data
 
+def _parse_franchise_standings(data:dict,lgs_df:pd.DataFrame) -> list[pd.DataFrame,pd.DataFrame]:
+    records_data = []
+    splits_data  = []
+    for ssn in data:
+        d = ssn['teams'][0]
+        rec = d['record']
+        
+        season    = d['season']
+        mlbam     = d['id']
+        name_full = d['name']
+        abbrv     = d['abbreviation']
+        
+        div = d.get('division')
+        lg_mlbam = d.get('league',{}).get('id',0)
+        if div is None:
+            div_mlbam    = d.get('division',{}).get('id',0)
+            lg_div_mlbam = lg_mlbam
+            lg_div_short = lgs_df.loc[lg_div_mlbam]['abbreviation']
+        else:
+            div_mlbam    = d.get('division',{}).get('id',0)
+            lg_div_mlbam = div_mlbam
+            lg_div_short = lgs_df.loc[lg_div_mlbam]['name_short']
+        
+        games_played = rec.get('gamesPlayed','')
+        wins     = rec.get('wins','')
+        losses   = rec.get('losses','')
+        win_perc = rec.get('winningPercentage','')
+        runs     = rec.get('runsScored','')
+        runs_allowed = rec.get('runsAllowed','')
+        run_diff = rec.get('runDifferential','')
+        
+        wc_gb  = rec.get('wildCardGamesBack','-')
+        div_gb = rec.get('divisionGamesBack','-')
+        lg_gb  = rec.get('leagueGamesBack','-')
+        sp_gb  = rec.get('sportGamesBack','-')
+        gb     = rec.get('gamesBack','-')
+        
+        lg_row    = lgs_df.loc[lg_mlbam]
+        lg_abbrv  = lg_row['abbreviation']
+        div_row   = lgs_df.loc[div_mlbam]
+        div_short = div_row['div_part']
+        
+        splits_dict = {'home':'-','away':'-',
+                       'left':'-','right':'-',
+                       'lastTen':'-','extraInning':'-',
+                       'oneRun':'-','winners':'-',
+                       'day':'-','night':'-',
+                       'grass':'-','turf':'-',
+                       'American League':'-','National League':'-',
+                       'east':'-','central':'-','west':'-',
+                       }
+        
+        records = rec.get('records',{})
+        record_splits = records.get('splitRecords',[{}])
+        record_lgs    = records.get('leagueRecords',[{}])
+        record_divs   = records.get('divisionRecords',[{}])
+
+        for lg_rec in record_lgs:
+            lg = lg_rec.get('league',{}).get('name','')
+            lg_wins   = lg_rec.get('wins','')
+            lg_losses = lg_rec.get('losses','')
+            splits_dict[lg] = f'{lg_wins}-{lg_losses}'
+            
+        for lg_rec in record_divs:
+            lg = lg_rec.get('division',{}).get('name','')
+            
+            if 'east' in lg.lower():
+                lg = 'east'
+            elif 'central' in lg.lower():
+                lg = 'central'
+            elif 'west' in lg.lower():
+                lg = 'west'
+                
+            lg_wins   = lg_rec.get('wins','')
+            lg_losses = lg_rec.get('losses','')
+            splits_dict[lg] = f'{lg_wins}-{lg_losses}'
+        
+        for s in record_splits:
+            rec_type = s.get('type')
+            if rec_type in splits_dict.keys():
+                rec_wins   = s['wins']
+                rec_losses = s['losses']
+                splits_dict[rec_type] = f'{rec_wins}-{rec_losses}'
+        
+        records_data.append([season,
+                             mlbam,
+                             abbrv,
+                             name_full,
+                             lg_div_short,
+                             games_played,
+                             wins,
+                             losses,
+                             win_perc,
+                             runs,
+                             runs_allowed,
+                             run_diff,
+                             gb,
+                             wc_gb,
+                             div_gb,
+                             lg_gb,
+                             sp_gb])
+        
+        splits_data.append([season,
+                            mlbam,
+                            name_full,
+                            lg_mlbam,
+                            lg_abbrv,
+                            div_mlbam,
+                            div_short,
+                            games_played,
+                            wins,
+                            losses,
+                            win_perc,
+                            runs,
+                            runs_allowed,
+                            run_diff,
+                            splits_dict['American League'],
+                            splits_dict['National League'],
+                            splits_dict['east'],
+                            splits_dict['central'],
+                            splits_dict['west'],
+                            splits_dict['home'],
+                            splits_dict['away'],
+                            splits_dict['right'],
+                            splits_dict['left'],
+                            splits_dict['lastTen'],
+                            splits_dict['extraInning'],
+                            splits_dict['oneRun'],
+                            splits_dict['winners'],
+                            splits_dict['day'],
+                            splits_dict['night'],
+                            splits_dict['grass'],
+                            splits_dict['turf'],
+                            ])
+        
+    records_df = pd.DataFrame(data=records_data,columns=YBY_REC_COLS)
+    splits_df  = pd.DataFrame(data=splits_data, columns=YBY_REC_SPLIT_COLS)
+    records_df.sort_values(by='season',ascending=False,inplace=True)
+    splits_df.sort_values(by='season',ascending=False,inplace=True)
+    
+    return records_df, splits_df
+        
 def _franchise_data(mlbam,**kwargs) -> dict:
     """Fetch various team season data & information for a team in one API call
 
@@ -1447,14 +1591,13 @@ def _franchise_data(mlbam,**kwargs) -> dict:
     standings = standings[standings['mlbam']==int(mlbam)]
 
     # == ASYNC STARTS HERE ===============================================
-    
+    lgs_df = get_leagues_df().set_index('mlbam')
     team_df = get_teams_df()
     team_df = team_df[team_df['mlbam']==int(mlbam)]
-    firstYear = team_df.iloc[0]["firstYear"]
-
-    urls = []
+    firstYear = team_df.iloc[0]["first_year"]
     years = range(firstYear,int(default_season())+1)
 
+    urls = []
     for year in years:
         urls.append(f"https://statsapi.mlb.com/api/v1/teams/{mlbam}?hydrate=standings&season={year}")                   # yby_data
 
@@ -1469,7 +1612,7 @@ def _franchise_data(mlbam,**kwargs) -> dict:
     # https://statsapi.mlb.com/api/v1/teams/145/roster/coach?season=1904
 
     resps = fetch(urls)
-
+    
     yby_data = resps[:-5]
     team_info = resps[-5]
     team_stats = resps[-4]
@@ -1477,14 +1620,15 @@ def _franchise_data(mlbam,**kwargs) -> dict:
     hof_players = resps[-2]
     retired_numbers = resps[-1]
 
-    # ---- Parsing 'team_info' --------- team_info_parsed
+    records_df, splits_df = _parse_franchise_standings(data=yby_data,lgs_df=lgs_df)
+    # ---- Parsing 'team_info' ---------
 
-    #        Includes basic team information and recent/upcoming schedule information
+    # Includes basic team information and recent/upcoming schedule information
 
     team_info_parsed = {}
     teams = team_info["teams"][0]
-    lg  = teams.get("league")
-    div = teams.get("division")
+    lg  = teams.get("league",{})
+    div = teams.get("division",{})
     team_info_parsed["mlbam"]               = teams["id"]
     team_info_parsed["full_name"]           = teams["name"]
     team_info_parsed["location_name"]       = teams["locationName"]
@@ -1505,6 +1649,7 @@ def _franchise_data(mlbam,**kwargs) -> dict:
     team_info_parsed["div_abbrv"]           = div.get("abbreviation","")
     team_info_parsed["season"]              = teams["season"]
 
+    sched_df_cols = ['season','date','gamePk','game_type','away_mlbam','away_name','home_mlbam','home_name','double_header','series_game','series_length']
     sched_prev_data = []
     for d in teams.get("previousGameSchedule",{}).get("dates",[{}]):
         date_obj = dt.datetime.strptime(d["date"],r"%Y-%m-%d")
@@ -1524,7 +1669,7 @@ def _franchise_data(mlbam,**kwargs) -> dict:
                 gm.get("seriesGameNumber"),
                 gm.get("gamesInSeries")
             ])
-    sched_prev_df = pd.DataFrame(data=sched_prev_data,columns=['season','date','gamePk','game_type','away_mlbam','away_name','home_mlbam','home_name','double_header','series_game','series_length'])
+    sched_prev_df = pd.DataFrame(data=sched_prev_data,columns=sched_df_cols)
     team_info_parsed["sched_prev"] = sched_prev_df
 
     sched_next_data = []
@@ -1546,9 +1691,8 @@ def _franchise_data(mlbam,**kwargs) -> dict:
                 gm.get("seriesGameNumber"),
                 gm.get("gamesInSeries")
             ])
-    sched_next_df = pd.DataFrame(data=sched_next_data,columns=['season','date','gamePk','game_type','away_mlbam','away_name','home_mlbam','home_name','double_header','series_game','series_length'])
+    sched_next_df = pd.DataFrame(data=sched_next_data,columns=sched_df_cols)
     team_info_parsed["sched_next"] = sched_next_df
-
 
     # ---- Parsing 'team_stats' --------
     team_stats_json = team_stats # using alias for consistency
@@ -1622,8 +1766,6 @@ def _franchise_data(mlbam,**kwargs) -> dict:
                 cols.remove(col)
         
         stat_dict[df_name] = df[['season'] + cols].sort_values(by="season",ascending=False)
-
-
 
     hit_df          = stat_dict['hit_df']
     hit_adv_df      = stat_dict['hit_adv_df']
@@ -1710,6 +1852,8 @@ def _franchise_data(mlbam,**kwargs) -> dict:
         "hof":hof_df,
         "retired_numbers":retired_numbers_df,
         "temp":hof_players,
+        "records_df":records_df,
+        "splits_df":splits_df
     }
 
     return fetched_data
@@ -2995,7 +3139,6 @@ def player_stats(mlbam,statGroup,statType,season=None,**kwargs) -> pd.DataFrame:
 
     return df
 
-
 # ===============================================================
 # TEAM Functions
 # ===============================================================
@@ -4222,12 +4365,14 @@ def play_search(
 
     # log = resp["stats"][0]
     all_logs = []
-    for l in resp["stats"]:
-        all_logs.append(l)
+    for log_stats in resp["stats"]:
+        all_logs.append(log_stats)
 
     plays = []
 
     for log in all_logs:
+        if statGroup is None:
+            statGroup = log.get('group',{}).get("displayName")
         if statGroup == "hitting":
             # plays = []
             for split in log["splits"]:
@@ -4982,18 +5127,18 @@ def schedule(
     
     tz = kwargs.get("tz",kwargs.get("timezone"))
     if tz is None:
-        tz = ct_zone
-    else:
-        if type(tz) is str:
-            tz = tz.lower()
-            if tz in ("cst","ct","central"):
-                tz = ct_zone
-            elif tz in ("est","et","eastern"):
-                tz = et_zone
-            elif tz in ("mst","mt","mountain"):
-                tz = mt_zone
-            elif tz in ("pst","pt","pacific"):
-                tz = pt_zone
+        # tz = ct_zone
+        tz = et_zone
+    elif type(tz) is str:
+        tz = tz.lower()
+        if tz in ("cst","cdt","ct","central","us/central"):
+            tz = ct_zone
+        elif tz in ("est","edt","et","eastern","us/eastern"):
+            tz = et_zone
+        elif tz in ("mst","mdt","mt","mountain","us/mountain"):
+            tz = mt_zone
+        elif tz in ("pst","pdt","pt","pacific","us/pacific"):
+            tz = pt_zone
     
     if kwargs.get("oppTeamId") is not None:
         opponentId = kwargs["oppTeamId"]
@@ -5011,7 +5156,8 @@ def schedule(
     resp = requests.get(url,params=params)
 
     # print("\n================")
-    # print(resp.url)
+    if kwargs.get('log') is True:
+        print(resp.url)
     # print("================\n")
 
     dates = resp.json()['dates']
@@ -5028,6 +5174,10 @@ def schedule(
         "resched_time",
         "gamePk",
         "game_type",
+        "inn",
+        "inn_ord",
+        "inn_state",
+        "inn_half",
         "venue_mlbam",
         "venue_name",
         "away_mlbam",
@@ -5042,6 +5192,11 @@ def schedule(
         "home_record",
         "hm_pp_name",
         "hm_pp_mlbam",
+        "at_bat_tm",
+        "at_bat_mlbam",
+        "at_bat_bsname",
+        "on_mound_mlbam",
+        "on_mound_bsname",
         "abstract_state",
         "abstract_code",
         "detailed_state",
@@ -5067,7 +5222,29 @@ def schedule(
             teams = g["teams"]
             away = teams["away"]
             home = teams["home"]
-
+            
+            linescore = g.get('linescore',{})
+            inn = linescore.get('currentInning','')
+            inn_ord = linescore.get('currentInningOrdinal','')
+            inn_state = linescore.get('inningState','')
+            inn_half = linescore.get('inningHalf','')
+            
+            offense = linescore.get('offense',{})
+            defense = linescore.get('defense',{})
+            at_bat_tm = offense.get('team',{}).get('id',0)
+            if at_bat_tm == str(int(away.get("team").get("id"))):
+                at_bat_tm = 'away'
+            else:
+                at_bat_tm = 'home'
+            at_bat = offense.get('batter',{})
+            at_bat_mlbam  = at_bat.get('id',0)
+            at_bat_name   = at_bat.get('fullName','')
+            at_bat_bsname = at_bat.get('lastInitName','')
+            on_mound = defense.get('pitcher',{})
+            on_mound_mlbam  = on_mound.get('id',0)
+            on_mound_name   = on_mound.get('fullName','')
+            on_mound_bsname = on_mound.get('lastInitName','')
+            
             game_date = g.get("gameDate")
             resched_date = g.get("rescheduleDate")
             date_official = g.get("officialDate")
@@ -5189,6 +5366,10 @@ def schedule(
                 resched_time,
                 gamePk,
                 game_type,
+                inn,
+                inn_ord,
+                inn_state,
+                inn_half,
                 venue_mlbam,
                 venue_name,
                 away_mlbam,
@@ -5203,6 +5384,11 @@ def schedule(
                 home_rec,
                 hm_pp_name,
                 hm_pp_mlbam,
+                at_bat_tm,
+                at_bat_mlbam,
+                at_bat_bsname,
+                on_mound_mlbam,
+                on_mound_bsname,
                 abstract_state,
                 abstract_code,
                 detailed_state,
@@ -5226,6 +5412,47 @@ def schedule(
     df.insert(0,"official_dt",official_dt_col)
 
     return df
+
+def games_today():
+    date_str = dt.datetime.today().strftime(r'%Y-%m-%d')
+    sched = schedule(date=date_str)
+    return sched
+
+def scores():
+    today = dt.datetime.today()
+    date_str = today.strftime(r'%Y-%m-%d')
+    games = schedule(date=date_str,hydrate='linescore')
+    tms = get_teams_df(year=today.year).set_index('mlbam')
+    score_list = []
+    gm_str = '{:3} {:>2}  vs  {:2} {:3} ({}) | {}'
+    for idx,gm in games.iterrows():
+        aw_mlbam = int(gm.away_mlbam)
+        hm_mlbam = int(gm.home_mlbam)
+        aw_abbrv = tms.loc[aw_mlbam]['mlbID']
+        aw_score = gm.away_score
+        hm_abbrv = tms.loc[hm_mlbam]['mlbID']
+        hm_score = gm.home_score
+        gm_start = f'{gm.game_start} ET'
+        
+        gpk = gm.gamePk
+        
+        gm_state = gm.abstract_state
+        inn = gm.inn
+        inn_ord = gm.inn_ord
+        inn_state = gm.inn_state
+        inn_half = gm.inn_half
+        
+        if gm_state == 'Final':
+            gm_deets = 'Final'
+        elif gm_state == 'Live':
+            gm_deets = f'{inn_state[:3]} {inn_ord}'
+        else:
+            gm_deets = gm_start
+
+        row_str = gm_str.format(aw_abbrv,aw_score,hm_score,hm_abbrv,gm_deets,gpk)
+        score_list.append(row_str)
+    
+    return '\n'.join(score_list)
 
 def game_highlights(
     mlbam=None,
