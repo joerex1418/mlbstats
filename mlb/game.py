@@ -50,8 +50,8 @@ class Game:
 
     Paramaters
     ----------
-    gamePk : int or str
-        numeric ID for the game
+    game_pk : int or str
+        Unique primary key for specific game
 
     timecode : str
         specify a value to retrieve a "snapshot" of the game at a specific 
@@ -118,69 +118,67 @@ class Game:
         returns a dictionary of notable attributes about the game
     """
 
-    def __init__(self,gamePk, timecode=None, tz="et"):
+    def __init__(self,game_pk, timecode=None, tz='et'):
         self.last_updated = dt.datetime.now()
-        if timecode is not None:
+        if timecode == '':
+            timecode = None
+        if timecode is not None and timecode.find('_') == -1:
             timecode = parse(timecode).strftime(r'%Y%m%d_%H%M%S')
         
-        game_id = gamePk
         tz_obj = get_tz(tz)
         self._tz = tz
         
-        self.game_id = game_id
-        self.gamePk = game_id
+        self.__game_pk = game_pk
 
-        if timecode is None:
-            timecode_query = ""
-        else:
-            timecode_query = f"&timecode={timecode}"
-
-        BASE = "https://statsapi.mlb.com/api"
+        BASE = 'https://statsapi.mlb.com/api'
         
-        game_url = f"{BASE}/v1.1/game/{self.game_id}/feed/live?"
+        game_url = f'{BASE}/v1.1/game/{game_pk}/feed/live?'
         params = {'hydrate':'venue,flags,preState',
                   'timecode':timecode}
 
         gm = requests.get(game_url,params=params).json()
         self._raw_game_data = gm
 
-        gameData = gm["gameData"]
-        liveData = gm["liveData"]
+        self.meta = gm['metaData']
+        gameData = gm['gameData']
+        liveData = gm['liveData']
 
         # GAME Information
-        self._linescore = liveData["linescore"]
-        self._boxscore = liveData["boxscore"]
-        self._flags = gameData["flags"]
+        self._linescore = liveData['linescore']
+        self._boxscore = liveData['boxscore']
+        self._flags = gameData['flags']
 
-        self.gameState = gameData["status"]["abstractGameState"]
-        self.game_state = self.gameState
-        self.detailedState = gameData["status"]["detailedState"]
+        self.abstractState  = gameData['status']['abstractGameState']
+        self.abstract_state = self.abstractState
+        self.detailedState  = gameData['status']['detailedState']
         self.detailed_state = self.detailedState
-        self.info = self._boxscore["info"]
-        self.sky = gameData["weather"].get("condition", "-")
-        self.temp = gameData["weather"].get("temp", "-")
-        self.wind = gameData["weather"].get("wind", "-")
-        self.first_pitch = gameData.get("gameInfo", {}).get("firstPitch", "-")
-        self.attendance = gameData.get("gameInfo", {}).get("attendance", "-")
-        self.start = gameData.get("datetime", {}).get("time", "-")
-        self.start_iso = gameData.get("datetime", {}).get("dateTime", "-")
+        self.gameState  = self.abstract_state
+        self.game_state = self.abstract_state
+        self.info = self._boxscore['info']
+        self.sky = gameData['weather'].get('condition', '-')
+        self.temp = gameData['weather'].get('temp', '-')
+        self.wind = gameData['weather'].get('wind', '-')
+        self.first_pitch = gameData.get('gameInfo', {}).get('firstPitch', '-')
+        self.attendance = gameData.get('gameInfo', {}).get('attendance', '-')
+        self.start = gameData.get('datetime', {}).get('time', '-')
+        self.start_iso = gameData.get('datetime', {}).get('dateTime', '-')
 
         self._game_datetime = mdt(self.start_iso,tz=tz_obj)
 
-        datetime = gameData["datetime"]
-        self.game_date = datetime["officialDate"]
+        datetime = gameData['datetime']
+        self.game_date = datetime['officialDate']
         self.gameDate = self.game_date
-        self.daynight = datetime["dayNight"]
+        self.daynight = datetime['dayNight']
 
-        self._venue = gameData["venue"]
+        self._venue = gameData['venue']
 
-        self._officials = self._boxscore.get("officials", [{}, {}, {}, {}])
+        self._officials = self._boxscore.get('officials', [{}, {}, {}, {}])
 
         if len(self._officials) != 0:
-            _ump_home = self._officials[0].get("official", {})
-            _ump_first = self._officials[1].get("official", {})
-            _ump_second = self._officials[2].get("official", {})
-            _ump_third = self._officials[3].get("official", {})
+            _ump_home = self._officials[0].get('official', {})
+            _ump_first = self._officials[1].get('official', {})
+            _ump_second = self._officials[2].get('official', {})
+            _ump_third = self._officials[3].get('official', {})
         else:
             _ump_home = {}
             _ump_first = {}
@@ -195,87 +193,87 @@ class Game:
             )
 
         # ALL PLAYERS IN GAME
-        self._players = gameData["players"]
+        self._players = gameData['players']
 
         # AWAY Team Data
-        away = gameData["teams"]["away"]
-        _away_data = self._boxscore["teams"]["away"]
-        _away_score_data = self._linescore["teams"]["away"]
-        self.away_id = away["id"]
-        self._away_team_full = away["name"]
-        self._away_team = away["clubName"]
-        self._away_team_abbrv = away["abbreviation"]
-        self._away_stats = _away_data["teamStats"]
-        self._away_player_data = _away_data["players"]
-        self._away_lineup = _away_data["batters"]
-        self._away_starting_order = _away_data["battingOrder"]
-        self._away_pitcher_lineup = _away_data["pitchers"]
-        self._away_bullpen = _away_data["bullpen"]
-        self._away_rhe = self._linescore["teams"]["away"]
-        self._away_bench = _away_data["bench"]
+        away = gameData['teams']['away']
+        _away_data = self._boxscore['teams']['away']
+        _away_score_data = self._linescore['teams']['away']
+        self.away_id = away['id']
+        self._away_team_full = away['name']
+        self._away_team = away['clubName']
+        self._away_team_abbrv = away['abbreviation']
+        self._away_stats = _away_data['teamStats']
+        self._away_player_data = _away_data['players']
+        self._away_lineup = _away_data['batters']
+        self._away_starting_order = _away_data['battingOrder']
+        self._away_pitcher_lineup = _away_data['pitchers']
+        self._away_bullpen = _away_data['bullpen']
+        self._away_rhe = self._linescore['teams']['away']
+        self._away_bench = _away_data['bench']
         self.away_full = self._away_team_full
         self.away_club = self._away_team
         self.away_abbrv = self._away_team_abbrv
         self.away_runs = _away_score_data.get('runs')
         self.away_hits = _away_score_data.get('hits')
         self.away_errs = _away_score_data.get('errors')
-        self.away_record = f'{away["record"]["wins"]}-{away["record"]["losses"]}'
+        self.away_record = f"{away['record']['wins']}-{away['record']['losses']}"
 
         # HOME Team Data
-        home = gameData["teams"]["home"]
-        _home_data = self._boxscore["teams"]["home"]
-        _home_score_data = self._linescore["teams"]["home"]
-        self.home_id = home["id"]
-        self._home_team_full = home["name"]
-        self._home_team = home["clubName"]
-        self._home_team_abbrv = home["abbreviation"]
-        self._home_stats = _home_data["teamStats"]
-        self._home_player_data = _home_data["players"]
-        self._home_lineup = _home_data["batters"]
-        self._home_starting_order = _home_data["battingOrder"]
-        self._home_pitcher_lineup = _home_data["pitchers"]
-        self._home_bullpen = _home_data["bullpen"]
-        self._home_rhe = self._linescore["teams"]["home"]
-        self._home_bench = _home_data["bench"]
+        home = gameData['teams']['home']
+        _home_data = self._boxscore['teams']['home']
+        _home_score_data = self._linescore['teams']['home']
+        self.home_id = home['id']
+        self._home_team_full = home['name']
+        self._home_team = home['clubName']
+        self._home_team_abbrv = home['abbreviation']
+        self._home_stats = _home_data['teamStats']
+        self._home_player_data = _home_data['players']
+        self._home_lineup = _home_data['batters']
+        self._home_starting_order = _home_data['battingOrder']
+        self._home_pitcher_lineup = _home_data['pitchers']
+        self._home_bullpen = _home_data['bullpen']
+        self._home_rhe = self._linescore['teams']['home']
+        self._home_bench = _home_data['bench']
         self.home_full = self._home_team_full
         self.home_club = self._home_team
         self.home_abbrv = self._home_team_abbrv
         self.home_runs = _home_score_data.get('runs')
         self.home_hits = _home_score_data.get('hits')
         self.home_errs = _home_score_data.get('errors')
-        self.home_record = f'{home["record"]["wins"]}-{home["record"]["losses"]}'
+        self.home_record = f"{home['record']['wins']}-{home['record']['losses']}"
 
-        self._curr_defense = self._linescore["defense"]
-        self._curr_offense = self._linescore["offense"]
-        self._curr_play = liveData["plays"].get("currentPlay", {})
+        self._curr_defense = self._linescore['defense']
+        self._curr_offense = self._linescore['offense']
+        self._curr_play = liveData['plays'].get('currentPlay', {})
 
-        self.balls = self._linescore.get("balls", 0)
-        self.strikes = self._linescore.get("strikes", 0)
-        self.outs = self._linescore.get("outs", 0)
-        self._inning = self._linescore.get("currentInning", "-")
-        self._inning_ordinal = self._linescore.get("currentInningOrdinal", "-")
-        self._inning_state = self._linescore.get("inningState", "-")
+        self.balls = self._linescore.get('balls', 0)
+        self.strikes = self._linescore.get('strikes', 0)
+        self.outs = self._linescore.get('outs', 0)
+        self._inning = self._linescore.get('currentInning', '-')
+        self._inning_ordinal = self._linescore.get('currentInningOrdinal', '-')
+        self._inning_state = self._linescore.get('inningState', '-')
 
-        self._inn_half = self._linescore.get("inningHalf", "-")
-        self._inn_label = f"{self._inn_half} of the {self._inning_ordinal}"
-        self._scheduled_innings = self._linescore.get("scheduledInnings", 9)
+        self._inn_half = self._linescore.get('inningHalf', '-')
+        self._inn_label = f'{self._inn_half} of the {self._inning_ordinal}'
+        self._scheduled_innings = self._linescore.get('scheduledInnings', 9)
 
         # PLAYS and EVENTS
-        self._all_plays = liveData["plays"]["allPlays"]
+        self._all_plays = liveData['plays']['allPlays']
         self._scoring_plays = []
 
         self._all_events = []
         self._pitch_events = []
         self._bip_events = []
         for play in self._all_plays:
-            for event in play["playEvents"]:
+            for event in play['playEvents']:
                 self._all_events.append(event)
-                if event["isPitch"] == True:
+                if event['isPitch'] == True:
                     self._pitch_events.append(event)
-                    if event["details"]["isInPlay"] == True:
+                    if event['details']['isInPlay'] == True:
                         self._bip_events.append(event)
             try:
-                if play["about"]["isScoringPlay"] == True:
+                if play['about']['isScoringPlay'] == True:
                     self._scoring_plays.append(play)
             except:
                 pass
@@ -288,6 +286,11 @@ class Game:
 
     def __getitem__(self, key):
         return getattr(self, key)
+
+    @property
+    def game_pk(self):
+        """Unique Game Primary Key/ID"""
+        return self.__game_pk
 
     @property
     def game_datetime(self):
@@ -331,6 +334,61 @@ class Game:
     def umpires(self):
         """Umpire Names"""
         return self._umpires
+
+    @property
+    def venue(self) -> dict:
+        """Venue Data"""
+        v = self._venue
+        venue_name = v["name"]
+        venue_mlbam = v["id"]
+        fieldInfo = v["fieldInfo"]
+        capacity = fieldInfo["capacity"]
+        roof = fieldInfo["roofType"]
+        turf = fieldInfo["turfType"]
+        try:
+            dimensions = {
+                "leftLine": fieldInfo["leftLine"],
+                "leftCenter": fieldInfo["leftCenter"],
+                "center": fieldInfo["center"],
+                "rightCenter": fieldInfo["rightCenter"],
+                "rightLine": fieldInfo["rightLine"],
+            }
+        except:
+            dimensions = {
+                "leftLine": None,
+                "leftCenter": None,
+                "center": None,
+                "rightCenter": None,
+                "rightLine": None,
+            }
+        loc = v["location"]
+        latitude = loc.get("defaultCoordinates", {}).get("latitude", None)
+        longitude = loc.get("defaultCoordinates", {}).get("longitude", None)
+        address1 = loc.get("address1", None)
+        address2 = loc.get("address2", None)
+        city = loc.get("city", None)
+        state = loc.get("state", None)
+        stateAbbrev = loc.get("stateAbbrev", None)
+        zipCode = loc.get("postalCode", None)
+        phone = loc.get("phone", None)
+
+        return {
+            'name': venue_name,
+            'mlbam': venue_mlbam,
+            'capacity': capacity,
+            'roof': roof,
+            'turf': turf,
+            'dimensions': dimensions,
+            'lat': latitude,
+            'long': longitude,
+            'address1': address1,
+            'address2': address2,
+            'city': city,
+            'state': state,
+            'stateAbbrev': stateAbbrev,
+            'zipCode': zipCode,
+            'phone': phone,
+        }
 
     def boxscore(self, tz=None) -> dict:
         if tz is None:
@@ -406,7 +464,6 @@ class Game:
         ls_inns = []
         ls_innings_array = ls["innings"]
         for inn in ls_innings_array:
-            # inn = ls_innings_array[idx]
             ls_inns.append(
                 {
                     "away": {
@@ -423,7 +480,8 @@ class Game:
                     "inningOrdinal": ORDINALS[str(inn.get("num", "-"))],
                 }
             )
-        if len(ls_innings_array) < self.scheduled_innings:
+        
+        if  0 < len(ls_innings_array) < self.scheduled_innings:
             most_recent_inn = int(ls_inns[-1]["inning"])
             inns_til_9 = self.scheduled_innings - len(ls_innings_array)
             rem_innings = list(range(inns_til_9))
@@ -443,6 +501,8 @@ class Game:
         """Returns a python dictionary detailing the current game situation 
         (count, outs, men-on, batting queue):
 
+        Returned Keys:
+        --------------
         outs :
             number of current outs (int)
         balls :
@@ -482,30 +542,30 @@ class Game:
             runnersOn["first"] = {
                 "id": self._curr_offense["first"]["id"],
                 "name": self._curr_offense["first"]["fullName"],
-                "isOccuppied": True,
+                "isOccupied": True,
             }
         else:
-            runnersOn["first"] = {"isOccuppied": False}
+            runnersOn["first"] = {"isOccupied": False}
 
         if "second" in self._curr_offense.keys():
             basesOccupied.append(2)
             runnersOn["second"] = {
                 "id": self._curr_offense["second"]["id"],
                 "name": self._curr_offense["second"]["fullName"],
-                "isOccuppied": True,
+                "isOccupied": True,
             }
         else:
-            runnersOn["second"] = {"isOccuppied": False}
+            runnersOn["second"] = {"isOccupied": False}
 
         if "third" in self._curr_offense.keys():
             basesOccupied.append(3)
             runnersOn["third"] = {
                 "id": self._curr_offense["third"]["id"],
                 "name": self._curr_offense["third"]["fullName"],
-                "isOccuppied": True,
+                "isOccupied": True,
             }
         else:
-            runnersOn["third"] = {"isOccuppied": False}
+            runnersOn["third"] = {"isOccupied": False}
 
         return {
             "outs": self.outs,
@@ -517,59 +577,6 @@ class Game:
                 "onDeck": {"id": onDeck["id"], "name": onDeck["fullName"]},
                 "inHole": {"id": inHole["id"], "name": inHole["fullName"]},
             },
-        }
-
-    def venue(self) -> dict:
-        v = self._venue
-        venue_name = v["name"]
-        venue_mlbam = v["id"]
-        fieldInfo = v["fieldInfo"]
-        capacity = fieldInfo["capacity"]
-        roof = fieldInfo["roofType"]
-        turf = fieldInfo["turfType"]
-        try:
-            dimensions = {
-                "leftLine": fieldInfo["leftLine"],
-                "leftCenter": fieldInfo["leftCenter"],
-                "center": fieldInfo["center"],
-                "rightCenter": fieldInfo["rightCenter"],
-                "rightLine": fieldInfo["rightLine"],
-            }
-        except:
-            dimensions = {
-                "leftLine": None,
-                "leftCenter": None,
-                "center": None,
-                "rightCenter": None,
-                "rightLine": None,
-            }
-        loc = v["location"]
-        latitude = loc.get("defaultCoordinates", {}).get("latitude", None)
-        longitude = loc.get("defaultCoordinates", {}).get("longitude", None)
-        address1 = loc.get("address1", None)
-        address2 = loc.get("address2", None)
-        city = loc.get("city", None)
-        state = loc.get("state", None)
-        stateAbbrev = loc.get("stateAbbrev", None)
-        zipCode = loc.get("postalCode", None)
-        phone = loc.get("phone", None)
-
-        return {
-            "name": venue_name,
-            "mlbam": venue_mlbam,
-            "capacity": capacity,
-            "roof": roof,
-            "turf": turf,
-            "dimensions": dimensions,
-            "lat": latitude,
-            "long": longitude,
-            "address1": address1,
-            "address2": address2,
-            "city": city,
-            "state": state,
-            "stateAbbrev": stateAbbrev,
-            "zipCode": zipCode,
-            "phone": phone,
         }
 
     def diamond(self, print_as_df=True):
@@ -2302,6 +2309,7 @@ class Game:
         return df
 
     def timestamps(self) -> pd.DataFrame:
+        """Get timestamps for all plays as "timecodes" """
         plays = self._all_plays
         ts = []
         for p in plays:
@@ -2405,3 +2413,7 @@ class Game:
     def home_season_stats(self):
         """This method has not been configured yet"""
         pass
+    
+    gamePk  = game_pk
+    game_id = game_pk
+    gameId  = game_pk
