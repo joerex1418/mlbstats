@@ -1,0 +1,71 @@
+code,description,hit,plateAppearance,baseRunningEvent
+pickoff_1b,Pickoff 1B,False,False,True
+pickoff_2b,Pickoff 2B,False,False,True
+pickoff_3b,Pickoff 3B,False,False,True
+pickoff_error_1b,Pickoff Error 1B,False,False,True
+pickoff_error_2b,Pickoff Error 2B,False,False,True
+pickoff_error_3b,Pickoff Error 3B,False,False,True
+no_pitch,No Pitch,False,False,False
+single,Single,True,True,False
+double,Double,True,True,False
+triple,Triple,True,True,False
+home_run,Home Run,True,True,False
+double_play,Double Play,False,True,False
+field_error,Field Error,False,True,False
+error,Error,False,False,True
+field_out,Field Out,False,True,False
+fielders_choice,Fielders Choice,False,True,False
+fielders_choice_out,Fielders Choice Out,False,True,False
+force_out,Forceout,False,True,False
+grounded_into_double_play,Grounded Into DP,False,True,False
+grounded_into_triple_play,Grounded Into TP,False,False,False
+strikeout,Strikeout,False,True,False
+strike_out,Strike Out,False,True,False
+strikeout_double_play,Strikeout Double Play,False,True,False
+strikeout_triple_play,Strikeout Triple Play,False,True,False
+triple_play,Triple Play,False,True,False
+sac_fly,Sac Fly,False,True,False
+catcher_interf,Catcher Interference,False,True,False
+batter_interference,Batter Interference,False,True,False
+fielder_interference,Fielder Interference,False,False,False
+runner_interference,Runner Interference,False,False,False
+fan_interference,Fan Interference,False,True,False
+batter_turn,Batter Turn,False,False,False
+ejection,Ejection,False,False,False
+cs_double_play,Cs Double Play,False,False,True
+defensive_indiff,Defensive Indiff,False,False,True
+sac_fly_double_play,Sac Fly Double Play,False,True,False
+sac_bunt,Sac Bunt,False,True,False
+sac_bunt_double_play,Sac Bunt Double Play,False,True,False
+walk,Walk,False,True,False
+intent_walk,Intent Walk,False,True,False
+hit_by_pitch,Hit By Pitch,False,True,False
+injury,Injury,False,False,False
+os_ruling_pending_prior,Official Scorer Ruling Pending,False,False,False
+os_ruling_pending_primary,Official Scorer Ruling Pending,False,True,False
+at_bat_start,At Bat Start,False,False,False
+passed_ball,Passed Ball,False,False,True
+other_advance,Other Advance,False,False,True
+runner_double_play,Runner Double Play,False,False,True
+runner_placed,Runner Placed On Base,False,False,False
+pitching_substitution,Pitching Substitution,False,False,False
+offensive_substitution,Offensive Substitution,False,False,False
+defensive_switch,Defensive Switch,False,False,False
+umpire_substitution,Umpire Substitution,False,False,False
+pitcher_switch,Pitcher Switch,False,False,False
+game_advisory,Game Advisory,False,False,False
+stolen_base,Stolen Base,False,False,False
+stolen_base_2b,Stolen Base 2B,False,False,True
+stolen_base_3b,Stolen Base 3B,False,False,True
+stolen_base_home,Stolen Base Home,False,False,True
+caught_stealing,Caught Stealing,False,False,False
+caught_stealing_2b,Caught Stealing 2B,False,False,True
+caught_stealing_3b,Caught Stealing 3B,False,False,True
+caught_stealing_home,Caught Stealing Home,False,False,True
+defensive_substitution,Defensive Sub,False,False,False
+pickoff_caught_stealing_2b,Pickoff Caught Stealing 2B,False,False,True
+pickoff_caught_stealing_3b,Pickoff Caught Stealing 3B,False,False,True
+pickoff_caught_stealing_home,Pickoff Caught Stealing Home,False,False,True
+balk,Balk,False,False,True
+wild_pitch,Wild Pitch,False,False,True
+other_out,Runner Out,False,False,True

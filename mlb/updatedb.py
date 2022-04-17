@@ -17,17 +17,21 @@ from .paths import (
     BBREF_DATA_CSV,
     LEAGUES_CSV,
     SEASONS_CSV,
+    PITCH_CODES_CSV,
+    PITCH_TYPES_CSV,
+    EVENT_TYPES_CSV,
 )
 # from .async_mlb import fetch
 from .async_mlb import get_updated_records
 
-def update_people(replace_existing=True) -> Union[pd.DataFrame,None]:
+def update_people(inplace=True) -> Union[pd.DataFrame,None]:
     """Update 'people' in the library's CSV files
     
     Parameters:
     -----------
-    replace_existing : bool default TRUE
-        if FALSE, function will simply return the data retrieved from the API without updating the current CSV file
+    inplace : bool default True
+        if False, function will simply return the data retrieved from the API 
+        without updating the current CSV file
         
     """
     url = "https://raw.githubusercontent.com/chadwickbureau/register/master/data/people.csv"
@@ -59,35 +63,37 @@ def update_people(replace_existing=True) -> Union[pd.DataFrame,None]:
     df = df.astype({'year_debut':'int32','year_recent':'int32','mlbam':'int32'})
     df.reset_index(drop=True,inplace=True)
 
-    if replace_existing is False:
+    if inplace is False:
         return df
     else:
         df.to_csv(PEOPLE_CSV,index=False)
         
-def update_yby_records(replace_existing=True) -> Union[pd.DataFrame,None]:
+def update_yby_records(inplace=True) -> Union[pd.DataFrame,None]:
     """Update yby records in the package's 'baseball.db'
     
     Parameters:
     -----------
-    replace_existing : bool default TRUE
-        if FALSE, function will simply return the data retrieved from the API without updating the current CSV file
+    inplace : bool default True
+        if False, function will simply return the data retrieved from the API 
+        without updating the current CSV file
         
     """
     df = get_updated_records()
     df = df.sort_values(by=["season","W%"],ascending=[False,False])
     
-    if replace_existing is False:
+    if inplace is False:
         return df
     else:
         df.to_csv(YBY_RECORDS_CSV,index=False)
 
-def update_hof(replace_existing=True) -> Union[pd.DataFrame,None]:
+def update_hof(inplace=True) -> Union[pd.DataFrame,None]:
     """Update "Hall Of Fame" data in the library's CSV files
     
     Parameters:
     -----------
-    replace_existing : bool default TRUE
-        if FALSE, function will simply return the data retrieved from the API without updating the current CSV file
+    inplace : bool default True
+        if False, function will simply return the data retrieved from the API 
+        without updating the current CSV file
         
     """
     url = "https://statsapi.mlb.com/api/v1/awards/MLBHOF/recipients?sportId=1&hydrate=results,team"
@@ -110,18 +116,19 @@ def update_hof(replace_existing=True) -> Union[pd.DataFrame,None]:
 
     df = pd.DataFrame(data=recipients,columns=('player_mlbam','player','position','team','tm_mlbam','date','award_id','award','ntoes','votes'))
 
-    if replace_existing is False:
+    if inplace is False:
         return df
     else:
         df.to_csv(HALL_OF_FAME_CSV,index=False)
 
-def update_seasons(replace_existing=True) -> Union[pd.DataFrame,None]:
+def update_seasons(inplace=True) -> Union[pd.DataFrame,None]:
     """Update 'seasons' data in the library's CSV files
     
     Parameters:
     -----------
-    replace_existing : bool default TRUE
-        if FALSE, function will simply return the data retrieved from the API without updating the current CSV file
+    inplace : bool default True
+        if False, function will simply return the data retrieved from the API 
+        without updating the current CSV file
         
     """
     cols = COLS_SEASON
@@ -162,19 +169,20 @@ def update_seasons(replace_existing=True) -> Union[pd.DataFrame,None]:
     df.drop(columns=['seasonLevelGamedayType','gameLevelGamedayType','firstDate2ndHalf','lastDate1stHalf'],inplace=True)
 
 
-    if replace_existing is False:
+    if inplace is False:
         df : pd.DataFrame = df
         return df
     else:
         df.to_csv(SEASONS_CSV,index=False)
 
-def update_venues(replace_existing=True) -> Union[pd.DataFrame,None]:
+def update_venues(inplace=True) -> Union[pd.DataFrame,None]:
     """Update 'venues' data in the library's CSV files
     
     Parameters:
     -----------
-    replace_existing : bool default TRUE
-        if FALSE, function will simply return the data retrieved from the API without updating the current CSV file
+    inplace : bool default True
+        if False, function will simply return the data retrieved from the API 
+        without updating the current CSV file
         
     """
     base = "https://statsapi.mlb.com/api/v1"
@@ -286,12 +294,12 @@ def update_venues(replace_existing=True) -> Union[pd.DataFrame,None]:
     
     df = df.astype({'mlbam':'int32','tz_offset':'int32'})
 
-    if replace_existing is False:
+    if inplace is False:
         return df
     else:
         df.to_csv(VENUES_CSV,index=False)
 
-def update_bbref_data(replace_existing=True) -> Union[pd.DataFrame,None]:
+def update_bbref_data(inplace=True) -> Union[pd.DataFrame,None]:
     url = "https://www.baseball-reference.com/data/war_daily_bat.txt"
     hit = pd.read_csv(url)
     hit = hit.drop_duplicates(subset='mlb_ID',keep='first')[['name_common','mlb_ID','player_ID']].dropna()
@@ -304,18 +312,19 @@ def update_bbref_data(replace_existing=True) -> Union[pd.DataFrame,None]:
     
     df = pd.concat([hit,pit]).drop_duplicates(subset='mlb_ID',keep='first').rename(columns={'name_common':'name','mlb_ID':'mlbam','player_ID':'bbrefID'})
     
-    if replace_existing is False:
+    if inplace is False:
         return df.reset_index(drop=True)
     else:
         df.to_csv(BBREF_DATA_CSV,index=False)
         
-def update_leagues(replace_existing=True) -> Union[pd.DataFrame,None]:
+def update_leagues(inplace=True) -> Union[pd.DataFrame,None]:
     """Update 'leagues' data in the library's CSV files
     
     Parameters:
     -----------
-    replace_existing : bool default TRUE
-        if FALSE, function will simply return the data retrieved from the API without updating the current CSV file
+    inplace : bool default True
+        if False, function will simply return the data retrieved from the API 
+        without updating the current CSV file
         
     """
     
@@ -354,24 +363,101 @@ def update_leagues(replace_existing=True) -> Union[pd.DataFrame,None]:
     
     df = pd.DataFrame(data=data,columns=['mlbam','name_full','name_short','div_part','abbreviation','parent_mlbam','parent_name'])
 
-    if replace_existing is False:
+    if inplace is False:
         return df
     else:
         df.to_csv(LEAGUES_CSV,index=False)
     
-def update_bbref_hitting_war(replace_existing=True) -> Union[pd.DataFrame,None]:
+def update_bbref_hitting_war(inplace=True) -> Union[pd.DataFrame,None]:
     url = "https://www.baseball-reference.com/data/war_daily_bat.txt"
     df = pd.read_csv(url)
-    if replace_existing is False:
+    if inplace is False:
         return df
     else:
         df.to_csv(BBREF_BATTING_DATA_CSV,index=False)
 
-def update_bbref_pitching_war(replace_existing=True) -> Union[pd.DataFrame,None]:
+def update_bbref_pitching_war(inplace=True) -> Union[pd.DataFrame,None]:
     url = "https://www.baseball-reference.com/data/war_daily_pitch.txt"
     df = pd.read_csv(url)
-    if replace_existing is False:
+    if inplace is False:
         return df
     else:
         df.to_csv(BBREF_PITCHING_DATA_CSV,index=False)
 
+def update_pitch_types(inplace=True) -> Union[pd.DataFrame,None]:
+    """Update 'pitch_types' in the library's CSV files
+    
+    Parameters:
+    -----------
+    inplace : bool default True
+        if False, function will simply return the data retrieved from the API 
+        without updating the current CSV file
+        
+    """
+    url = 'https://statsapi.mlb.com/api/v1/pitchTypes'
+    resp = requests.get(url)
+    data = []
+    for p in resp.json():
+        data.append({'code':p['code'],'description':p['description']})
+
+    df = pd.DataFrame.from_dict(data).sort_values(by='code')
+    df = df.reset_index(drop=True,inplace=False)
+
+    if inplace is not True:
+        return df
+    
+    df.to_csv(PITCH_TYPES_CSV,index=False)
+    
+def update_pitch_codes(inplace=True) -> Union[pd.DataFrame,None]:
+    """Update 'pitch_codes' in the library's CSV files
+    
+    Parameters:
+    -----------
+    inplace : bool default True
+        if False, function will simply return the data retrieved from the API 
+        without updating the current CSV file
+        
+    """
+    url = 'https://statsapi.mlb.com/api/v1/pitchCodes'
+    resp = requests.get(url)
+    data = []
+    for p in resp.json():
+        data.append({'code':p['code'],'description':p['description']})
+
+    df = pd.DataFrame.from_dict(data).sort_values(by='code')
+    df = df.reset_index(drop=True,inplace=False)
+    
+    if inplace is False:
+        return df
+    
+    df.to_csv(PITCH_CODES_CSV,index=False)
+    
+def update_event_types(inplace=True) -> Union[pd.DataFrame,None]:
+    """Update 'event_types' in the library's CSV files
+    
+    Parameters:
+    -----------
+    inplace : bool default True
+        if False, function will simply return the data retrieved from the API 
+        without updating the current CSV file
+        
+    """
+    url = 'https://statsapi.mlb.com/api/v1/eventTypes'
+    resp = requests.get(url)
+    data = []
+    for e in resp.json():
+        e_type_data = {'code':e['code'],
+                       'description':e['description'],
+                       'hit':e['hit'],
+                       'plateAppearance':e['plateAppearance'],
+                       'baseRunningEvent':e['baseRunningEvent']}
+        data.append(e_type_data)
+
+    df = pd.DataFrame.from_dict(data)
+    df = df.reset_index(drop=True,inplace=False)
+    
+    if inplace is False:
+        return df
+    
+    df.to_csv(EVENT_TYPES_CSV,index=False)
+    

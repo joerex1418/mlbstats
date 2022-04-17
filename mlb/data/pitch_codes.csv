@@ -1,0 +1,33 @@
+code,description
+*B,Ball - Ball In Dirt
++1,Pickoff Throw 1st - Catcher
++2,Pickoff Throw 2nd - Catcher
++3,Pickoff Throw 3rd - Catcher
+.,Non Pitch
+1,Pickoff Throw 1st - Pitcher
+2,Pickoff Throw 2nd - Pitcher
+3,Pickoff Throw 3rd - Pitcher
+A,Strike - Automatic
+B,Ball - Called
+C,Strike - Called
+D,Hit Into Play - No Out(s)
+E,Hit Into Play - Run(s)
+F,Strike - Foul
+H,Ball - Hit by Pitch
+I,Ball - Intentional
+J,Pitchout Hit Into Play - No Out(s)
+K,Strike - Unknown
+L,Strike - Foul Bunt
+M,Strike - Missed Bunt
+N,No Pitch
+O,Strike - Bunt Foul Tip
+P,Ball - Pitchout
+Q,Strike - Swinging on Pitchout
+R,Strike - Foul on Pitchout
+S,Strike - Swinging
+T,Strike - Foul Tip
+V,Ball - Automatic
+W,Strike - Swinging Blocked
+X,Hit Into Play - Out(s)
+Y,Pitchout Hit Into Play - Out(s)
+Z,Pitchout Hit Into Play - Run(s)

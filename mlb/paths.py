@@ -16,4 +16,7 @@ BBREF_BATTING_DATA_CSV  = os.path.join(os.path.dirname(__file__),'data/bbref_war
 BBREF_PITCHING_DATA_CSV = os.path.join(os.path.dirname(__file__),'data/bbref_war_pitch.csv')
 BBREF_DATA_CSV          = os.path.join(os.path.dirname(__file__),'data/bbref_data.csv')
 LEAGUES_CSV             = os.path.join(os.path.dirname(__file__),'data/leagues.csv')
+PITCH_TYPES_CSV         = os.path.join(os.path.dirname(__file__),'data/pitch_types.csv')
+PITCH_CODES_CSV         = os.path.join(os.path.dirname(__file__),'data/pitch_codes.csv')
+EVENT_TYPES_CSV         = os.path.join(os.path.dirname(__file__),'data/event_types.csv')
 API_TEAMS_CSV           = os.path.join(os.path.dirname(__file__),'data/api_teams.csv')

@@ -138,7 +138,10 @@ from .mlbdata import get_standings_df as standings
 from .mlbdata import get_yby_records as yby_records
 from .mlbdata import get_hall_of_fame as hall_of_fame
 from .mlbdata import get_broadcasts_df as broadcasts
+from .mlbdata import get_pitch_types_df as pitch_types
+from .mlbdata import get_pitch_codes_df as pitch_codes
 from .mlbdata import get_bbref_data as bbref_data
+from .mlbdata import get_event_types_df as event_types
 from .mlbdata import get_bbref_hitting_war_df as bbref_war_hit
 from .mlbdata import get_bbref_pitching_war_df as bbref_war_pitch
 from .mlbdata import get_teams_from_register_df as chadwick_teams
@@ -153,6 +156,9 @@ from .updatedb import update_yby_records
 from .updatedb import update_bbref_data
 from .updatedb import update_bbref_hitting_war
 from .updatedb import update_bbref_pitching_war
+from .updatedb import update_pitch_types
+from .updatedb import update_pitch_codes
+from .updatedb import update_event_types
 update_legends = update_hof
 update_bbref_batting_war = update_bbref_hitting_war
 

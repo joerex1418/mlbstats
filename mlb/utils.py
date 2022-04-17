@@ -72,7 +72,7 @@ def compile_codes(*code_lists, output_list=False) -> str:
     return all_codes
 
 
-def draw_strikezone(matchup):
+def draw_strikezone(matchup,s=1):
     player_zoneTop = matchup[0]["zone_top"]
     player_zoneBottom = matchup[0]["zone_bot"]
     bat_side = matchup[0]["bat_side"]
@@ -98,8 +98,8 @@ def draw_strikezone(matchup):
             }
         )
 
-    zoneTop = ZONE_TOP_STANDARD * 12
-    zoneBot = ZONE_BOTTOM_STANDARD * 12
+    zoneTop = ZONE_TOP_STANDARD * 12 * s
+    zoneBot = ZONE_BOTTOM_STANDARD * 12 * s
 
     if bat_side == "R":
         batter_img = "righty"
@@ -183,7 +183,7 @@ def draw_strikezone(matchup):
     return batters_box_html
 
 
-def draw_pitches(pCoordinates: list, zoneTop, pitchCodes=[], ab=""):
+def draw_pitches(pCoordinates: list, zoneTop='3.467', pitchCodes=[], ab=''):
     # still need to determine correct 'zoneTop' and 'zoneBottom' values since they may be different for each pitch
 
     c_radius = 1.2

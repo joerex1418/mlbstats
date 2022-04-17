@@ -10,6 +10,12 @@ def get(df_title) -> pd.DataFrame:
     return pd.read_csv(DATA_DIR + f"{df_title}.csv",index_col=False)
 
 def get_teams_df(year=None) -> pd.DataFrame:
+    """Get reference dataframe of all teams in the MLB history
+    
+    This data details all team IDs and names for every season. A specific
+    franchise can be identified by the 'mlbam' or 'franchID' keys.
+    
+    """
     teams_df = pd.read_csv(
         TEAMS_CSV,
         index_col=False,
@@ -22,7 +28,13 @@ def get_teams_df(year=None) -> pd.DataFrame:
         return df
 
 def get_standings_df() -> pd.DataFrame:
-    """Standings for each season"""
+    """Standings dataframe for each season
+    
+    NOTE: DEPRECATED - Data only covered up to 2022. In the future, a new 
+    verision will incorporate async to get updated standings and records on 
+    the fly
+    
+    """
     try:
         df = pd.read_csv(YBY_STANDINGS_CSV,index_col=False)
 
@@ -33,7 +45,15 @@ def get_standings_df() -> pd.DataFrame:
         return None
 
 def get_yby_records(raw=False) -> pd.DataFrame:
-    """Record splits by season for each team"""
+    """Record splits by season for each team
+    
+    NOTE: DEPRECATED - Data only covered up to 2022. In the future, a new 
+    verision will incorporate async to get updated standings and records on 
+    the fly
+    
+    """
+    
+
     try:
         df = pd.read_csv(YBY_RECORDS_CSV,index_col=False)
         return df
@@ -80,8 +100,7 @@ def get_venues_df(active_only=False) -> pd.DataFrame:
     return df
 
 def get_season_info(date=None) -> tuple:
-    """
-    Get current season in-progress and most recently completed season, 
+    """Get current season in-progress and most recently completed season, 
     given a specified date
 
     Parameters:
@@ -156,8 +175,11 @@ def get_broadcasts_df() -> pd.DataFrame:
     return pd.read_csv(BROADCASTS_CSV,index_col=False)
 
 def get_bbref_data() -> pd.DataFrame:
-    """Reference dataframe for player's 'Baseball-Reference' & 
-    MLB Advanced Media IDs
+    """Reference dataframe for all player "Baseball-Reference" (bbref) and 
+    "MLB Advanced Media" (mlbam) IDs
+    
+    NOTE: It is entirely possible that not every player is accounted for, as
+    the MLB and "Baseball-Reference" get their data from different sources
     
     """
     
@@ -172,13 +194,9 @@ def get_bbref_pitching_war_df() -> pd.DataFrame:
     return df
 
 def get_leagues_df() -> pd.DataFrame:
-    try:
-        df = pd.read_csv(LEAGUES_CSV,index_col=False)
-
-        return df
-
-    except Exception as e:
-        print(e)
+    """Get reference dataframe of all leagues and divisions in the MLB"""
+    df = pd.read_csv(LEAGUES_CSV,index_col=False)
+    return df
         
 def get_teams_from_register_df(match_columns=False) -> pd.DataFrame:
     """Periodically updated dataset of team ids (similar to the 'mlb.teams()' 
@@ -201,4 +219,27 @@ def get_teams_from_register_df(match_columns=False) -> pd.DataFrame:
         df = df.rename(columns={'lgID'})
     return df
 
+def get_pitch_types_df() -> pd.DataFrame:
+    """Pitch IDs and descriptions
+    
+    NOTE: Not to be confused with 'pitch_codes()'
+    """
+    df = pd.read_csv(PITCH_TYPES_CSV,index_col=False)
+    return df
+
+def get_pitch_codes_df() -> pd.DataFrame:
+    """Pitch result codes and their descriptions
+    
+    NOTE: Not to be confused with 'pitch_types()'
+    """
+    df = pd.read_csv(PITCH_CODES_CSV,index_col=False)
+    return df
+  
+def get_event_types_df() -> pd.DataFrame:
+    """Event types and their descriptions
+    
+    """
+    df = pd.read_csv(EVENT_TYPES_CSV,index_col=False)
+    return df
+  
     

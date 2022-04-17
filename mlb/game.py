@@ -247,12 +247,18 @@ class Game:
         self._curr_offense = self._linescore['offense']
         self._curr_play = liveData['plays'].get('currentPlay', {})
 
-        self.balls = self._linescore.get('balls', 0)
-        self.strikes = self._linescore.get('strikes', 0)
-        self.outs = self._linescore.get('outs', 0)
         self._inning = self._linescore.get('currentInning', '-')
         self._inning_ordinal = self._linescore.get('currentInningOrdinal', '-')
         self._inning_state = self._linescore.get('inningState', '-')
+        
+        if self._inning_state == 'Top' or self._inning_state == 'Bottom':
+            self.balls = self._linescore.get('balls', 0)
+            self.strikes = self._linescore.get('strikes', 0)
+            self.outs = self._linescore.get('outs', 0)
+        else:
+            self.balls = 0
+            self.strikes = 0
+            self.outs = 0
 
         self._inn_half = self._linescore.get('inningHalf', '-')
         self._inn_label = f'{self._inn_half} of the {self._inning_ordinal}'
@@ -705,27 +711,28 @@ class Game:
         """
 
         headers = [
-            "pitch_num",
-            "details",
-            "zone_top",
-            "zone_bot",
-            "zoneTopInitial",
-            "zoneBottomInitial",
-            "pitch_type",
-            "pitch_code",
-            "release_speed",
-            "end_speed",
-            "spin",
-            "zone",
-            "pX",
-            "pZ",
-            "hit_location",
-            "hX",
-            "hY",
-            "play_id",
+            'pitch_num',
+            'details',
+            'zone_top',
+            'zone_bot',
+            'zoneTopInitial',
+            'zoneBottomInitial',
+            'pitch_type',
+            'pitch_type_id',
+            'pitch_code',
+            'release_speed',
+            'end_speed',
+            'spin',
+            'zone',
+            'pX',
+            'pZ',
+            'hit_location',
+            'hX',
+            'hY',
+            'play_id',
         ]
         try:
-            pa_events = self._curr_play["playEvents"]
+            pa_events = self._curr_play['playEvents']
         except:
             empty_df = pd.DataFrame(columns=headers)
             return empty_df
@@ -733,88 +740,92 @@ class Game:
         events_data = []
 
         for ab_log in pa_events:
-            play_id = ab_log.get("playId")
-            if ab_log["isPitch"] == False:
+            play_id = ab_log.get('playId')
+            if ab_log['isPitch'] == False:
                 pass
             else:
                 event = []
 
-                pitchNumber = ab_log["pitchNumber"]
+                pitch_number = ab_log['pitchNumber']
 
-                details = ab_log["details"]["description"]
+                details = ab_log['details']
+                pitch_desc = details['description']
 
                 try:
-                    pitchType = ab_log["details"]["type"]["description"]
-                    pitchCode = ab_log["details"]["type"]["code"]
+                    pitch_type = details['type']['description']
+                    pitch_type_id = details['type']['code']
+                    pitch_code = details['code']
                 except:
-                    pitchType = "unknown"
-                    pitchCode = "unknown"
+                    pitch_type = 'unknown'
+                    pitch_type_id = 'UN'
+                    pitch_code = 'UN'
 
                 try:
-                    start_vel = ab_log["pitchData"]["startSpeed"]
+                    start_vel = ab_log['pitchData']['startSpeed']
                 except:
-                    start_vel = "--"
+                    start_vel = '--'
 
                 try:
-                    end_vel = ab_log["pitchData"]["endSpeed"]
+                    end_vel = ab_log['pitchData']['endSpeed']
                 except:
-                    end_vel = "--"
+                    end_vel = '--'
 
                 try:
-                    pX_coord = ab_log["pitchData"]["coordinates"]["pX"]
+                    pX_coord = ab_log['pitchData']['coordinates']['pX']
                 except:
-                    pX_coord = "--"
+                    pX_coord = '--'
                 try:
-                    pZ_coord = ab_log["pitchData"]["coordinates"]["pZ"]
+                    pZ_coord = ab_log['pitchData']['coordinates']['pZ']
                 except:
-                    pZ_coord = "--"
+                    pZ_coord = '--'
 
                 try:
-                    zoneTopInitial = pa_events[0]["pitchData"]["strikeZoneTop"]
-                    zoneBottomInitial = pa_events[0]["pitchData"]["strikeZoneBottom"]
+                    zoneTopInitial = pa_events[0]['pitchData']['strikeZoneTop']
+                    zoneBottomInitial = pa_events[0]['pitchData']['strikeZoneBottom']
                 except:
                     try:
-                        zoneTopInitial = pa_events[0]["pitchData"]["strikeZoneTop"]
-                        zoneBottomInitial = pa_events[0]["pitchData"][
-                            "strikeZoneBottom"
+                        zoneTopInitial = pa_events[0]['pitchData']['strikeZoneTop']
+                        zoneBottomInitial = pa_events[0]['pitchData'][
+                            'strikeZoneBottom'
                         ]
                     except:
                         zoneTopInitial = 3.5
                         zoneBottomInitial = 1.5
                 try:
-                    zone_top = ab_log["pitchData"]["strikeZoneTop"]
-                    zone_bot = ab_log["pitchData"]["strikeZoneBottom"]
+                    zone_top = ab_log['pitchData']['strikeZoneTop']
+                    zone_bot = ab_log['pitchData']['strikeZoneBottom']
                 except:
                     zone_top = 3.5
                     zone_bot = 1.5
 
                 try:
-                    spin = ab_log["pitchData"]["breaks"]["spinRate"]
+                    spin = ab_log['pitchData']['breaks']['spinRate']
                 except:
-                    spin = ""
+                    spin = ''
                 try:
-                    zone = ab_log["pitchData"]["zone"]
+                    zone = ab_log['pitchData']['zone']
                 except:
-                    zone = ""
+                    zone = ''
                 try:
-                    hit_location = ab_log["hitData"]["location"]
+                    hit_location = ab_log['hitData']['location']
                 except:
-                    hit_location = ""
+                    hit_location = ''
                 try:
-                    hX = ab_log["hitData"]["coordinates"]["coordX"]
-                    hY = ab_log["hitData"]["coordinates"]["coordY"]
+                    hX = ab_log['hitData']['coordinates']['coordX']
+                    hY = ab_log['hitData']['coordinates']['coordY']
                 except:
-                    hX = ""
-                    hY = ""
+                    hX = ''
+                    hY = ''
 
-                event.append(pitchNumber)
-                event.append(details)
+                event.append(pitch_number)
+                event.append(pitch_desc)
                 event.append(zone_top)
                 event.append(zone_bot)
                 event.append(zoneTopInitial)
                 event.append(zoneBottomInitial)
-                event.append(pitchType)
-                event.append(pitchCode)
+                event.append(pitch_type)
+                event.append(pitch_type_id)
+                event.append(pitch_code)
                 event.append(start_vel)
                 event.append(end_vel)
                 event.append(spin)
