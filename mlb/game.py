@@ -396,6 +396,21 @@ class Game:
             'phone': phone,
         }
 
+    def get_player_stats(self,mlbam):
+        """Get game or season stats for a specific player"""
+        
+        mlbam = str(mlbam)
+        away_data = self._boxscore['teams']['away']['players']
+        home_data = self._boxscore['teams']['home']['players']
+        
+        all_player_data = {}
+        all_player_data.update(away_data)
+        all_player_data.update(home_data)
+        
+        player_data = all_player_data.get(f'ID{mlbam}',{})
+        player_stats = {'game':player_data.get('stats',{}),'season':player_data.get('seasonStats',{})}
+        return player_stats
+
     def boxscore(self, tz=None) -> dict:
         if tz is None:
             tz = self._tz
@@ -688,7 +703,7 @@ class Game:
             "throws": matchup["pitchHand"]["code"],
         }
 
-        return {"atBat": atBat, "pitching": pitching, "zone": (zone_top, zone_bot)}
+        return {"batting": atBat, "pitching": pitching, "zone": (zone_top, zone_bot)}
 
     def matchup_event_log(self) -> pd.DataFrame:
         """
@@ -717,6 +732,7 @@ class Game:
             'zone_bot',
             'zoneTopInitial',
             'zoneBottomInitial',
+            'bat_side',
             'pitch_type',
             'pitch_type_id',
             'pitch_code',
@@ -733,6 +749,8 @@ class Game:
         ]
         try:
             pa_events = self._curr_play['playEvents']
+            matchup = self._curr_play.get('matchup',{})
+            bat_side = matchup.get('batSide',{}).get('code','R')
         except:
             empty_df = pd.DataFrame(columns=headers)
             return empty_df
@@ -823,6 +841,7 @@ class Game:
                 event.append(zone_bot)
                 event.append(zoneTopInitial)
                 event.append(zoneBottomInitial)
+                event.append(bat_side)
                 event.append(pitch_type)
                 event.append(pitch_type_id)
                 event.append(pitch_code)
