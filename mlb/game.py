@@ -197,6 +197,7 @@ class Game:
 
         # AWAY Team Data
         away = gameData['teams']['away']
+        self._away_info = away
         _away_data = self._boxscore['teams']['away']
         _away_score_data = self._linescore['teams']['away']
         self.away_id = away['id']
@@ -221,6 +222,7 @@ class Game:
 
         # HOME Team Data
         home = gameData['teams']['home']
+        self._home_info = home
         _home_data = self._boxscore['teams']['home']
         _home_score_data = self._linescore['teams']['home']
         self.home_id = home['id']
@@ -307,6 +309,17 @@ class Game:
     def scheduled_innings(self) -> int:
         """Number of scheduled innings"""
         return int(self._scheduled_innings)
+
+    @property
+    def away(self) -> dict:
+        """Away team info"""
+        return self._away_info
+
+    @property
+    def home(self) -> dict:
+        """Home team info"""
+        return self._home_info
+    
 
     @property
     def inning(self) -> str:
@@ -396,10 +409,29 @@ class Game:
             'phone': phone,
         }
 
-    def get_player_stats(self,mlbam):
-        """Get game or season stats for a specific player"""
+    def player_info(self,mlbam) -> dict:
+        """Get bio information for a specific player
         
-        mlbam = str(mlbam)
+        Parameters:
+        -----------
+        mlbam : int | str
+            Player's unique MLB Advanced Media ID
+        
+        """
+        
+        return self._players.get(f'ID{mlbam}',{})
+        
+
+    def player_stats(self,mlbam) -> dict:
+        """Get game and season stats for a specific player
+        
+        Parameters:
+        -----------
+        mlbam : int | str
+            Player's unique MLB Advanced Media ID
+        
+        """
+        
         away_data = self._boxscore['teams']['away']['players']
         home_data = self._boxscore['teams']['home']['players']
         
