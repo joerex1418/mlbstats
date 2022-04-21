@@ -277,6 +277,7 @@ class Game:
         self._all_events = []
         self._pitch_events = []
         self._bip_events = []
+        
         for play in self._all_plays:
             for event in play['playEvents']:
                 self._all_events.append(event)
@@ -290,8 +291,9 @@ class Game:
             except:
                 pass
 
-        self.__away_player_data = self.__get_all_player_data('away')
-        self.__home_player_data = self.__get_all_player_data('home')
+        self.__away_player_data  = self.__get_player_data('away')
+        self.__home_player_data  = self.__get_player_data('home')
+
 
     def __str__(self):
         return f"{self.game_id} | {self._away_team_abbrv} ({self._away_rhe.get('runs',0)}) @ {self._home_team_abbrv} ({self._home_rhe.get('runs',0)})"
@@ -414,16 +416,83 @@ class Game:
             'zipCode': zipCode,
             'phone': phone,
         }
+     
+    def __get_player_data(self,home_or_away,**kwargs):
+        team_data = self._boxscore['teams'][home_or_away]
+
+        all_player_data = {}
+        for lineup_type in ['batters','pitchers','bullpen','bench']:
+            data = []
+            for mlbam in team_data.get(lineup_type,[]):
+                player_bio = self.player_bio(mlbam)
+                player_data = self.player_game_data(mlbam)
+                game_status = player_data['gameStatus']
+                batting_order = player_data.get('battingOrder','999')
+
+                player_stats = self.player_stats(mlbam)
+                name_full = player_bio['fullName']
+                name_box  = player_bio['lastInitName']
+                try:
+                    all_positions = ' | '.join(list([pos['abbreviation'] for pos in player_data['allPositions']]))
+                except:
+                    all_positions = ''
+                
+                for scope in ['game','season']:
+                    for group in ['batting','pitching','fielding']:
+                        player_stats[scope][group] = pd.Series(player_stats[scope][group]).rename(STATDICT).to_dict()
+                
+                p_data = {'mlbam':mlbam,'name_full':name_full,'name_box':name_box,
+                            'pos':all_positions,'order':batting_order,
+                            'is_batting':game_status['isCurrentBatter'],
+                            'is_pitching':game_status['isCurrentPitcher'],
+                            'is_on_bench':game_status['isOnBench'],
+                            'is_sub':game_status['isSubstitute'],
+                            'batting':{'game':player_stats['game']['batting'],
+                                    'season':player_stats['season']['batting']},
+                            'pitching':{'game':player_stats['game']['pitching'],
+                                        'season':player_stats['season']['pitching']},
+                            'fielding':{'game':player_stats['game']['fielding'],
+                                        'season':player_stats['season']['fielding']},
+                            }
+                data.append(p_data)
+            
+            df = pd.DataFrame.from_dict(data=data).sort_values(by='order')
+            
+            all_player_data[lineup_type] = df
+        
+        return all_player_data
         
     @property
-    def away_player_data(self) -> pd.DataFrame:
-        """Get away team's player information, stats, and other game data"""
-        return self.__away_player_data
+    def away_batters(self) -> pd.DataFrame:
+        return self.__away_player_data['batters']
     
     @property
-    def home_player_data(self) -> pd.DataFrame:
-        """Get home team's player information, stats, and other game data"""
-        return self.__home_player_data
+    def away_pitchers(self) -> pd.DataFrame:
+        return self.__away_player_data['pitchers']
+    
+    @property
+    def away_bullpen(self) -> pd.DataFrame:
+        return self.__away_player_data['bullpen']
+    
+    @property
+    def away_bench(self) -> pd.DataFrame:
+        return self.__away_player_data['bench']
+    
+    @property
+    def home_batters(self) -> pd.DataFrame:
+        return self.__home_player_data['batters']
+    
+    @property
+    def home_pitchers(self) -> pd.DataFrame:
+        return self.__home_player_data['pitchers']
+    
+    @property
+    def home_bullpen(self) -> pd.DataFrame:
+        return self.__home_player_data['bullpen']
+    
+    @property
+    def home_bench(self) -> pd.DataFrame:
+        return self.__home_player_data['bench']
 
     def player_bio(self,mlbam) -> dict:
         """Get bio information for a specific player
@@ -2486,35 +2555,6 @@ class Game:
         """This method has not been configured yet"""
         pass
     
-    def __get_all_player_data(self,home_or_away):
-        data = []
-        for mlbam in self._boxscore['teams'][home_or_away].get('batters',[]):
-            player_bio = self.player_bio(mlbam)
-            player_data = self.player_game_data(mlbam)
-            batting_order = player_data.get('battingOrder','999')
-
-            player_stats = self.player_stats(mlbam)
-            name_full = player_bio['fullName']
-            name_box  = player_bio['lastInitName']
-            all_positions = ' | '.join(list([x['abbreviation'] for x in player_data['allPositions']]))
-            for scope in ['game','season']:
-                for group in ['batting','pitching','fielding']:
-                    player_stats[scope][group] = pd.Series(player_stats[scope][group]).rename(STATDICT).to_dict()
-            
-            pdata = {'mlbam':mlbam,'name_full':name_full,'name_box':name_box,
-                     'pos':all_positions,'order':batting_order,#'stats':player_stats,
-                     'batting':{'game':player_stats['game']['batting'],
-                                'season':player_stats['season']['batting']},
-                     'pitching':{'game':player_stats['game']['pitching'],
-                                 'season':player_stats['season']['pitching']},
-                     'fielding':{'game':player_stats['game']['fielding'],
-                                 'season':player_stats['season']['fielding']},
-                     }
-            data.append(pdata)
-            
-        df = pd.DataFrame.from_dict(data=data).sort_values(by='order')
-        
-        return df
     
     gamePk  = game_pk
     game_id = game_pk
