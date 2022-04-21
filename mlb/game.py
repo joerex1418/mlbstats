@@ -36,7 +36,7 @@ from .helpers import mlb_person
 
 from .helpers import umpires
 
-from .constants import BASE, POSITION_DICT, ORDINALS
+from .constants import BASE, POSITION_DICT, ORDINALS, STATDICT
 
 from .utils import iso_format_ms
 from .utils import utc_zone
@@ -194,6 +194,10 @@ class Game:
 
         # ALL PLAYERS IN GAME
         self._players = gameData['players']
+        
+        self.__all_players_game_data = {}
+        self.__all_players_game_data.update(self._boxscore['teams']['away']['players'])
+        self.__all_players_game_data.update(self._boxscore['teams']['home']['players'])
 
         # AWAY Team Data
         away = gameData['teams']['away']
@@ -205,7 +209,7 @@ class Game:
         self._away_team = away['clubName']
         self._away_team_abbrv = away['abbreviation']
         self._away_stats = _away_data['teamStats']
-        self._away_player_data = _away_data['players']
+        self._away_players = _away_data['players']
         self._away_lineup = _away_data['batters']
         self._away_starting_order = _away_data['battingOrder']
         self._away_pitcher_lineup = _away_data['pitchers']
@@ -230,7 +234,7 @@ class Game:
         self._home_team = home['clubName']
         self._home_team_abbrv = home['abbreviation']
         self._home_stats = _home_data['teamStats']
-        self._home_player_data = _home_data['players']
+        self._home_players = _home_data['players']
         self._home_lineup = _home_data['batters']
         self._home_starting_order = _home_data['battingOrder']
         self._home_pitcher_lineup = _home_data['pitchers']
@@ -286,6 +290,9 @@ class Game:
             except:
                 pass
 
+        self.__away_player_data = self.__get_all_player_data('away')
+        self.__home_player_data = self.__get_all_player_data('home')
+
     def __str__(self):
         return f"{self.game_id} | {self._away_team_abbrv} ({self._away_rhe.get('runs',0)}) @ {self._home_team_abbrv} ({self._home_rhe.get('runs',0)})"
 
@@ -320,7 +327,6 @@ class Game:
         """Home team info"""
         return self._home_info
     
-
     @property
     def inning(self) -> str:
         """Current inning as an string formatted integer"""
@@ -408,8 +414,18 @@ class Game:
             'zipCode': zipCode,
             'phone': phone,
         }
+        
+    @property
+    def away_player_data(self) -> pd.DataFrame:
+        """Get away team's player information, stats, and other game data"""
+        return self.__away_player_data
+    
+    @property
+    def home_player_data(self) -> pd.DataFrame:
+        """Get home team's player information, stats, and other game data"""
+        return self.__home_player_data
 
-    def player_info(self,mlbam) -> dict:
+    def player_bio(self,mlbam) -> dict:
         """Get bio information for a specific player
         
         Parameters:
@@ -421,7 +437,6 @@ class Game:
         
         return self._players.get(f'ID{mlbam}',{})
         
-
     def player_stats(self,mlbam) -> dict:
         """Get game and season stats for a specific player
         
@@ -440,8 +455,15 @@ class Game:
         all_player_data.update(home_data)
         
         player_data = all_player_data.get(f'ID{mlbam}',{})
-        player_stats = {'game':player_data.get('stats',{}),'season':player_data.get('seasonStats',{})}
+        player_stats = {'game':player_data.get('stats',{}),
+                        'season':player_data.get('seasonStats',{})}
         return player_stats
+
+    def player_game_data(self,mlbam) -> dict:
+        """Get player meta data for the game"""
+        all_player_data = self.__all_players_game_data
+        player = all_player_data.get(f'ID{mlbam}')
+        return player
 
     def boxscore(self, tz=None) -> dict:
         if tz is None:
@@ -706,40 +728,28 @@ class Game:
         Gets current matchup info in form of python dictionary:
 
         Returned dict keys:
-        * `at_bat`: current batter (dict)
+        * `batting`: current batter (dict)
         * `pitching`: current pitcher (dict)
         * `zone`: current batter's strike zone metrics (tuple)
         """
+        matchup  = self._curr_play.get('matchup',{})
+        current_play_events = self._curr_play.get('playEvents',[])
 
-        try:
-            matchup = self._curr_play["matchup"]
-            zone_top = self._curr_play["playEvents"][-1]["pitchData"]["strikeZoneTop"]
-            zone_bot = self._curr_play["playEvents"][-1]["pitchData"][
-                "strikeZoneBottom"
-            ]
-        except:
-            return {"atBat": {}, "pitching": {}, "zone": (3.5, 1.5)}
-        atBat = {
-            "name": matchup["batter"]["fullName"],
-            "id": matchup["batter"]["id"],
-            "bats": matchup["batSide"]["code"],
-            "zone_top": self._players[f'ID{matchup["batter"]["id"]}']["strikeZoneTop"],
-            "zone_bot": self._players[f'ID{matchup["batter"]["id"]}'][
-                "strikeZoneBottom"
-            ],
-            "stands": matchup["batSide"]["code"],
-        }
-        pitching = {
-            "name": matchup["pitcher"]["fullName"],
-            "id": matchup["pitcher"]["id"],
-            "throws": matchup["pitchHand"]["code"],
-        }
+        atBat = {'name': matchup['batter']['fullName'],
+                 'id': matchup["batter"]["id"],
+                 'bats': matchup["batSide"]["code"],
+                 'zone_top': self._players[f'ID{matchup["batter"]["id"]}']['strikeZoneTop'],
+                 'zone_bot': self._players[f'ID{matchup["batter"]["id"]}']['strikeZoneBottom'],
+                 'stands': matchup['batSide']['code']
+                 }
+        pitching = {'name': matchup['pitcher']['fullName'],
+                    'id': matchup['pitcher']['id'],
+                    'throws': matchup['pitchHand']['code']}
 
-        return {"batting": atBat, "pitching": pitching, "zone": (zone_top, zone_bot)}
+        return {'batting': atBat, 'pitching': pitching, 'zone': (3.5, 1.5)}
 
     def matchup_event_log(self) -> pd.DataFrame:
-        """
-        Gets a pitch-by-pitch log of the current batter-pitcher matchup:
+        """Gets a pitch-by-pitch log of the current batter-pitcher matchup:
 
         Column labels:
         * `Pitch #`: pitch number for current matchup (current event included)
@@ -1093,7 +1103,7 @@ class Game:
                 print(f"ERROR: -- {e} --")
 
             # Is Home Team Batting?
-            if f"ID{batterID}" in self._home_player_data.keys():
+            if f"ID{batterID}" in self._home_players.keys():
                 homeBatting = True
                 batTeamID = self.home_id
                 battingTeam = self._home_team
@@ -1365,7 +1375,7 @@ class Game:
                     category = "--"
 
                 # Is Home Team Batting?
-                if f'ID{batter["id"]}' in self._home_player_data.keys():
+                if f'ID{batter["id"]}' in self._home_players.keys():
                     homeBatting = True
                     batTeamID = self.home_id
                     battingTeam = self._home_team
@@ -1617,7 +1627,7 @@ class Game:
                     category = "--"
 
                 # Is Home Team Batting?
-                if f'ID{batter["id"]}' in self._home_player_data.keys():
+                if f'ID{batter["id"]}' in self._home_players.keys():
                     homeBatting = True
                     batTeamID = self.home_id
                     battingTeam = self._home_team
@@ -1706,7 +1716,7 @@ class Game:
             or self.gameState == "Preview"
         ):
             tm = self._away_stats["batting"]
-            players = self._away_player_data
+            players = self._away_players
             # headers = ["Player","Pos","AB","R","H","RBI","SO","BB","AVG","HR","2B","3B","FO","GO","IBB","SacBunts","SacFlies","GIDP","batting","substitute","bbrefID","mlbam"]
             headers = [
                 "Player",
@@ -1858,7 +1868,7 @@ class Game:
             or self.gameState == "Preview"
         ):
             tm = self._home_stats["batting"]
-            players = self._home_player_data
+            players = self._home_players
             headers = [
                 "Player",
                 "Pos",
@@ -1989,7 +1999,7 @@ class Game:
         >>>
         """
         # these stats will be only for this CURRENT GAME (with the exception of a player's ERA stat)
-        players = self._away_player_data
+        players = self._away_players
         headers = [
             "Player",
             "Ct",
@@ -2110,7 +2120,7 @@ class Game:
         >>>
         """
         # these stats will be only for this CURRENT GAME (with the exception of a player's ERA stat)
-        players = self._home_player_data
+        players = self._home_players
         headers = [
             "Player",
             "Ct",
@@ -2224,7 +2234,7 @@ class Game:
         # These stats will be only for this CURRENT GAME 
         #   (with the exception of a player's fielding average stat)
         tm = self._away_stats["fielding"]
-        players = self._away_player_data
+        players = self._away_players
         headers = [
             "Player",
             "Pos",
@@ -2309,7 +2319,7 @@ class Game:
         # These stats will be only for this CURRENT GAME 
         #   (with the exception of a player's fielding average stat)
         tm = self._home_stats["fielding"]
-        players = self._home_player_data
+        players = self._home_players
         headers = [
             "Player",
             "Pos",
@@ -2475,6 +2485,36 @@ class Game:
     def home_season_stats(self):
         """This method has not been configured yet"""
         pass
+    
+    def __get_all_player_data(self,home_or_away):
+        data = []
+        for mlbam in self._boxscore['teams'][home_or_away].get('batters',[]):
+            player_bio = self.player_bio(mlbam)
+            player_data = self.player_game_data(mlbam)
+            batting_order = player_data.get('battingOrder','999')
+
+            player_stats = self.player_stats(mlbam)
+            name_full = player_bio['fullName']
+            name_box  = player_bio['lastInitName']
+            all_positions = ' | '.join(list([x['abbreviation'] for x in player_data['allPositions']]))
+            for scope in ['game','season']:
+                for group in ['batting','pitching','fielding']:
+                    player_stats[scope][group] = pd.Series(player_stats[scope][group]).rename(STATDICT).to_dict()
+            
+            pdata = {'mlbam':mlbam,'name_full':name_full,'name_box':name_box,
+                     'pos':all_positions,'order':batting_order,#'stats':player_stats,
+                     'batting':{'game':player_stats['game']['batting'],
+                                'season':player_stats['season']['batting']},
+                     'pitching':{'game':player_stats['game']['pitching'],
+                                 'season':player_stats['season']['pitching']},
+                     'fielding':{'game':player_stats['game']['fielding'],
+                                 'season':player_stats['season']['fielding']},
+                     }
+            data.append(pdata)
+            
+        df = pd.DataFrame.from_dict(data=data).sort_values(by='order')
+        
+        return df
     
     gamePk  = game_pk
     game_id = game_pk
