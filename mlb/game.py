@@ -2536,9 +2536,9 @@ class Game:
 
     def get_feed_data(self, timecode=None):
         if timecode is not None:
-            url = f"https://statsapi.mlb.com/api/v1.1/game/{self.gamePk}/feed/live?timecode={timecode}"
+            url = f'https://statsapi.mlb.com/api/v1.1/game/{self.gamePk}/feed/live?timecode={timecode}'
         else:
-            url = f"https://statsapi.mlb.com/api/v1.1/game/{self.gamePk}/feed/live"
+            url = f'https://statsapi.mlb.com/api/v1.1/game/{self.gamePk}/feed/live'
         resp = requests.get(url)
         return resp.json()
 
