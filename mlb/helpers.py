@@ -342,6 +342,33 @@ class mlb_wrapper:
         return getattr(self, _attr)
 
 
+class player_position_wrapper(mlb_wrapper):
+    def __init__(self,**kwargs):
+        self.__code = kwargs.get('__code','-')
+        self.__name = kwargs.get('__name','-')
+        self.__type = kwargs.get('__type','-')
+        self.__abbreviation = kwargs.get('__abbreviation','-')
+        super().__init__(**kwargs)
+        
+    @property
+    def code(self):
+        return self.__code
+    
+    @property
+    def name(self):
+        return self.__name
+    
+    @property
+    def type_(self):
+        return self.__type
+    
+    @property
+    def abbreviation(self):
+        return self.__abbreviation
+    
+    abbrv = abbreviation
+
+
 class edu_wrapper:
     """Education wrapper"""
 
@@ -546,52 +573,54 @@ class league_name_wrapper(mlb_wrapper):
 
 
 class team_name_data(mlb_wrapper):
-    """A wrapper containing data on a variations of a TEAM's name"""
+    """A wrapper containing data on a variations of a team's name"""
 
-    def __init__(self, **kwargs):
+    def __init__(self,mlbam=None,full=None,short=None,franchise=None,location=None,club=None,season=None,abbreviation=None,**kwargs):
         super().__init__(**kwargs)
+        self.__mlbam = mlbam
+        self.__full = full
+        self.__short = short
+        self.__franchise = franchise
+        self.__location = location
+        self.__club = club
+        self.__season = season
+        self.__abbreviation = abbreviation
 
     def __str__(self) -> str:
-        return self.full
+        return self.__full
 
     def __repr__(self) -> str:
-        return self.full
+        return self.__full
 
     @property
     def mlbam(self):
         """Team's official MLB ID"""
-        return self._mlbam
+        return self.__mlbam
 
     @property
     def full(self):
         """Team's full name"""
-        return self._full
+        return self.__full
 
     @property
     def short(self):
         """Team's shortened name"""
-        try:
-            return self._short
-        except:
-            return "-"
+        return self.__short
 
     @property
     def franchise(self):
         """Team's parent franchise org name"""
-        try:
-            return self._franchise
-        except:
-            return "-"
+        return self.__franchise
 
     @property
     def location(self):
         """Team's location (typically the city or state that a club is based)"""
-        return self._location
+        return self.__location
 
     @property
     def club(self):
         """Team's club name"""
-        return self._club
+        return self.__club
 
     @property
     def slug(self):
@@ -599,16 +628,20 @@ class team_name_data(mlb_wrapper):
         page on a website)
         
         """
-        
-        return self._slug
+        return self.__slug
 
     @property
     def season(self):
         """Season of play"""
-        try:
-            return self._season
-        except:
-            return "-"
+        return self.__season
+    
+    @property
+    def abbreviation(self):
+        """Season of play"""
+        return self.__abbreviation
+
+    id_ = mlbam
+    abbrv = abbreviation
 
 
 class team_slim(mlb_wrapper):

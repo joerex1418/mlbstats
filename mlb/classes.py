@@ -1,6 +1,7 @@
 import requests
 import datetime as dt
 from typing import Union, Optional, Dict, List, Literal
+from pprint import pprint as pp
 
 import pandas as pd
 
@@ -11,6 +12,7 @@ from .functions import fetch as _fetch
 
 from .helpers import mlb_date as md
 from .helpers import mlb_wrapper
+from .helpers import player_position_wrapper
 from .helpers import venue_name_wrapper
 from .helpers import league_name_wrapper
 from .helpers import team_name_data
@@ -114,7 +116,10 @@ class Person:
         _teams: dict = data["teams"]
         _awards: _pd_df = data["awards"]
         _past_teams: pd.DataFrame = data["past_teams"]
-
+        self.__bats = _info['bats']
+        self.__throws = _info['throws']
+        self.__weight = _info['weight']
+        self.__height = _info['height']
         # name info
         _name_data = {
             "_given": _info["givenName"],
@@ -129,11 +134,10 @@ class Person:
         # position info
         pos = _info["primary_position"]
         _position_data = {
-            "_code": pos.get("code", "-"),
-            "_name": pos.get("name", "-"),
-            "_type": pos.get("type", "-"),
-            "_abbrv": pos.get("abbreviation", "-"),
-            "_abbreviation": pos.get("abbreviation", "-"),
+            "__code": pos.get("code", "-"),
+            "__name": pos.get("name", "-"),
+            "__type": pos.get("type", "-"),
+            "__abbreviation": pos.get("abbreviation", "-"),
         }
 
         # birth info
@@ -200,7 +204,7 @@ class Person:
         self._mlbam = _info["mlbam"]
         self._bio = _bio
         self._name = person_name_data(**_name_data)
-        self._position = mlb_wrapper(**_position_data)
+        self.__position = player_position_wrapper(**_position_data)
         self._birth = mlb_wrapper(**_birth_data)
         self._death = mlb_wrapper(**_death_data)
         self._debut = mlb_wrapper(**_debut_data)
@@ -329,7 +333,17 @@ class Person:
         return self._death
 
     @property
-    def position(self):
+    def height(self):
+        """Player's height"""
+        return self.__height
+    
+    @property
+    def weight(self):
+        """Player's weight"""
+        return self.__weight
+
+    @property
+    def position(self) -> player_position_wrapper:
         """Wrapper for player's primary position
 
         Keys/Attributes:
@@ -338,8 +352,19 @@ class Person:
         - 'name' : str ('First Base')
         - 'type' (or 'province') : str ('Infielder')
         - 'abbreviation' : str ('1B')
+            - 'abbrv' ALIAS
         """
-        return self._position
+        return self.__position
+    
+    @property
+    def bats(self) -> str:
+        """Code for for player's batting side ('R','L','S')"""
+        return self.__bats
+    
+    @property
+    def throws(self) -> str:
+        """Code for for player's throwing arm ('R','L','S')"""
+        return self.__throws
 
     @property
     def stats(self) -> player_stats:

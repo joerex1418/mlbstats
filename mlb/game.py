@@ -223,6 +223,10 @@ class Game:
         self.away_hits = _away_score_data.get('hits')
         self.away_errs = _away_score_data.get('errors')
         self.away_record = f"{away['record']['wins']}-{away['record']['losses']}"
+        
+        self.__away = team_name_data(mlbam=away['id'],full=away['name'],short=away['shortName'],
+                                     franchise=away['franchiseName'],location=away['locationName'],
+                                     club=away['clubName'],season=away['season'],abbreviation=away['abbreviation'])
 
         # HOME Team Data
         home = gameData['teams']['home']
@@ -248,16 +252,24 @@ class Game:
         self.home_hits = _home_score_data.get('hits')
         self.home_errs = _home_score_data.get('errors')
         self.home_record = f"{home['record']['wins']}-{home['record']['losses']}"
+        
+        """
+        (mlbam=None, full=None, short=None, franchise=None, location=None, club=None, season=None, abbreviation=None, **kwargs: Any) -> None
+        """
+        
+        self.__home = team_name_data(mlbam=home['id'],full=home['name'],short=home['shortName'],
+                                     franchise=home['franchiseName'],location=home['locationName'],
+                                     club=home['clubName'],season=home['season'],abbreviation=home['abbreviation'])
 
         self._curr_defense = self._linescore['defense']
         self._curr_offense = self._linescore['offense']
         self._curr_play = liveData['plays'].get('currentPlay', {})
 
-        self._inning = self._linescore.get('currentInning', '-')
-        self._inning_ordinal = self._linescore.get('currentInningOrdinal', '-')
-        self._inning_state = self._linescore.get('inningState', '-')
+        self.__inning = self._linescore.get('currentInning', '-')
+        self.__inning_ordinal = self._linescore.get('currentInningOrdinal', '-')
+        self.__inning_state = self._linescore.get('inningState', '-')
         
-        if self._inning_state == 'Top' or self._inning_state == 'Bottom':
+        if self.__inning_state == 'Top' or self.__inning_state == 'Bottom':
             self.balls = self._linescore.get('balls', 0)
             self.strikes = self._linescore.get('strikes', 0)
             self.outs = self._linescore.get('outs', 0)
@@ -267,7 +279,7 @@ class Game:
             self.outs = 0
 
         self._inn_half = self._linescore.get('inningHalf', '-')
-        self._inn_label = f'{self._inn_half} of the {self._inning_ordinal}'
+        self._inn_label = f'{self._inn_half} of the {self.__inning_ordinal}'
         self._scheduled_innings = self._linescore.get('scheduledInnings', 9)
 
         # PLAYS and EVENTS
@@ -320,19 +332,19 @@ class Game:
         return int(self._scheduled_innings)
 
     @property
-    def away(self) -> dict:
+    def away(self) -> team_name_data:
         """Away team info"""
-        return self._away_info
+        return self.__away
 
     @property
-    def home(self) -> dict:
+    def home(self) -> team_name_data:
         """Home team info"""
-        return self._home_info
+        return self.__home
     
     @property
     def inning(self) -> str:
         """Current inning as an string formatted integer"""
-        return str(self._inning)
+        return str(self.__inning)
 
     @property
     def inning_half(self) -> str:
@@ -341,12 +353,12 @@ class Game:
         "Top", "Bottom"
 
         """
-        return str(self._inning_half)
+        return str(self.__inning_half)
 
     @property
     def inning_state(self) -> str:
         """State of current inning"""
-        return str(self._inning_state)
+        return str(self.__inning_state)
 
     @property
     def inning_ordinal(self) -> str:
@@ -355,7 +367,7 @@ class Game:
         "1st", "2nd", "3rd", etc...
 
         """
-        return str(self._inning_ordinal)
+        return str(self.__inning_ordinal)
     
     @property
     def umpires(self):
