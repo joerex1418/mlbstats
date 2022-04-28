@@ -306,7 +306,6 @@ class Game:
         self.__away_player_data  = self.__get_player_data('away')
         self.__home_player_data  = self.__get_player_data('home')
 
-
     def __str__(self):
         return f"{self.game_id} | {self._away_team_abbrv} ({self._away_rhe.get('runs',0)}) @ {self._home_team_abbrv} ({self._home_rhe.get('runs',0)})"
 
@@ -429,11 +428,20 @@ class Game:
             'phone': phone,
         }
      
-    def __get_player_data(self,home_or_away,**kwargs):
+    def __get_player_data(self,home_or_away,lineup_type=None,**kwargs):
         team_data = self._boxscore['teams'][home_or_away]
-
         all_player_data = {}
-        for lineup_type in ['batters','pitchers','bullpen','bench']:
+        
+        lineup_types = []
+        if lineup_type is None:
+            lineup_types.append('batters')
+            lineup_types.append('pitchers')
+            lineup_types.append('bullpen')
+            lineup_types.append('bench')
+        elif type(lineup_type) is str:
+            lineup_types.append(lineup_type)
+        
+        for lineup_type in lineup_types:
             data = []
             for mlbam in team_data.get(lineup_type,[]):
                 player_bio = self.player_bio(mlbam)
@@ -445,7 +453,7 @@ class Game:
                 name_full = player_bio['fullName']
                 name_box  = player_bio['lastInitName']
                 try:
-                    all_positions = ' | '.join(list([pos['abbreviation'] for pos in player_data['allPositions']]))
+                    all_positions = '|'.join(list([pos['abbreviation'] for pos in player_data['allPositions']]))
                 except:
                     all_positions = ''
                 
@@ -473,38 +481,96 @@ class Game:
             all_player_data[lineup_type] = df
         
         return all_player_data
+    
+    def away_team_stats(self):
+        """Away team stats for game and current season"""
+        batting = self._away_stats['batting']
+        batting = pd.Series(batting).rename(STATDICT).to_dict()
+        
+        pitching = self._away_stats['pitching']
+        pitching = pd.Series(pitching).rename(STATDICT).to_dict()
+        
+        fielding = self._away_stats['fielding']
+        fielding = pd.Series(fielding).rename(STATDICT).to_dict()
+        
+        return {'batting':batting,'pitching':pitching,'fielding':fielding}
+        
+    def home_team_stats(self):
+        """Home team stats for game and current season"""
+        batting = self._home_stats['batting']
+        batting = pd.Series(batting).rename(STATDICT).to_dict()
+        
+        pitching = self._home_stats['pitching']
+        pitching = pd.Series(pitching).rename(STATDICT).to_dict()
+        
+        fielding = self._home_stats['fielding']
+        fielding = pd.Series(fielding).rename(STATDICT).to_dict()
+        
+        return {'batting':batting,'pitching':pitching,'fielding':fielding}
         
     @property
-    def away_batters(self) -> pd.DataFrame:
-        return self.__away_player_data['batters']
+    def away_batters(self,default_index=None) -> pd.DataFrame:
+        """Away batters game/season stats, bio, and game status"""
+        if default_index is None:
+            return self.__away_player_data['batters']
+        else:
+            return self.__away_player_data['batters'].set_index(default_index)
     
     @property
-    def away_pitchers(self) -> pd.DataFrame:
-        return self.__away_player_data['pitchers']
+    def away_pitchers(self,default_index=None) -> pd.DataFrame:
+        """Away pitchers game/season stats, bio, and game status"""
+        if default_index is None:
+            return self.__away_player_data['pitchers']
+        else:
+            return self.__away_player_data['pitchers'].set_index(default_index)
     
     @property
-    def away_bullpen(self) -> pd.DataFrame:
-        return self.__away_player_data['bullpen']
+    def away_bullpen(self,default_index=None) -> pd.DataFrame:
+        """Away bullpen game/season stats, bio, and game status"""
+        if default_index is None:
+            return self.__away_player_data['bullpen']
+        else:
+            return self.__away_player_data['bullpen'].set_index(default_index)
     
     @property
-    def away_bench(self) -> pd.DataFrame:
-        return self.__away_player_data['bench']
+    def away_bench(self,default_index=None) -> pd.DataFrame:
+        """Away bench game/season stats, bio, and game status"""
+        if default_index is None:
+            return self.__away_player_data['bench']
+        else:
+            return self.__away_player_data['bench'].set_index(default_index)
     
     @property
-    def home_batters(self) -> pd.DataFrame:
-        return self.__home_player_data['batters']
+    def home_batters(self,default_index=None) -> pd.DataFrame:
+        """Home batters game/season stats, bio, and game status"""
+        if default_index is None:
+            return self.__home_player_data['batters']
+        else:
+            return self.__home_player_data['batters'].set_index(default_index)
     
     @property
-    def home_pitchers(self) -> pd.DataFrame:
-        return self.__home_player_data['pitchers']
+    def home_pitchers(self,default_index=None) -> pd.DataFrame:
+        """Home pitchers game/season stats, bio, and game status"""
+        if default_index is None:
+            return self.__home_player_data['pitchers']
+        else:
+            return self.__home_player_data['pitchers'].set_index(default_index)
     
     @property
-    def home_bullpen(self) -> pd.DataFrame:
-        return self.__home_player_data['bullpen']
+    def home_bullpen(self,default_index=None) -> pd.DataFrame:
+        """Home bullpen game/season stats, bio, and game status"""
+        if default_index is None:
+            return self.__home_player_data['bullpen']
+        else:
+            return self.__home_player_data['bullpen'].set_index(default_index)
     
     @property
-    def home_bench(self) -> pd.DataFrame:
-        return self.__home_player_data['bench']
+    def home_bench(self,default_index=None) -> pd.DataFrame:
+        """Home bench game/season stats, bio, and game status"""
+        if default_index is None:
+            return self.__home_player_data['bench']
+        else:
+            return self.__home_player_data['bench'].set_index(default_index)
 
     def player_bio(self,mlbam) -> dict:
         """Get bio information for a specific player
