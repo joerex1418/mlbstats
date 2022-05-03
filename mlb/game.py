@@ -837,20 +837,21 @@ class Game:
         * `zone`: current batter's strike zone metrics (tuple)
         """
         matchup  = self._curr_play.get('matchup',{})
-        current_play_events = self._curr_play.get('playEvents',[])
-
-        atBat = {'name': matchup['batter']['fullName'],
-                 'id': matchup["batter"]["id"],
-                 'bats': matchup["batSide"]["code"],
-                 'zone_top': self._players[f'ID{matchup["batter"]["id"]}']['strikeZoneTop'],
-                 'zone_bot': self._players[f'ID{matchup["batter"]["id"]}']['strikeZoneBottom'],
-                 'stands': matchup['batSide']['code']
+        batter = matchup.get('batter',{})
+        pitcher = matchup.get('pitcher',{})
+        
+        batting = {'name': batter.get('fullName','-'),
+                   'id': batter.get('id','-'),
+                   'bats': matchup.get('batSide',{}).get('code','R'),
+                   'zone_top': self._players[f'ID{batter.get("id")}'].get('strikeZoneTop',3.5),
+                   'zone_bot': self._players[f'ID{batter.get("id")}'].get('strikeZoneBottom',1.5),
+                   'stands': matchup.get('batSide',{}).get('code','R'),
                  }
-        pitching = {'name': matchup['pitcher']['fullName'],
-                    'id': matchup['pitcher']['id'],
-                    'throws': matchup['pitchHand']['code']}
+        pitching = {'name': pitcher.get('fullName','-'),
+                    'id': pitcher.get('id','-'),
+                    'throws': matchup.get('pitchHand',{}).get('code','R'),}
 
-        return {'batting': atBat, 'pitching': pitching, 'zone': (3.5, 1.5)}
+        return {'batting': batting, 'pitching': pitching, 'zone': (3.5, 1.5)}
 
     def matchup_event_log(self) -> pd.DataFrame:
         """Gets a pitch-by-pitch log of the current batter-pitcher matchup:
@@ -1013,9 +1014,7 @@ class Game:
         """
         Get detailed log of each plate appearance in game
 
-        Note:
-        ----------
-            Dataframe begins with most recent plate appearance
+        NOTE: Dataframe begins with most recent plate appearance
         """
 
         events_data = []
