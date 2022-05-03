@@ -443,45 +443,54 @@ class Game:
         
         for lineup_type in lineup_types:
             data = []
-            for mlbam in team_data.get(lineup_type,[]):
-                player_bio = self.player_bio(mlbam)
-                player_data = self.player_game_data(mlbam)
-                game_status = player_data['gameStatus']
-                batting_order = player_data.get('battingOrder','999')
+            lineup_datalist = team_data.get(lineup_type,[])
+            
+            if len(lineup_datalist) > 0:
+                for mlbam in lineup_datalist: 
+                    player_bio = self.player_bio(mlbam)
+                    player_data = self.player_game_data(mlbam)
+                    game_status = player_data['gameStatus']
+                    batting_order = player_data.get('battingOrder','0999')
 
-                player_stats = self.player_stats(mlbam)
-                name_full = player_bio['fullName']
-                name_box  = player_bio['lastInitName']
-                try:
-                    all_positions = '|'.join(list([pos['abbreviation'] for pos in player_data['allPositions']]))
-                except:
-                    all_positions = ''
+                    player_stats = self.player_stats(mlbam)
+                    name_full = player_bio['fullName']
+                    name_box  = player_bio['lastInitName']
+                    try:
+                        all_positions = '|'.join(list([pos['abbreviation'] for pos in player_data['allPositions']]))
+                    except:
+                        all_positions = ''
+                    
+                    for scope in ['game','season']:
+                        for group in ['batting','pitching','fielding']:
+                            player_stats[scope][group] = pd.Series(player_stats[scope][group]).rename(STATDICT).to_dict()
+                    
+                    p_data = {'mlbam':mlbam,'name_full':name_full,'name_box':name_box,
+                                'pos':all_positions,'order':batting_order,
+                                'is_batting':game_status['isCurrentBatter'],
+                                'is_pitching':game_status['isCurrentPitcher'],
+                                'is_on_bench':game_status['isOnBench'],
+                                'is_sub':game_status['isSubstitute'],
+                                'batting':{'game':player_stats['game']['batting'],
+                                        'season':player_stats['season']['batting']},
+                                'pitching':{'game':player_stats['game']['pitching'],
+                                            'season':player_stats['season']['pitching']},
+                                'fielding':{'game':player_stats['game']['fielding'],
+                                            'season':player_stats['season']['fielding']},
+                                }
+
+                    data.append(p_data)
+                    
+                df = pd.DataFrame.from_dict(data=data).sort_values(by='order')
+            else:
+                df = pd.DataFrame(data=[],columns=self.__generate_pdata_list())
                 
-                for scope in ['game','season']:
-                    for group in ['batting','pitching','fielding']:
-                        player_stats[scope][group] = pd.Series(player_stats[scope][group]).rename(STATDICT).to_dict()
-                
-                p_data = {'mlbam':mlbam,'name_full':name_full,'name_box':name_box,
-                            'pos':all_positions,'order':batting_order,
-                            'is_batting':game_status['isCurrentBatter'],
-                            'is_pitching':game_status['isCurrentPitcher'],
-                            'is_on_bench':game_status['isOnBench'],
-                            'is_sub':game_status['isSubstitute'],
-                            'batting':{'game':player_stats['game']['batting'],
-                                    'season':player_stats['season']['batting']},
-                            'pitching':{'game':player_stats['game']['pitching'],
-                                        'season':player_stats['season']['pitching']},
-                            'fielding':{'game':player_stats['game']['fielding'],
-                                        'season':player_stats['season']['fielding']},
-                            }
-                data.append(p_data)
-            
-            df = pd.DataFrame.from_dict(data=data).sort_values(by='order')
-            
             all_player_data[lineup_type] = df
         
         return all_player_data
-    
+
+    def __get_team_stats(self):
+        pass
+
     def away_team_stats(self):
         """Away team stats for game and current season"""
         batting = self._away_stats['batting']
@@ -612,58 +621,6 @@ class Game:
         player = all_player_data.get(f'ID{mlbam}')
         return player
 
-    def boxscore(self, tz=None) -> dict:
-        if tz is None:
-            tz = self._tz
-        # compiles score, batting lineups, players on field, current matchup, 
-        #   count, outs, runners on base, etc.
-        away = {
-            "full": self._away_team_full,
-            "club": self._away_team,
-            "mlbam": self.away_id,
-        }
-        home = {
-            "full": self._home_team_full,
-            "club": self._home_team,
-            "mlbam": self.home_id,
-        }
-
-        if self._inn_half == "Top":  # might have to adjust to using "inning state"
-            team_batting = away
-            team_fielding = home
-        else:
-            team_batting = home
-            team_fielding = away
-
-        diamond = self.diamond()
-        situation = self.situation()
-        matchup = self.matchup_info()
-        scoreAway = self._away_rhe.get("runs", 0)
-        scoreHome = self._home_rhe.get("runs", 0)
-        firstPitch = prettify_time(self.first_pitch, tz=tz)
-        scheduledStart = prettify_time(self.start_iso, tz=tz)
-        umps = {
-            "home": self._ump_home,
-            "first": self._ump_first,
-            "second": self._ump_second,
-            "third": self._ump_third,
-        }
-
-        return {
-            "away": away,
-            "home": home,
-            "batting": team_batting,
-            "fielding": team_fielding,
-            "diamond": diamond,
-            "situation": situation,
-            "matchup": matchup,
-            "score": {"away": scoreAway, "home": scoreHome},
-            "gameState": self.gameState,
-            "firstPitch": firstPitch,
-            "scheduledStart": scheduledStart,
-            "umpires": umps,
-        }
-
     def linescore(self) -> dict:
         """
         Returns a tuple of game's current linescore
@@ -671,53 +628,53 @@ class Game:
 
         ls = self._linescore
         ls_total = {
-            "away": {
-                "runs": ls.get("teams", {}).get("away", {}).get("runs", "-"),
-                "hits": ls.get("teams", {}).get("away", {}).get("hits", "-"),
-                "errors": ls.get("teams", {}).get("away", {}).get("errors", "-"),
+            'away': {
+                'runs': ls.get('teams', {}).get('away', {}).get('runs', '-'),
+                'hits': ls.get('teams', {}).get('away', {}).get('hits', '-'),
+                'errors': ls.get('teams', {}).get('away', {}).get('errors', '-'),
             },
-            "home": {
-                "runs": ls.get("teams", {}).get("home", {}).get("runs", "-"),
-                "hits": ls.get("teams", {}).get("home", {}).get("hits", "-"),
-                "errors": ls.get("teams", {}).get("home", {}).get("errors", "-"),
+            'home': {
+                'runs': ls.get('teams', {}).get('home', {}).get('runs', '-'),
+                'hits': ls.get('teams', {}).get('home', {}).get('hits', '-'),
+                'errors': ls.get('teams', {}).get('home', {}).get('errors', '-'),
             },
         }
 
         ls_inns = []
-        ls_innings_array = ls["innings"]
+        ls_innings_array = ls['innings']
         for inn in ls_innings_array:
             ls_inns.append(
                 {
-                    "away": {
-                        "runs": inn.get("away", {}).get("runs", "-"),
-                        "hits": inn.get("away", {}).get("hits", "-"),
-                        "errors": inn.get("away", {}).get("errors", "-"),
+                    'away': {
+                        'runs': inn.get('away', {}).get('runs', '-'),
+                        'hits': inn.get('away', {}).get('hits', '-'),
+                        'errors': inn.get('away', {}).get('errors', '-'),
                     },
-                    "home": {
-                        "runs": inn.get("home", {}).get("runs", "-"),
-                        "hits": inn.get("home", {}).get("hits", "-"),
-                        "errors": inn.get("home", {}).get("errors", "-"),
+                    'home': {
+                        'runs': inn.get('home', {}).get('runs', '-'),
+                        'hits': inn.get('home', {}).get('hits', '-'),
+                        'errors': inn.get('home', {}).get('errors', '-'),
                     },
-                    "inning": inn.get("num", "-"),
-                    "inningOrdinal": ORDINALS[str(inn.get("num", "-"))],
+                    'inning': inn.get('num', '-'),
+                    'inningOrdinal': ORDINALS[str(inn.get('num', '-'))],
                 }
             )
         
         if  0 < len(ls_innings_array) < self.scheduled_innings:
-            most_recent_inn = int(ls_inns[-1]["inning"])
+            most_recent_inn = int(ls_inns[-1]['inning'])
             inns_til_9 = self.scheduled_innings - len(ls_innings_array)
             rem_innings = list(range(inns_til_9))
             for inn in rem_innings:
                 next_inn = most_recent_inn + inn + 1
                 ls_inns.append(
                     {
-                        "away": {"runs": "-", "hits": "-", "errors": "-"},
-                        "home": {"runs": "-", "hits": "-", "errors": "-"},
-                        "inning": str(next_inn),
-                        "inningOrdinal": ORDINALS[str(next_inn)],
+                        'away': {'runs': '-', 'hits': '-', 'errors': '-'},
+                        'home': {'runs': '-', 'hits': '-', 'errors': '-'},
+                        'inning': str(next_inn),
+                        'inningOrdinal': ORDINALS[str(next_inn)],
                     }
                 )
-        return {"total": ls_total, "innings": ls_inns, "away": {}, "home": {}}
+        return {'total': ls_total, 'innings': ls_inns, 'away': {}, 'home': {}}
 
     def situation(self) -> dict:
         """Returns a python dictionary detailing the current game situation 
@@ -1060,43 +1017,10 @@ class Game:
         ----------
             Dataframe begins with most recent plate appearance
         """
-        headers = [
-            "bat_tm_mlbam",
-            "bat_tm_name",
-            "pa",
-            "inning",
-            "batter",
-            "bat_side",
-            "pitcher",
-            "pa_pitch_count",
-            "event",
-            "event_type",
-            "details",
-            "pitch_type",
-            "pitch_code",
-            "release_velocity",
-            "end_velocity",
-            "spin_rate",
-            "zone",
-            "exit_velocity",
-            "launch_angle",
-            "distance",
-            "location",
-            "hit_trajectory",
-            "hX",
-            "hY",
-            "category",
-            "timeElasped",
-            "timeStart",
-            "timeEnd",
-            "batterID",
-            "pitcherID",
-            "isHome",
-            "play_id",
-        ]
 
         events_data = []
         for play in self._all_plays:
+            ev_data = {}
             events = play["playEvents"]
             for e in events:
                 if "game_advisory" in e.get("details", {}).get("eventType", "").lower():
@@ -1109,6 +1033,7 @@ class Game:
             # seconds; so we skip over it for the time being
             if len(events) == 0:
                 continue
+            _play_matchup = play.get('matchup',{})
             lastEvent = events[-1]
             play_id = lastEvent.get("playId", "-")
             pitchData = lastEvent.get('pitchData',{})
@@ -1116,52 +1041,32 @@ class Game:
                 ab_num = play["atBatIndex"] + 1
             except:
                 ab_num = "--"
-            try:
-                bat_side = play["matchup"]["batSide"]["code"]
-            except:
-                bat_side = "--"
+            
+            bat_side = _play_matchup.get('batSide',{}).get('code','--')
 
-            try:
-                innNum = play["about"]["inning"]
-            except:
-                innNum = "--"
-            try:
-                innHalf = play["about"]["halfInning"]
-            except:
-                innHalf = "--"
+            innNum = play.get('about',{}).get('inning','--')
+            innHalf = play.get('about',{}).get('halfInning','--')
+
             if innHalf == "bottom":
                 inning = f"Bot {innNum}"
             else:
                 inning = f"Top {innNum}"
 
-            try:
-                batter = play["matchup"]["batter"]
-                batterName = batter["fullName"]
-                batterID = batter["id"]
-            except:
-                batterName = "--"
-                batterID = "--"
-            try:
-                pitcher = play["matchup"]["pitcher"]
-                pitcherName = pitcher["fullName"]
-                pitcherID = pitcher["id"]
-            except:
-                pitcherName = "--"
-                pitcherID = "--"
-            try:
-                pitchNum = lastEvent["pitchNumber"]
-            except:
-                pitchNum = "--"
-            try:
-                event = play["result"]["event"]
-                event_type = play["result"]["eventType"]
-            except:
-                event = "--"
-                event_type = "--"
-            try:
-                details = play["result"]["description"]
-            except:
-                details = "--"
+            batter = _play_matchup.get('batter',{})
+            batter_name = batter.get('fullName','--')
+            batter_mlbam = batter.get('id','--')
+            
+            pitcher = _play_matchup.get('pitcher',{})
+            pitcher_name = pitcher.get('fullName','--')
+            pitcher_mlbam = pitcher.get('id','--')
+            
+            pa_pitch_count = lastEvent.get('pitchNumber','--')
+
+            _play_result = play.get('result',{})
+            event = _play_result.get('event','--')
+            event_type = _play_result.get('eventType','--')
+            details = _play_result.get('description','--')
+
             try:
                 pitchType = lastEvent["details"]["type"]["description"]
                 pitchCode = lastEvent["details"]["type"]["code"]
@@ -1186,43 +1091,17 @@ class Game:
                 zone = "--"
 
             # Hit Data (and Trajectory - if ball is in play)
-            try:
-                hitData = lastEvent["hitData"]
-            except:
-                pass
-            try:
-                launchSpeed = hitData["launchSpeed"]
-            except:
-                launchSpeed = "--"
-            try:
-                launchAngle = hitData["launchAngle"]
-            except:
-                launchAngle = "--"
-            try:
-                distance = hitData["totalDistance"]
-            except:
-                distance = "--"
-            try:
-                hitLocation = hitData["location"]
-            except:
-                hitLocation = "--"
-            try:
-                hX = hitData["coordinates"]["coordX"]
-                hY = hitData["coordinates"]["coordY"]
-            except:
-                hX = "--"
-                hY = "--"
-
-            try:
-                hitTrajectory = hitData["trajectory"]
-            except:
-                hitTrajectory = "--"
+            _hitData = lastEvent.get('hitData',{})
+            launch_speed = _hitData.get('launchSpeed','-')
+            launch_angle = _hitData.get('launchAngle','-')
+            distance = _hitData.get('totalDistance','-')
+            location = _hitData.get('location','-')
+            hX = _hitData.get('coordinates',{}).get('coordX','-')
+            hY = _hitData.get('coordinates',{}).get('coordY','-')
+            hitTrajectory = _hitData.get('trajectory','-')
 
             # Event Category/Type
-            try:
-                category = lastEvent["type"]
-            except:
-                category = "--"
+            category = lastEvent.get('type','-')
 
             # Time information
             try:
@@ -1250,55 +1129,53 @@ class Game:
                 print(f"ERROR: -- {e} --")
 
             # Is Home Team Batting?
-            if f"ID{batterID}" in self._home_players.keys():
-                homeBatting = True
-                batTeamID = self.home_id
-                battingTeam = self._home_team
+            if f"ID{batter_mlbam}" in self._home_players.keys():
+                is_home = True
+                bat_tm_mlbam = self.home_id
+                bat_tm_name = self._home_team
             else:
-                homeBatting = False
-                batTeamID = self.away_id
-                battingTeam = self._away_team
+                is_home = False
+                bat_tm_mlbam = self.away_id
+                bat_tm_name = self._away_team
 
-            event_data = [
-                batTeamID,
-                battingTeam,
-                ab_num,
-                inning,
-                batterName,
-                bat_side,
-                pitcherName,
-                pitchNum,
-                event,
-                event_type,
-                details,
-                pitchType,
-                pitchCode,
-                releaseSpeed,
-                endSpeed,
-                spinRate,
-                zone,
-                launchSpeed,
-                launchAngle,
-                distance,
-                hitLocation,
-                hitTrajectory,
-                hX,
-                hY,
-                category,
-                prettify_time(elasped),
-                prettify_time(startTime),
-                prettify_time(endTime),
-                batterID,
-                pitcherID,
-                homeBatting,
-                play_id,
-            ]
+            ev_data = {'bat_tm_mlbam':bat_tm_mlbam,
+                        'bat_tm_name':bat_tm_name,
+                        'pa':ab_num,
+                        'inning':inning,
+                        'batter':batter_name,
+                        'bat_side':bat_side,
+                        'pitcher':pitcher_name,
+                        'pa_pitch_count':pa_pitch_count,
+                        'event':event,
+                        'event_type':event_type,
+                        'details':details,
+                        'pitch_type':pitchType,
+                        'pitch_code':pitchCode,
+                        'release_velocity':releaseSpeed,
+                        'end_velocity':endSpeed,
+                        'spin_rate':spinRate,
+                        'zone':zone,
+                        'exit_velocity':launch_speed,
+                        'launch_angle':launch_angle,
+                        'distance':distance,
+                        'location':location,
+                        'hit_trajectory':hitTrajectory,
+                        'hX':hX,
+                        'hY':hY,
+                        'category':category,
+                        'timeElasped':prettify_time(elasped),
+                        'timeStart':prettify_time(startTime),
+                        'timeEnd':prettify_time(endTime),
+                        'batter_mlbam':batter_mlbam,
+                        'pitcher_mlbam':pitcher_mlbam,
+                        'is_home':is_home,
+                        'play_id':play_id,
+                        }
 
-            events_data.append(event_data)
+            events_data.append(ev_data)
 
-        df = pd.DataFrame(data=events_data, columns=headers).sort_values(
-            by=["pa"], ascending=False
-        )
+        df = pd.DataFrame.from_dict(data=events_data).sort_values(by='pa',
+                                                              ascending=False)
 
         return df
 
@@ -1307,525 +1184,162 @@ class Game:
 
         NOTE: Dataframe begins with most recent pitch event
         """
-        headers = [
-            "bat_tm_mlbam",
-            "bat_tm_name",
-            "pa",
-            "event",
-            "event_type",
-            "inning",
-            "pitch_idx",
-            "batter",
-            "batter_mlbam",
-            "bat_side",
-            "zone_top",
-            "zone_bot",
-            "pitcher",
-            "pitcher_mlbam",
-            "details",
-            "pitch_num",
-            "pitch_type",
-            "pitch_code",
-            "call",
-            "count",
-            "outs",
-            "zone_top",
-            "zone_bot",
-            "release_velocity",
-            "end_velocity",
-            "spin_rate",
-            "zone",
-            "pX",
-            "pZ",
-            "exit_velocity",
-            "launch_angle",
-            "distance",
-            "location",
-            "hX",
-            "hY",
-            "category",
-            "end_time",
-            "isHome",
-            "play_id",
-        ]
-
+        
         events_data = []
         for play in self._all_plays:
+            
             try:
-                ab_num = play["about"]["atBatIndex"] + 1
+                ab_num = play['about']['atBatIndex'] + 1
             except:
-                ab_num = "--"
-            try:
-                batter = play["matchup"]["batter"]
-            except:
-                batter = "--"
-            try:
-                pitcher = play["matchup"]["pitcher"]
-            except:
-                pitcher = "--"
-            try:
-                zone_top = self._players[f'ID{batter["id"]}']["strikeZoneTop"]
-                zone_bot = self._players[f'ID{batter["id"]}']["strikeZoneBottom"]
-            except:
-                zone_top = "-"
-                zone_bot = "-"
-            try:
-                bat_side = play["matchup"]["batSide"]["code"]
-            except:
-                bat_side = "-"
+                ab_num = '--'
+            
+            matchup = play.get('matchup',{'batter':{},'pitcher':{}})
+            
+            batter = matchup['batter']
+            batter_name = batter.get('fullName','--')
+            batter_mlbam = batter.get('id','--')
+            
+            pitcher = matchup['pitcher']
+            pitcher_name = pitcher.get('fullName','--')
+            pitcher_mlbam = pitcher.get('id','--')
+
+            zone_top = self._players.get(f'ID{batter_mlbam}',{}
+                                         ).get('strikeZoneTop','-')
+            zone_bot = self._players.get(f'ID{batter_mlbam}',{}
+                                         ).get('strikeZoneBottom','-')
                 
-            play_events = play["playEvents"]
+            bat_side = matchup.get('batSide',{}).get('code')
+                
+            play_events = play['playEvents']
             if len(play_events) == 0:
                 continue
-            last_idx = play_events[-1]["index"]
+            last_idx = play_events[-1]['index']
 
-            for event_idx, event in enumerate(play["playEvents"]):
-                play_id = event.get("playId")
+            for event_idx, event in enumerate(play_events):
+                play_id = event.get('playId')
                 try:
                     if event_idx != last_idx:
-                        desc = "--"
+                        desc = '--'
                     else:
-                        desc = play["result"]["description"]
+                        desc = play['result']['description']
                 except:
-                    desc = "--"
+                    desc = '--'
 
-                try:
-                    event_label = play["result"]["event"]
-                    event_type = play["result"]["eventType"]
-                except:
-                    event_label = "--"
-                    event_type = "--"
-
-                try:
-                    pitchNumber = event["pitchNumber"]
-                except:
-                    pitchNumber = 0
+                event_label = play.get('result',{}).get('event','--')
+                event_type  = play.get('result',{}).get('eventType','--')
+                pitch_number = event.get('pitchNumber',0)
 
                 # Times
                 try:
                     startTime = dt.datetime.strptime(
-                        event["startTime"], iso_format_ms
+                        event['startTime'], iso_format_ms
                     ).replace(tzinfo=utc_zone)
-                    # startTimeStr = startTime.strftime(r"%H:%M:%S (%Y-%m-%d)")
                 except:
-                    startTime = "--"
+                    startTime = '--'
                 try:
                     endTime = dt.datetime.strptime(
-                        event["endTime"], iso_format_ms
+                        event['endTime'], iso_format_ms
                     ).replace(tzinfo=utc_zone)
-                    # endTimeStr = endTime.strftime(r"%H:%M:%S (%Y-%m-%d)")
                 except:
-                    endTime = "--"
-                    # endTimeStr = "--"
+                    endTime = '--'
                 try:
                     elapsed = endTime - startTime
                     elapsed = prettify_time(elapsed)
                 except:
-                    elapsed = "--"
+                    elapsed = '--'
 
                 # Call and Pitch Type and Count/Outs
-                try:
-                    pitchType = event["details"]["type"]["description"]
-                except:
-                    pitchType = "--"
-                try:
-                    pitchCode = event["details"]["type"]["code"]
-                except:
-                    pitchCode = "--"
-                try:
-                    call = event["details"]["description"]
-                except:
-                    call = "--"
-                try:
-                    count = f'{event["count"]["balls"]}-{event["count"]["strikes"]}'
-                except:
-                    count = "--"
-                try:
-                    outs = event["count"]["outs"]
-                except:
-                    outs = "--"
+                _event_details = event['details']
+                pitchType = _event_details.get('type',{}).get('description','--')
+                pitchCode = _event_details.get('type',{}).get('code','--')
+                call = _event_details.get('description','--')
+                
+                _count_data = event.get('count',{})
+                balls = _count_data.get('balls',0)
+                strikes = _count_data.get('strikes',0)
+                count = f'{balls}-{strikes}'
+                outs = _count_data.get('outs',0)
+
 
                 # Pitch Data
-                try:
-                    pitchData = event["pitchData"]
-                except:
-                    pass
-                try:
-                    startSpeed = pitchData["startSpeed"]
-                except:
-                    startSpeed = "--"
-                try:
-                    endSpeed = pitchData["endSpeed"]
-                except:
-                    endSpeed = "--"
-                try:
-                    spinRate = pitchData["breaks"]["spinRate"]
-                except:
-                    spinRate = "--"
-                try:
-                    zone = pitchData["zone"]
-                except:
-                    zone = "--"
-                try:
-                    pX = pitchData["coordinates"]["pX"]
-                    pZ = pitchData["coordinates"]["pZ"]
-                except:
-                    pX = "--"
-                    pZ = "--"
-                try:
-                    zone_top = pitchData["strikeZoneTop"]
-                    zone_bot = pitchData["strikeZoneBottom"]
-                except:
-                    zone_top = 3.5
-                    zone_bot = 1.5
+                _pitchData = event.get('pitchData',{})
+                
+                startSpeed = _pitchData.get('startSpeed','-')
+                endSpeed   = _pitchData.get('endSpeed','-')
+                spinRate   = _pitchData.get('breaks',{}).get('spinRate','-')
+                zone = _pitchData.get('zone','-')
+
+                pX = _pitchData.get('coordinates',{}).get('pX','-')
+                pZ = _pitchData.get('coordinates',{}).get('pZ','-')
+
+                zone_top = _pitchData.get('strikeZoneTope',3.5)
+                zone_bot = _pitchData.get('strikeZoneTope',1.5)
 
                 # Hit Data
-                if "hitData" in event.keys():
-                    try:
-                        hitData = event["hitData"]
-                    except:
-                        pass
-                    try:
-                        launchSpeed = hitData["launchSpeed"]
-                    except:
-                        launchSpeed = "--"
-                    try:
-                        launchAngle = hitData["launchAngle"]
-                    except:
-                        launchAngle = "--"
-                    try:
-                        distance = hitData["totalDistance"]
-                    except:
-                        distance = "--"
-                    try:
-                        hitLocation = hitData["location"]
-                    except:
-                        hitLocation = "--"
-                    try:
-                        hX = hitData["coordinates"]["coordX"]
-                        hY = hitData["coordinates"]["coordY"]
-                    except:
-                        hX = "--"
-                        hY = "--"
-                else:
-                    launchSpeed = "--"
-                    launchAngle = "--"
-                    distance = "--"
-                    hitLocation = "--"
-                    hX = "--"
-                    hY = "--"
+                _hitData = event.get('hitData',{})
+                launch_speed = _hitData.get('launchSpeed','-')
+                launch_angle = _hitData.get('launchAngle','-')
+                distance = _hitData.get('totalDistance','-')
+                location = _hitData.get('location','-')
+                hX = _hitData.get('coordinates',{}).get('coordX','-')
+                hY = _hitData.get('coordinates',{}).get('coordY','-')
 
-                # type
-                try:
-                    category = event["type"]
-                except:
-                    category = "--"
+                category = event.get('type','--')
 
                 # Is Home Team Batting?
                 if f'ID{batter["id"]}' in self._home_players.keys():
-                    homeBatting = True
-                    batTeamID = self.home_id
-                    battingTeam = self._home_team
+                    is_home = True
+                    bat_tm_mlbam = self.home_id
+                    bat_tm_name = self._home_team
                 else:
-                    homeBatting = False
-                    batTeamID = self.away_id
-                    battingTeam = self._away_team
+                    is_home = False
+                    bat_tm_mlbam = self.away_id
+                    bat_tm_name = self._away_team
+                    
+                ev_data = {'bat_tm_mlbam':bat_tm_mlbam,
+                            'bat_tm_name':bat_tm_name,
+                            'pa':ab_num,
+                            'event':event_label,
+                            'event_type':event_type,
+                            'inning':play["about"]["inning"],
+                            'pitch_idx':event_idx,
+                            'batter':batter_name,
+                            'batter_mlbam':batter_mlbam,
+                            'bat_side':bat_side,
+                            'zone_top':zone_top,
+                            'zone_bot':zone_bot,
+                            'pitcher':pitcher_name,
+                            'pitcher_mlbam':pitcher_mlbam,
+                            'desc':desc,
+                            'pitch_num':pitch_number,
+                            'pitch_type':pitchType,
+                            'pitch_code':pitchCode,
+                            'call':call,
+                            'count':count,
+                            'outs':outs,
+                            'release_velocity':startSpeed,
+                            'end_velocity':endSpeed,
+                            'spin_rate':spinRate,
+                            'zone':zone,
+                            'pX':pX,
+                            'pZ':pZ,
+                            'exit_velocity':launch_speed,
+                            'launch_angle':launch_angle,
+                            'distance':distance,
+                            'location':location,
+                            'hX':hX,
+                            'hY':hY,
+                            'category':category,
+                            'end_time':endTime,
+                            'is_home':is_home,
+                            'play_id':play_id,
+                            }
 
-                #
-                event_data = [
-                    batTeamID,
-                    battingTeam,
-                    ab_num,
-                    event_label,
-                    event_type,
-                    play["about"]["inning"],
-                    event_idx,
-                    batter["fullName"],
-                    batter["id"],
-                    bat_side,
-                    zone_top,
-                    zone_bot,
-                    pitcher["fullName"],
-                    pitcher["id"],
-                    desc,
-                    pitchNumber,
-                    pitchType,
-                    pitchCode,
-                    call,
-                    count,
-                    outs,
-                    zone_top,
-                    zone_bot,
-                    startSpeed,
-                    endSpeed,
-                    spinRate,
-                    zone,
-                    pX,
-                    pZ,
-                    launchSpeed,
-                    launchAngle,
-                    distance,
-                    hitLocation,
-                    hX,
-                    hY,
-                    category,
-                    endTime,
-                    homeBatting,
-                    play_id,
-                ]
+                events_data.append(ev_data)
 
-                events_data.append(event_data)
-
-        df = pd.DataFrame(data=events_data, columns=headers).sort_values(
-            by=["pa", "pitch_idx"], ascending=False
-        )
-        #
-        return df
-
-    def scoring_event_log(self) -> pd.DataFrame:
-        """Get detailed log of every scoring play pitch event
-
-        NOTE: Dataframe begins with most recent pitch event
-        """
-        headers = [
-            "bat_tm_mlbam",
-            "bat_tm_name",
-            "pa",
-            "event",
-            "event_type",
-            "inning",
-            "pitch_idx",
-            "batter",
-            "batter_mlbam",
-            "pitcher",
-            "pitcher_mlbam",
-            "details",
-            "pitch_num",
-            "pitch_type",
-            "pitch_code",
-            "call",
-            "count",
-            "outs",
-            "release_velocity",
-            "end_velocity",
-            "spin_rate",
-            "zone",
-            "pX",
-            "pZ",
-            "exit_velocity",
-            "launch_angle",
-            "distance",
-            "location",
-            "hX",
-            "hY",
-            "category",
-            "end_time",
-            "isHome",
-        ]
-
-        events_data = []
-        for play in self._scoring_plays:
-            try:
-                ab_num = play["about"]["atBatIndex"] + 1
-            except:
-                ab_num = "--"
-            try:
-                batter = play["matchup"]["batter"]
-            except:
-                batter = "--"
-            try:
-                pitcher = play["matchup"]["pitcher"]
-            except:
-                pitcher = "--"
-
-            last_idx = play["playEvents"][-1]["index"]
-
-            for event_idx, event in enumerate(play["playEvents"]):
-                try:
-                    if event_idx != last_idx:
-                        desc = "--"
-                    else:
-                        desc = play["result"]["description"]
-                except:
-                    desc = "--"
-
-                try:
-                    event_label = play["result"]["event"]
-                    event_type = play["result"]["eventType"]
-                except:
-                    event_label = "--"
-                    event_type = "--"
-                # Times
-
-                try:
-                    pitchNumber = event["pitchNumber"]
-                except:
-                    pitchNumber = 0
-                try:
-                    # startTime = dt.datetime.strptime(event["startTime"],iso_format_ms).replace(tzinfo=utc_zone)
-                    startTime = dt.datetime.strptime(event["startTime"], iso_format_ms)
-                    startTimeStr = startTime.strftime(r"%H:%M:%S (%Y-%m-%d)")
-                except:
-                    startTime = "--"
-                    # startTimeStr = "--"
-                try:
-                    # endTime = dt.datetime.strptime(event["endTime"],iso_format_ms).replace(tzinfo=utc_zone)
-                    endTime = dt.datetime.strptime(event["endTime"], iso_format_ms)
-                    # endTimeStr = endTime.strftime(r"%H:%M:%S (%Y-%m-%d)")
-                except:
-                    endTime = "--"
-                    # endTimeStr = "--"
-                try:
-                    elapsed = endTime - startTime
-                    elapsed = prettify_time(elapsed)
-                except:
-                    elapsed = "--"
-
-                # Call and Pitch Type and Count/Outs
-                try:
-                    pitchType = event["details"]["type"]["description"]
-                except:
-                    pitchType = "--"
-                try:
-                    pitchCode = event["details"]["type"]["code"]
-                except:
-                    pitchCode = "--"
-                try:
-                    call = event["details"]["description"]
-                except:
-                    call = "--"
-                try:
-                    count = f'{event["count"]["balls"]}-{event["count"]["strikes"]}'
-                except:
-                    count = "--"
-                try:
-                    outs = event["count"]["outs"]
-                except:
-                    outs = "--"
-
-                # Pitch Data
-                try:
-                    pitchData = event["pitchData"]
-                except:
-                    pass
-                try:
-                    startSpeed = pitchData["startSpeed"]
-                except:
-                    startSpeed = "--"
-                try:
-                    endSpeed = pitchData["endSpeed"]
-                except:
-                    endSpeed = "--"
-                try:
-                    spinRate = pitchData["breaks"]["spinRate"]
-                except:
-                    spinRate = "--"
-                try:
-                    zone = pitchData["zone"]
-                except:
-                    zone = "--"
-                try:
-                    pX = pitchData["coordinates"]["pX"]
-                    pZ = pitchData["coordinates"]["pZ"]
-                except:
-                    pX = "--"
-                    pZ = "--"
-
-                # Hit Data
-                if "hitData" in event.keys():
-                    try:
-                        hitData = event["hitData"]
-                    except:
-                        pass
-                    try:
-                        launchSpeed = hitData["launchSpeed"]
-                    except:
-                        launchSpeed = "--"
-                    try:
-                        launchAngle = hitData["launchAngle"]
-                    except:
-                        launchAngle = "--"
-                    try:
-                        distance = hitData["totalDistance"]
-                    except:
-                        distance = "--"
-                    try:
-                        hitLocation = hitData["location"]
-                    except:
-                        hitLocation = "--"
-                    try:
-                        hX = hitData["coordinates"]["coordX"]
-                        hY = hitData["coordinates"]["coordY"]
-                    except:
-                        hX = "--"
-                        hY = "--"
-                else:
-                    launchSpeed = "--"
-                    launchAngle = "--"
-                    distance = "--"
-                    hitLocation = "--"
-                    hX = "--"
-                    hY = "--"
-
-                # type
-                try:
-                    category = event["type"]
-                except:
-                    category = "--"
-
-                # Is Home Team Batting?
-                if f'ID{batter["id"]}' in self._home_players.keys():
-                    homeBatting = True
-                    batTeamID = self.home_id
-                    battingTeam = self._home_team
-                else:
-                    homeBatting = False
-                    batTeamID = self.away_id
-                    battingTeam = self._away_team
-
-                #
-                event_data = [
-                    batTeamID,
-                    battingTeam,
-                    ab_num,
-                    event_label,
-                    event_type,
-                    play["about"]["inning"],
-                    event_idx,
-                    batter["fullName"],
-                    batter["id"],
-                    pitcher["fullName"],
-                    pitcher["id"],
-                    desc,
-                    pitchNumber,
-                    pitchType,
-                    pitchCode,
-                    call,
-                    count,
-                    outs,
-                    startSpeed,
-                    endSpeed,
-                    spinRate,
-                    zone,
-                    pX,
-                    pZ,
-                    launchSpeed,
-                    launchAngle,
-                    distance,
-                    hitLocation,
-                    hX,
-                    hY,
-                    category,
-                    endTime,
-                    homeBatting,
-                ]
-
-                events_data.append(event_data)
-
-        df = pd.DataFrame(data=events_data, columns=headers).sort_values(
-            by=["pa", "pitch_idx"], ascending=False
-        )
-        #
+        df = pd.DataFrame.from_dict(events_data).sort_values(
+            by=["pa", "pitch_idx"], ascending=False)
+        
         return df
 
     # TEAMS' INDIVIDUAL BATTER STATS
@@ -2604,7 +2118,7 @@ class Game:
         return f
 
     def get_content(self):
-        url = BASE + f"/game/{self.gamePk}/content"
+        url = BASE + f'/game/{self.gamePk}/content'
         resp = requests.get(url)
         return resp.json()
 
@@ -2633,6 +2147,11 @@ class Game:
         """This method has not been configured yet"""
         pass
     
+    def __generate_pdata_list(self):
+        new_list = ['mlbam','name_full','name_box','pos','order',
+                    'is_batting','is_pitching','is_on_bench','is_sub',
+                    'batting','pitching','fielding']
+        return new_list
     
     gamePk  = game_pk
     game_id = game_pk
