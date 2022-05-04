@@ -198,6 +198,27 @@ class Game:
         self.__all_players_game_data = {}
         self.__all_players_game_data.update(self._boxscore['teams']['away']['players'])
         self.__all_players_game_data.update(self._boxscore['teams']['home']['players'])
+        
+        away_probable_mlbam = gameData.get('probablePitchers',{}).get('away',{}).get('id',0)
+        home_probable_mlbam = gameData.get('probablePitchers',{}).get('home',{}).get('id',0)
+
+        _away_probable_bio = self.player_bio(away_probable_mlbam)
+        _home_probable_bio = self.player_bio(home_probable_mlbam)
+        self.away_probable = person_name_data(mlbam=away_probable_mlbam,
+                                              _full=_away_probable_bio['fullName'],
+                                              _given=_away_probable_bio['fullFMLName'],
+                                              _first=_away_probable_bio['firstName'],
+                                              _middle=_away_probable_bio['middleName'],
+                                              _last=_away_probable_bio['lastName'],
+                                              )
+        
+        self.home_probable = person_name_data(mlbam=home_probable_mlbam,
+                                              _full=_home_probable_bio['fullName'],
+                                              _given=_home_probable_bio['fullFMLName'],
+                                              _first=_home_probable_bio['firstName'],
+                                              _middle=_home_probable_bio['middleName'],
+                                              _last=_home_probable_bio['lastName'],
+                                              )
 
         # AWAY Team Data
         away = gameData['teams']['away']
@@ -253,9 +274,6 @@ class Game:
         self.home_errs = _home_score_data.get('errors')
         self.home_record = f"{home['record']['wins']}-{home['record']['losses']}"
         
-        """
-        (mlbam=None, full=None, short=None, franchise=None, location=None, club=None, season=None, abbreviation=None, **kwargs: Any) -> None
-        """
         
         self.__home = team_name_data(mlbam=home['id'],full=home['name'],short=home['shortName'],
                                      franchise=home['franchiseName'],location=home['locationName'],

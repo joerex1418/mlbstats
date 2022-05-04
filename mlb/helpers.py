@@ -747,18 +747,24 @@ class person_name_data(mlb_wrapper):
 
     @property
     def last(self):
-        """PPerson's last name"""
+        """Person's last name"""
         return self._last
 
     @property
     def nick(self):
         """Person's nick name (if player has one)"""
-        return self._nick
+        try:
+            return self._nick
+        except:
+            return None
 
     @property
     def pronunciation(self):
         """Pronunciation of person's LAST name"""
-        return self._pronunciation
+        try:
+            return self._pronunciation
+        except:
+            return None
 
 
 class stat_group(mlb_wrapper):
