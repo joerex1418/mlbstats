@@ -206,19 +206,19 @@ class Game:
         _away_probable_bio = self.player_bio(away_probable_mlbam)
         _home_probable_bio = self.player_bio(home_probable_mlbam)
         self.away_probable = person_name_data(mlbam=away_probable_mlbam,
-                                              _full=_away_probable_bio['fullName'],
-                                              _given=_away_probable_bio['fullFMLName'],
-                                              _first=_away_probable_bio['firstName'],
-                                              _middle=_away_probable_bio['middleName'],
-                                              _last=_away_probable_bio['lastName'],
+                                              _full=_away_probable_bio.get('fullName'),
+                                              _given=_away_probable_bio.get('fullFMLName'),
+                                              _first=_away_probable_bio.get('firstName'),
+                                              _middle=_away_probable_bio.get('middleName'),
+                                              _last=_away_probable_bio.get('lastName'),
                                               )
         
         self.home_probable = person_name_data(mlbam=home_probable_mlbam,
-                                              _full=_home_probable_bio['fullName'],
-                                              _given=_home_probable_bio['fullFMLName'],
-                                              _first=_home_probable_bio['firstName'],
-                                              _middle=_home_probable_bio['middleName'],
-                                              _last=_home_probable_bio['lastName'],
+                                              _full=_home_probable_bio.get('fullName'),
+                                              _given=_home_probable_bio.get('fullFMLName'),
+                                              _first=_home_probable_bio.get('firstName'),
+                                              _middle=_home_probable_bio.get('middleName'),
+                                              _last=_home_probable_bio.get('lastName'),
                                               )
         
 
@@ -430,7 +430,7 @@ class Game:
         zipCode = loc.get("postalCode", None)
         phone = loc.get("phone", None)
 
-        return {
+        data = {
             'name': venue_name,
             'mlbam': venue_mlbam,
             'capacity': capacity,
@@ -447,6 +447,8 @@ class Game:
             'zipCode': zipCode,
             'phone': phone,
         }
+        
+        return mlb_wrapper(**data)
      
     def __get_player_data(self,home_or_away,lineup_type=None,**kwargs):
         team_data = self._boxscore['teams'][home_or_away]

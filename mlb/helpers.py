@@ -743,7 +743,10 @@ class person_name_data(mlb_wrapper):
         """Person's middle name (may sometimes just be the middle 
         initial)
         """
-        return self._middle
+        try:
+            return self._middle
+        except:
+            return None
 
     @property
     def last(self):
