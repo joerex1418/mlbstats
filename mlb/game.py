@@ -2,6 +2,7 @@ import requests
 import datetime as dt
 from dateutil.parser import parse
 from typing import Union, Optional, Dict, List, Literal
+from pprint import pprint as pp
 
 import pandas as pd
 
@@ -219,6 +220,7 @@ class Game:
                                               _middle=_home_probable_bio['middleName'],
                                               _last=_home_probable_bio['lastName'],
                                               )
+        
 
         # AWAY Team Data
         away = gameData['teams']['away']
@@ -462,41 +464,43 @@ class Game:
         for lineup_type in lineup_types:
             data = []
             lineup_datalist = team_data.get(lineup_type,[])
-            
             if len(lineup_datalist) > 0:
-                for mlbam in lineup_datalist: 
-                    player_bio = self.player_bio(mlbam)
-                    player_data = self.player_game_data(mlbam)
-                    game_status = player_data['gameStatus']
-                    batting_order = player_data.get('battingOrder','0999')
-
-                    player_stats = self.player_stats(mlbam)
-                    name_full = player_bio['fullName']
-                    name_box  = player_bio['lastInitName']
+                for mlbam in lineup_datalist:
                     try:
-                        all_positions = '|'.join(list([pos['abbreviation'] for pos in player_data['allPositions']]))
-                    except:
-                        all_positions = ''
-                    
-                    for scope in ['game','season']:
-                        for group in ['batting','pitching','fielding']:
-                            player_stats[scope][group] = pd.Series(player_stats[scope][group]).rename(STATDICT).to_dict()
-                    
-                    p_data = {'mlbam':mlbam,'name_full':name_full,'name_box':name_box,
-                                'pos':all_positions,'order':batting_order,
-                                'is_batting':game_status['isCurrentBatter'],
-                                'is_pitching':game_status['isCurrentPitcher'],
-                                'is_on_bench':game_status['isOnBench'],
-                                'is_sub':game_status['isSubstitute'],
-                                'batting':{'game':player_stats['game']['batting'],
-                                        'season':player_stats['season']['batting']},
-                                'pitching':{'game':player_stats['game']['pitching'],
-                                            'season':player_stats['season']['pitching']},
-                                'fielding':{'game':player_stats['game']['fielding'],
-                                            'season':player_stats['season']['fielding']},
-                                }
+                        player_bio = self.player_bio(mlbam)
+                        player_data = self.player_game_data(mlbam)
+                        game_status = player_data.get('gameStatus',{})
+                        batting_order = player_data.get('battingOrder','0999')
 
-                    data.append(p_data)
+                        player_stats = self.player_stats(mlbam)
+                        name_full = player_bio['fullName']
+                        name_box  = player_bio['lastInitName']
+                        try:
+                            all_positions = '|'.join(list([pos['abbreviation'] for pos in player_data['allPositions']]))
+                        except:
+                            all_positions = ''
+                        
+                        for scope in ['game','season']:
+                            for group in ['batting','pitching','fielding']:
+                                player_stats[scope][group] = pd.Series(player_stats[scope][group]).rename(STATDICT).to_dict()
+                        
+                        p_data = {'mlbam':mlbam,'name_full':name_full,'name_box':name_box,
+                                    'pos':all_positions,'order':batting_order,
+                                    'is_batting':game_status.get('isCurrentBatter',False),
+                                    'is_pitching':game_status.get('isCurrentPitcher',False),
+                                    'is_on_bench':game_status.get('isOnBench',False),
+                                    'is_sub':game_status.get('isSubstitute',False),
+                                    'batting':{'game':player_stats['game']['batting'],
+                                            'season':player_stats['season']['batting']},
+                                    'pitching':{'game':player_stats['game']['pitching'],
+                                                'season':player_stats['season']['pitching']},
+                                    'fielding':{'game':player_stats['game']['fielding'],
+                                                'season':player_stats['season']['fielding']},
+                                    }
+
+                        data.append(p_data)
+                    except:
+                        pass
                     
                 df = pd.DataFrame.from_dict(data=data).sort_values(by='order')
             else:
