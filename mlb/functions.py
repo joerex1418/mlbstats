@@ -1239,111 +1239,111 @@ def _player_data(_mlbam,**kwargs) -> dict:
 
     # Parsing 'education'
     _edu_data = []
-    for e in education.get("highschools",[{}]):
-        if e.get("name") is None:
+    for e in education.get('highschools',[{}]):
+        if e.get('name') is None:
             pass
         else:
             _edu_data.append([
-                "highschool",
-                e.get("name",""),
-                e.get("city",""),
-                e.get("state","")
+                'highschool',
+                e.get('name',''),
+                e.get('city',''),
+                e.get('state','')
             ])
 
-    for e in education.get("colleges",[{}]):
-        if e.get("name") is None:
+    for e in education.get('colleges',[{}]):
+        if e.get('name') is None:
             pass
         else:
             _edu_data.append([
-                "college",
-                e.get("name",""),
-                e.get("city",""),
-                e.get("state","")
+                'college',
+                e.get('name',''),
+                e.get('city',''),
+                e.get('state','')
             ])
     
-    education = pd.DataFrame(data=_edu_data,columns=["type","school","city","state"])
+    education = pd.DataFrame(data=_edu_data,columns=['type','school','city','state'])
     
     # Parsing 'player_info'
-    first_game = player_info.get("mlbDebutDate",'-')
-    last_game = player_info.get("lastPlayedDate",'-')
+    first_game = player_info.get('mlbDebutDate','-')
+    last_game = player_info.get('lastPlayedDate','-')
     
     _player_info = {
-        "mlbam":                int(_mlbam),
-        "bbrefID":              pdf["bbrefID"],
-        "primary_position":     player_info.get("primaryPosition",{}),
-        "givenName":            player_info["fullFMLName"],
-        "fullName":             player_info["fullName"],
-        "firstName":            player_info["firstName"],
-        "middleName":           player_info.get("middleName","--"),
-        "lastName":             player_info["lastName"],
-        "nickName":             player_info.get("nickName","--"),
-        "pronunciation":        player_info.get("pronunciation",""),
-        "primary_number":       player_info["primaryNumber"],
-        "birthDate":            player_info.get("birthDate","-"),
-        "currentAge":           player_info["currentAge"],
-        "birthCity":            player_info.get("birthCity","-"),
-        "birthState":           player_info.get("birthStateProvince","-"),
-        "birthCountry":         player_info.get("birthCountry","-"),
-        "deathDate":            player_info.get("deathDate","-"),
-        "deathCity":            player_info.get("deathCity","-"),
-        "deathState":           player_info.get("deathStateProvince","-"),
-        "deathCountry":         player_info.get("deathCountry","-"),
-        "weight":               player_info["weight"],
-        "height":               player_info["height"],
-        "bats":                 player_info["batSide"]["code"],
-        "throws":               player_info["pitchHand"]["code"],
-        "zoneTop":              player_info["strikeZoneTop"],
-        "zoneBot":              player_info["strikeZoneBottom"],
-        "is_active":            player_info["active"],
-        "education":            education,
-        "roster_entries":       _player_roster_entries,
-        "team_mlbam":           currentTeam.get("id"),
-        "team_name":            currentTeam.get("name"),
-        "draft":                draft,
-        "first_game":           first_game,
-        "last_game":            last_game,
-        "debut_data":           player_info.get("debut_data").get("stats",[])
+        'mlbam':                int(_mlbam),
+        'bbrefID':              pdf['bbrefID'],
+        'primary_position':     player_info.get('primaryPosition',{}),
+        'givenName':            player_info['fullFMLName'],
+        'fullName':             player_info['fullName'],
+        'firstName':            player_info['firstName'],
+        'middleName':           player_info.get('middleName','--'),
+        'lastName':             player_info['lastName'],
+        'nickName':             player_info.get('nickName','--'),
+        'pronunciation':        player_info.get('pronunciation',''),
+        'primary_number':       player_info['primaryNumber'],
+        'birthDate':            player_info.get('birthDate','-'),
+        'currentAge':           player_info['currentAge'],
+        'birthCity':            player_info.get('birthCity','-'),
+        'birthState':           player_info.get('birthStateProvince','-'),
+        'birthCountry':         player_info.get('birthCountry','-'),
+        'deathDate':            player_info.get('deathDate','-'),
+        'deathCity':            player_info.get('deathCity','-'),
+        'deathState':           player_info.get('deathStateProvince','-'),
+        'deathCountry':         player_info.get('deathCountry','-'),
+        'weight':               player_info['weight'],
+        'height':               player_info['height'],
+        'bats':                 player_info['batSide']['code'],
+        'throws':               player_info['pitchHand']['code'],
+        'zoneTop':              player_info['strikeZoneTop'],
+        'zoneBot':              player_info['strikeZoneBottom'],
+        'is_active':            player_info['active'],
+        'education':            education,
+        'roster_entries':       _player_roster_entries,
+        'team_mlbam':           currentTeam.get('id'),
+        'team_name':            currentTeam.get('name'),
+        'draft':                draft,
+        'first_game':           first_game,
+        'last_game':            last_game,
+        'debut_data':           player_info.get('debut_data').get('stats',[])
     }
 
     if first_game != '-':
-        _player_info["first_year"] = first_game[:4]
+        _player_info['first_year'] = first_game[:4]
     else:
-        _player_info["first_year"] = '-'
+        _player_info['first_year'] = '-'
     if last_game != '-':
-        _player_info["last_year"] = last_game[:4]
+        _player_info['last_year'] = last_game[:4]
     else:
-        _player_info["last_year"] = '-'
+        _player_info['last_year'] = '-'
 
     # Parsing 'player_awards'
     award_data = []
     try:
         for a in player_awards:
-            award_id        = a.get("id","-")
-            award_name      = a.get("name","-")
-            award_date      = a.get("date","-")
-            award_season    = a.get("season","-")
-            award_tm_mlbam  = a.get("team",{}).get("id")
-            award_tm_name   = a.get("team",{}).get("teamName")
+            award_id        = a.get('id','-')
+            award_name      = a.get('name','-')
+            award_date      = a.get('date','-')
+            award_season    = a.get('season','-')
+            award_tm_mlbam  = a.get('team',{}).get('id')
+            award_tm_name   = a.get('team',{}).get('teamName')
             
             row = [award_id,award_name,award_date,award_season,award_tm_mlbam,award_tm_name]
             
             award_data.append(row)
 
-        _player_awards = pd.DataFrame(data=award_data,columns=("award_id","award","date","season","tm_mlbam","tm_name"))
+        _player_awards = pd.DataFrame(data=award_data,columns=('award_id','award','date','season','tm_mlbam','tm_name'))
     except:
         _player_awards = pd.DataFrame()
     
     # Parsing 'transactions'
     try:
-        trx_columns = ("name","mlbam","tr_type","tr","description","date","e_date","r_date","fr","fr_mlbam","to","to_mlbam")
+        trx_columns = ('name','mlbam','tr_type','tr','description','date','e_date','r_date','fr','fr_mlbam','to','to_mlbam')
         trx_data = []
         for t in player_transactions:
-            person = t.get("person",{})
-            p_name = person.get("fullName","")
-            p_mlbam = person.get("id","")
-            typeCode = t.get("typeCode","")
-            typeTr = t.get("typeDesc")
-            desc = t.get("description")
+            person = t.get('person',{})
+            p_name = person.get('fullName','')
+            p_mlbam = person.get('id','')
+            typeCode = t.get('typeCode','')
+            typeTr = t.get('typeDesc')
+            desc = t.get('description')
 
             if "fromTeam" in t.keys():
                 fr = t.get("fromTeam")
@@ -4215,7 +4215,6 @@ def league_leaders(season=None,statGroup=None,playerPool="Qualified"):
 
     return {"hitting":hit_df,"pitching":pitch_df}
 
-
 # ===============================================================
 # MISC Functions
 # ===============================================================
@@ -4283,7 +4282,7 @@ def find_venue(query):
   
 def play_search(
     mlbam,
-    seasons=None,
+    season=None,
     statGroup=None,
     opposingTeamId=None,
     eventTypes=None,
@@ -4315,127 +4314,141 @@ def play_search(
     """
 
     # Allows the user to lookup "playLog" or "pitchLog". URL is flexible since both statTypes are very similar
-    if kwargs.get("statType","playLog").lower() == "pitchlog":
-        statType = "pitchLog"
+
+    if kwargs.get('statType','playLog').lower() == 'pitchlog':
+        statType = 'pitchLog'
     else:
-        statType = "playLog"
+        statType = 'playLog'
 
-    if kwargs.get("season") is not None: seasons = kwargs["season"]
-    if kwargs.get("group") is not None: statGroup = kwargs["group"]
-    elif kwargs.get("groups") is not None: statGroup = kwargs["groups"]
-    elif kwargs.get("statGroups") is not None: statGroup = kwargs["statGroups"]
-    if kwargs.get("opposingTeamIds") is not None: opposingTeamId = kwargs["opposingTeamIds"]
-    if kwargs.get("eventType") is not None: eventTypes = kwargs["eventType"]
-    if kwargs.get("pitchType") is not None: pitchTypes = kwargs["pitchType"]
-    if kwargs.get("gameType") is not None: gameTypes = kwargs["gameType"]
+    if kwargs.get('season') is not None: season = kwargs['season']
+    if kwargs.get('group') is not None: statGroup = kwargs['group']
+    elif kwargs.get('groups') is not None: statGroup = kwargs['groups']
+    elif kwargs.get('statGroups') is not None: statGroup = kwargs['statGroups']
+    if kwargs.get('opposingTeamIds') is not None: opposingTeamId = kwargs['opposingTeamIds']
+    if kwargs.get('eventType') is not None: eventTypes = kwargs['eventType']
+    if kwargs.get('pitchType') is not None: pitchTypes = kwargs['pitchType']
+    if kwargs.get('gameType') is not None: gameTypes = kwargs['gameType']
 
-    if seasons is None:
-        seasons = default_season()
-
+    if season is None:
+        season = default_season()
+    season = int(season)
+    
     params = {
-        "stats":statType,
-        "seasons":seasons,
-        "hydrate":"hitData,pitchData"
+        'stats':statType,
+        'season':season,
+        'hydrate':'hitData,pitchData'
     }
 
     if opposingTeamId is not None:
-        params["opposingTeamId"] = opposingTeamId
+        params['opposingTeamId'] = opposingTeamId
 
     if eventTypes is not None:
-        params["eventType"] = eventTypes
+        params['eventType'] = eventTypes
 
     if pitchTypes is not None:
-        params["pitchType"] = pitchTypes
+        params['pitchType'] = pitchTypes
 
     if gameTypes is not None:
-        params["gameType"] = gameTypes
+        params['gameType'] = gameTypes
 
     if statGroup is not None:
-        params["group"] = statGroup
-    
+        params['group'] = statGroup
 
-    url = BASE + f"/people/{mlbam}/stats"
+    teams_df = get_teams_df(year=season).set_index('mlbam')
+
+    url = BASE + f'/people/{mlbam}/stats'
     response = requests.get(url,params=params)
     resp = response.json()
 
-    if kwargs.get("_log") is True:
-        print("\nREQUEST URL:\n")
+    if kwargs.get('_log') is True:
+        print('SEASON:\n')
+        print(season)
+        print('TEAMS:\n')
+        print(teams_df)
+        print('\nREQUEST URL:\n')
         print(response.url)
-        print("----------------------------\n")
+        print('----------------------------\n')
 
     # log = resp["stats"][0]
     all_logs = []
-    for log_stats in resp["stats"]:
+    for log_stats in resp['stats']:
         all_logs.append(log_stats)
 
     plays = []
 
     for log in all_logs:
         if statGroup is None:
-            statGroup = log.get('group',{}).get("displayName")
-        if statGroup == "hitting":
+            statGroup = log.get('group',{}).get('displayName')
+        if statGroup == 'hitting':
             # plays = []
-            for split in log["splits"]:
-                season = split["season"]
-                date = split["date"]
-                gameType = split["gameType"]
-                gamePk = split["game"]["gamePk"]
-                batter = split["batter"]
-                team = split["team"]
-                opponent = split["opponent"]
-                pitcher = split["pitcher"]
-                play = split.get("stat",{}).get("play",{})
-                play_id = play.get("playId")
-                details = play.get("details",{})
-                eventType = details.get("event","-")
-                event = details.get("call",{}).get("description","-")
-                description = details.get("description","-")
-                isInPlay = details.get("isInPlay","-")
-                isStrike = details.get("isStrike","-")
-                isBall = details.get("isBall","-")
-                isAtBat = details.get("isAtBat","-")
-                isPlateAppearance = details.get("isPlateAppearance","-")
-                pitchType = details.get("type",{}).get("description","-")
-                batterStands = details.get("batSide",{}).get("code")
-                pitcherThrows = details.get("pitchHand",{}).get("code")
-                balls = play.get("count",{}).get("balls","-")
-                strikes = play.get("count",{}).get("strikes","-")
-                outs = play.get("count",{}).get("outs","-")
-                inning = play.get("count",{}).get("inning","-")
-                runnerOnFirst = play.get("count",{}).get("runnerOn1b","-")
-                runnerOnSecond = play.get("count",{}).get("runnerOn2b","-")
-                runnerOnThird = play.get("count",{}).get("runnerOn3b","-")
+            for split in log['splits']:
+                season = split['season']
+                date = split['date']
+                gameType = split['gameType']
+                gamePk = split['game']['gamePk']
+                batter = split['batter']
+                team = split['team']
+                opponent = split['opponent']
+                pitcher = split['pitcher']
+                play = split.get('stat',{}).get('play',{})
+                play_id = play.get('playId')
+                details = play.get('details',{})
+                eventType = details.get('event','-')
+                event = details.get('call',{}).get('description','-')
+                description = details.get('description','-')
+                isInPlay = details.get('isInPlay','-')
+                isStrike = details.get('isStrike','-')
+                isBall = details.get('isBall','-')
+                isAtBat = details.get('isAtBat','-')
+                isPlateAppearance = details.get('isPlateAppearance','-')
+                pitchType = details.get('type',{}).get('description','-')
+                batterStands = details.get('batSide',{}).get('code')
+                pitcherThrows = details.get('pitchHand',{}).get('code')
+                balls = play.get('count',{}).get('balls','-')
+                strikes = play.get('count',{}).get('strikes','-')
+                outs = play.get('count',{}).get('outs','-')
+                inning = play.get('count',{}).get('inning','-')
+                runnerOnFirst = play.get('count',{}).get('runnerOn1b','-')
+                runnerOnSecond = play.get('count',{}).get('runnerOn2b','-')
+                runnerOnThird = play.get('count',{}).get('runnerOn3b','-')
 
-                hitData = play.get("hitData",{})
+                hitData = play.get('hitData',{})
+                pitchData = play.get('pitchData',{})
                 
-                pitchData = play.get("pitchData",{})
-
+                if split.get('isHome',False) is True:
+                    away_mlbam = opponent['id']
+                    home_mlbam = team['id']
+                else:
+                    away_mlbam = team['id']
+                    home_mlbam = opponent['id']
+                    
+                game_label = f'{teams_df.loc[away_mlbam]["mlbID"]} @ {teams_df.loc[home_mlbam]["mlbID"]}'
+                
                 pitch_info = [
                     play_id,
-                    batter["fullName"],
-                    batter["id"],
-                    pitcher["fullName"],
-                    pitcher["id"],
+                    batter['fullName'],
+                    batter['id'],
+                    pitcher['fullName'],
+                    pitcher['id'],
                     pitchType,
-                    pitchData.get("coordinates",{}).get("x","-"),
-                    pitchData.get("coordinates",{}).get("y","-"),
-                    pitchData.get("startSpeed","-"),
-                    pitchData.get("strikeZoneTop","-"),
-                    pitchData.get("strikeZoneBottom","-"),
-                    pitchData.get("zone","-"),
-                    hitData.get("launchSpeed","-"),
-                    hitData.get("launchAngle","-"),
-                    hitData.get("totalDistance","-"),
-                    hitData.get("trajectory","-"),
-                    hitData.get("coordinates",{}).get("landingPosX","-"),
-                    hitData.get("coordinates",{}).get("landingPosY","-"),
+                    pitchData.get('coordinates',{}).get('x','-'),
+                    pitchData.get('coordinates',{}).get('y','-'),
+                    pitchData.get('startSpeed','-'),
+                    pitchData.get('strikeZoneTop','-'),
+                    pitchData.get('strikeZoneBottom','-'),
+                    pitchData.get('zone','-'),
+                    hitData.get('launchSpeed','-'),
+                    hitData.get('launchAngle','-'),
+                    hitData.get('totalDistance','-'),
+                    hitData.get('trajectory','-'),
+                    hitData.get('coordinates',{}).get('landingPosX','-'),
+                    hitData.get('coordinates',{}).get('landingPosY','-'),
                     eventType,
                     event,
                     season,
                     date,
                     gameType,
                     gamePk,
-                    date,
                     balls,
                     strikes,
                     outs,
@@ -4451,76 +4464,87 @@ def play_search(
                     isPlateAppearance,
                     batterStands,
                     pitcherThrows,
-                    team["name"],
-                    team["id"],
-                    opponent["name"],
-                    opponent["id"]]
+                    team['name'],
+                    team['id'],
+                    opponent['name'],
+                    opponent['id'],
+                    away_mlbam,
+                    home_mlbam,
+                    game_label,
+                    ]
 
                 plays.append(pitch_info)
 
-        elif statGroup == "pitching":
+        elif statGroup == 'pitching':
             # plays = []
-            for split in log["splits"]:
-                season = split["season"]
-                date = split["date"]
-                gameType = split["gameType"]
-                gamePk = split["game"]["gamePk"]
-                batter = split["batter"]
-                team = split["team"]
-                opponent = split["opponent"]
-                pitcher = split["pitcher"]
-                play = split.get("stat",{}).get("play",{})
-                play_id = play.get("playId")
-                details = play.get("details",{})
-                eventType = details.get("event","-")
-                event = details.get("call",{}).get("description","-")
-                description = details.get("description","-")
-                isInPlay = details.get("isInPlay","-")
-                isStrike = details.get("isStrike","-")
-                isBall = details.get("isBall","-")
-                isAtBat = details.get("isAtBat","-")
-                isPlateAppearance = details.get("isPlateAppearance","-")
-                pitchType = details.get("type",{}).get("description","-")
-                batterStands = details.get("batSide",{}).get("code")
-                pitcherThrows = details.get("pitchHand",{}).get("code")
-                balls = play.get("count",{}).get("balls","-")
-                strikes = play.get("count",{}).get("strikes","-")
-                outs = play.get("count",{}).get("outs","-")
-                inning = play.get("count",{}).get("inning","-")
-                runnerOnFirst = play.get("count",{}).get("runnerOn1b","-")
-                runnerOnSecond = play.get("count",{}).get("runnerOn2b","-")
-                runnerOnThird = play.get("count",{}).get("runnerOn3b","-")
+            for split in log['splits']:
+                season = split['season']
+                date = split['date']
+                gameType = split['gameType']
+                gamePk = split['game']['gamePk']
+                batter = split['batter']
+                team = split['team']
+                opponent = split['opponent']
+                pitcher = split['pitcher']
+                play = split.get('stat',{}).get('play',{})
+                play_id = play.get('playId')
+                details = play.get('details',{})
+                eventType = details.get('event','-')
+                event = details.get('call',{}).get('description','-')
+                description = details.get('description','-')
+                isInPlay = details.get('isInPlay','-')
+                isStrike = details.get('isStrike','-')
+                isBall = details.get('isBall','-')
+                isAtBat = details.get('isAtBat','-')
+                isPlateAppearance = details.get('isPlateAppearance','-')
+                pitchType = details.get('type',{}).get('description','-')
+                batterStands = details.get('batSide',{}).get('code')
+                pitcherThrows = details.get('pitchHand',{}).get('code')
+                balls = play.get('count',{}).get('balls','-')
+                strikes = play.get('count',{}).get('strikes','-')
+                outs = play.get('count',{}).get('outs','-')
+                inning = play.get('count',{}).get('inning','-')
+                runnerOnFirst = play.get('count',{}).get('runnerOn1b','-')
+                runnerOnSecond = play.get('count',{}).get('runnerOn2b','-')
+                runnerOnThird = play.get('count',{}).get('runnerOn3b','-')
 
-                hitData = play.get("hitData",{})
+                hitData = play.get('hitData',{})
+                pitchData = play.get('pitchData',{})
                 
-                pitchData = play.get("pitchData",{})
+                if split.get('isHome',False) is True:
+                    away_mlbam = opponent['id']
+                    home_mlbam = team['id']
+                else:
+                    away_mlbam = team['id']
+                    home_mlbam = opponent['id']
+                    
+                game_label = f'{teams_df.loc[away_mlbam]["mlbID"]} @ {teams_df.loc[home_mlbam]["mlbID"]}'
 
                 pitch_info = [
                     play_id,
-                    batter["fullName"],
-                    batter["id"],
-                    pitcher["fullName"],
-                    pitcher["id"],
+                    batter['fullName'],
+                    batter['id'],
+                    pitcher['fullName'],
+                    pitcher['id'],
                     pitchType,
-                    pitchData.get("coordinates",{}).get("x","-"),
-                    pitchData.get("coordinates",{}).get("y","-"),
-                    pitchData.get("startSpeed","-"),
-                    pitchData.get("strikeZoneTop","-"),
-                    pitchData.get("strikeZoneBottom","-"),
-                    pitchData.get("zone","-"),
-                    hitData.get("launchSpeed","-"),
-                    hitData.get("launchAngle","-"),
-                    hitData.get("totalDistance","-"),
-                    hitData.get("trajectory","-"),
-                    hitData.get("coordinates",{}).get("landingPosX","-"),
-                    hitData.get("coordinates",{}).get("landingPosY","-"),
+                    pitchData.get('coordinates',{}).get('x','-'),
+                    pitchData.get('coordinates',{}).get('y','-'),
+                    pitchData.get('startSpeed','-'),
+                    pitchData.get('strikeZoneTop','-'),
+                    pitchData.get('strikeZoneBottom','-'),
+                    pitchData.get('zone','-'),
+                    hitData.get('launchSpeed','-'),
+                    hitData.get('launchAngle','-'),
+                    hitData.get('totalDistance','-'),
+                    hitData.get('trajectory','-'),
+                    hitData.get('coordinates',{}).get('landingPosX','-'),
+                    hitData.get('coordinates',{}).get('landingPosY','-'),
                     eventType,
                     event,
                     season,
                     date,
                     gameType,
                     gamePk,
-                    date,
                     balls,
                     strikes,
                     outs,
@@ -4536,10 +4560,14 @@ def play_search(
                     isPlateAppearance,
                     batterStands,
                     pitcherThrows,
-                    team["name"],
-                    team["id"],
-                    opponent["name"],
-                    opponent["id"]]
+                    team['name'],
+                    team['id'],
+                    opponent['name'],
+                    opponent['id'],
+                    away_mlbam,
+                    home_mlbam,
+                    game_label,
+                    ]
 
                 plays.append(pitch_info)
             
@@ -4568,7 +4596,6 @@ def play_search(
         'date',
         'gameType',
         'gamePk',
-        'date',
         'balls',
         'strikes',
         'outs',
@@ -4587,9 +4614,15 @@ def play_search(
         'team_name',
         'team_mlbam',
         'opponent_name',
-        'opponent_mlbam']
+        'opponent_mlbam',
+        'away_mlbam',
+        'home_mlbam',
+        'game_label',
+        ]
     
     df = pd.DataFrame(data=plays,columns=columns)
+    df = df.iloc[::-1]
+    
     
     return df
 

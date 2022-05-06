@@ -923,8 +923,7 @@ class Game:
             matchup = self._curr_play.get('matchup',{})
             bat_side = matchup.get('batSide',{}).get('code','R')
         except:
-            empty_df = pd.DataFrame(columns=headers)
-            return empty_df
+            return pd.DataFrame(columns=headers)
 
         events_data = []
 
@@ -939,34 +938,18 @@ class Game:
 
                 details = ab_log['details']
                 pitch_desc = details['description']
+                pitch_type = details.get('type',{}).get('description','unknown')
+                pitch_type_id = details.get('type',{}).get('code','UN')
+                pitch_code = details.get('code','UN')
 
-                try:
-                    pitch_type = details['type']['description']
-                    pitch_type_id = details['type']['code']
-                    pitch_code = details['code']
-                except:
-                    pitch_type = 'unknown'
-                    pitch_type_id = 'UN'
-                    pitch_code = 'UN'
+                _pitch_data = ab_log.get('pitchData',{})
+                _hit_data = ab_log.get('hitData',{})
 
-                try:
-                    start_vel = ab_log['pitchData']['startSpeed']
-                except:
-                    start_vel = '--'
+                start_vel = _pitch_data.get('startSpeed','--')
+                end_vel = _pitch_data.get('endSpeed','--')
 
-                try:
-                    end_vel = ab_log['pitchData']['endSpeed']
-                except:
-                    end_vel = '--'
-
-                try:
-                    pX_coord = ab_log['pitchData']['coordinates']['pX']
-                except:
-                    pX_coord = '--'
-                try:
-                    pZ_coord = ab_log['pitchData']['coordinates']['pZ']
-                except:
-                    pZ_coord = '--'
+                pX = _pitch_data.get('coordinates',{}).get('pX','--')
+                pZ = _pitch_data.get('coordinates',{}).get('pZ','--')
 
                 try:
                     zoneTopInitial = pa_events[0]['pitchData']['strikeZoneTop']
@@ -974,62 +957,48 @@ class Game:
                 except:
                     try:
                         zoneTopInitial = pa_events[0]['pitchData']['strikeZoneTop']
-                        zoneBottomInitial = pa_events[0]['pitchData'][
-                            'strikeZoneBottom'
-                        ]
+                        zoneBottomInitial = pa_events[0]['pitchData']['strikeZoneBottom']
                     except:
                         zoneTopInitial = 3.5
                         zoneBottomInitial = 1.5
-                try:
-                    zone_top = ab_log['pitchData']['strikeZoneTop']
-                    zone_bot = ab_log['pitchData']['strikeZoneBottom']
-                except:
-                    zone_top = 3.5
-                    zone_bot = 1.5
 
-                try:
-                    spin = ab_log['pitchData']['breaks']['spinRate']
-                except:
-                    spin = ''
-                try:
-                    zone = ab_log['pitchData']['zone']
-                except:
-                    zone = ''
-                try:
-                    hit_location = ab_log['hitData']['location']
-                except:
-                    hit_location = ''
-                try:
-                    hX = ab_log['hitData']['coordinates']['coordX']
-                    hY = ab_log['hitData']['coordinates']['coordY']
-                except:
-                    hX = ''
-                    hY = ''
+                zone_top = _pitch_data.get('strikeZoneTop',3.5)
+                zone_bot = _pitch_data.get('strikeZoneBottom',1.5)
 
-                event.append(pitch_number)
-                event.append(pitch_desc)
-                event.append(zone_top)
-                event.append(zone_bot)
-                event.append(zoneTopInitial)
-                event.append(zoneBottomInitial)
-                event.append(bat_side)
-                event.append(pitch_type)
-                event.append(pitch_type_id)
-                event.append(pitch_code)
-                event.append(start_vel)
-                event.append(end_vel)
-                event.append(spin)
-                event.append(zone)
-                event.append(pX_coord)
-                event.append(pZ_coord)
-                event.append(hit_location)
-                event.append(hX)
-                event.append(hY)
-                event.append(play_id)
+                spin = _pitch_data.get('breaks',{}).get('spinRate','')
+                zone = _pitch_data.get('zone','')
+                hit_location = _hit_data.get('hitData',{}).get('location','')
 
-                events_data.append(event)
+                hX = _hit_data.get('coordinates',{}).get('coordX','')
+                hY = _hit_data.get('coordinates',{}).get('coordY','')
+                
+                events_data.append({
+                    'pitch_num':pitch_number,
+                    'details':pitch_desc,
+                    'zone_top':zone_top,
+                    'zone_bot':zone_bot,
+                    'zoneTopInitial':zoneTopInitial,
+                    'zoneBottomInitial':zoneBottomInitial,
+                    'bat_side':bat_side,
+                    'pitch_type':pitch_type,
+                    'pitch_type_id':pitch_type_id,
+                    'pitch_code':pitch_code,
+                    'release_speed':start_vel,
+                    'end_speed':end_vel,
+                    'spin':spin,
+                    'zone':zone,
+                    'pX':pX,
+                    'pZ':pZ,
+                    'hit_location':hit_location,
+                    'hX':hX,
+                    'hY':hY,
+                    'play_id':play_id
+                })
 
-        matchup_df = pd.DataFrame(data=events_data, columns=headers)
+        matchup_df = pd.DataFrame.from_dict(data=events_data)
+        if matchup_df.empty:
+            matchup_df = pd.DataFrame(columns=headers)
+        
         matchup_df.sort_values(by=["pitch_num"], inplace=True)
 
         return matchup_df
@@ -1044,16 +1013,16 @@ class Game:
         events_data = []
         for play in self._all_plays:
             ev_data = {}
-            events = play["playEvents"]
+            events = play['playEvents']
             for e in events:
-                if "game_advisory" in e.get("details", {}).get("eventType", "").lower():
+                if 'game_advisory' in e.get('details', {}).get('eventType', '').lower():
                     pass
                 else:
                     firstEvent = e
                     break
                 
-            # Sometimes, the 'playEvents' array isn't populated for a few 
-            # seconds; so we skip over it for the time being
+            # Sometimes, the 'playEvents' array isn't populated for a few seconds; 
+            # So we skip over it for the time being
             if len(events) == 0:
                 continue
             _play_matchup = play.get('matchup',{})
@@ -1324,7 +1293,7 @@ class Game:
                             'pa':ab_num,
                             'event':event_label,
                             'event_type':event_type,
-                            'inning':play["about"]["inning"],
+                            'inning':play['about']['inning'],
                             'pitch_idx':event_idx,
                             'batter':batter_name,
                             'batter_mlbam':batter_mlbam,

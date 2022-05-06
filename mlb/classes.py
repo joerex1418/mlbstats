@@ -855,7 +855,7 @@ class api:
         teamIds: Optional[Union[str, list]] = None,
         **kwargs,
     ):
-        """Search for a person using the API by name
+        """Search for a person by name using the API
 
         Paramaters
         ----------
