@@ -1,4 +1,5 @@
-import lxml
+import platform
+# import lxml
 import time
 import pytz
 # import numpy as np
@@ -25,6 +26,11 @@ from .mlbdata import (
     get_leagues_df,
     get_seasons_df
 )
+
+if platform.system() == "Windows":
+    standard_time_fmt = r"%I:%M %p"
+else:
+    standard_time_fmt = r"%-I:%M %p"
 
 from .utils import curr_year, curr_date, default_season
 
@@ -371,8 +377,11 @@ async def _parse_team_data(
         else:
             reordered_cols  = added_cols + COLS_PIT
 
-        combined_df = pd.DataFrame(stat_data).rename(
-            columns=STATDICT).reindex(columns=reordered_cols)
+        try:
+            combined_df = pd.DataFrame(stat_data).rename(columns=STATDICT).reindex(columns=reordered_cols)
+        except:
+            combined_df = pd.DataFrame(stat_data).rename(columns=STATDICT)
+            # print(pd.DataFrame(stat_data).rename(columns=STATDICT).columns)
 
         if kwargs.get('_logtime') is True:
             print(f"\n{unquote(_url).replace(BASE,'')}")
@@ -471,9 +480,14 @@ async def _parse_team_data(
                 reordered_cols = pre_cols + COLS_PIT
         elif 'fielding' in _url:
             reordered_cols = pre_cols + COLS_FLD
-
-        combined_df = pd.DataFrame(stat_data).rename(columns=STATDICT).reindex(columns=reordered_cols)
-
+        # print(reordered_cols)
+        # print("line 480")
+        try:
+            combined_df = pd.DataFrame(stat_data).rename(columns=STATDICT).reindex(columns=reordered_cols)
+        except:
+            combined_df = pd.DataFrame(stat_data).rename(columns=STATDICT)
+            # print(pd.DataFrame(stat_data).rename(columns=STATDICT).columns)
+            
         if kwargs.get('_logtime') is True:
             print(f"\n{unquote(_url).replace(BASE,'')}")
             print(f'--- {time.time() - start} seconds ---\n')
@@ -514,8 +528,13 @@ async def _parse_team_data(
                         elif 'fielding' in _url:
                             reordered_cols = COLS_FLD
 
-                df = pd.DataFrame(data=stat_data).rename(
-                    columns=STATDICT).reindex(columns=reordered_cols)
+
+                try:
+                    df = pd.DataFrame(stat_data).rename(columns=STATDICT).reindex(columns=reordered_cols)
+                except:
+                    df = pd.DataFrame(stat_data).rename(columns=STATDICT)
+                    # print(pd.DataFrame(stat_data).rename(columns=STATDICT).columns)
+
                 df['game_type'] = gt
 
                 stat_dict[add_to] = df
@@ -672,9 +691,9 @@ def _team_data(_mlbam,_season,**kwargs) -> Union[dict,list]:
     ssn_row = ssn_df.loc[int(_season)]
 
     tms_df = tms_df[tms_df['season']==int(_season)]
-
-    ssn_start : pd.Timestamp = ssn_row['season_start_date']
-    ssn_end   : pd.Timestamp = ssn_row['season_end_date']
+    
+    ssn_start : pd.Timestamp = ssn_row['seasonStartDate']
+    ssn_end   : pd.Timestamp = ssn_row['seasonEndDate']
     ssn_start = ssn_start.strftime(r"%Y-%m-%d")
     ssn_end   = ssn_end.strftime(r"%Y-%m-%d")
 
@@ -755,6 +774,7 @@ def _team_data(_mlbam,_season,**kwargs) -> Union[dict,list]:
     url_list = (url for url in url_list)
     
     loop = _determine_loop()
+    
     team_data_dict = loop.run_until_complete(_fetch_team_data(urls=url_list,lgs_df=lgs_df,_mlbam=_mlbam,_logtime=_logtime))
     
     total_hitting_S  = team_data_dict[8]
@@ -1983,7 +2003,7 @@ def player_pitching(mlbam,*args,**kwargs) -> pd.DataFrame:
             gameType = args[0]
 
         gameType = gameType.replace(" ","")
-        print(gameType)
+        # print(gameType)
     else:
         gameType = None
 
@@ -5288,7 +5308,7 @@ def schedule(
                 game_dt = dt.datetime.strptime(game_date,r"%Y-%m-%dT%H:%M:%SZ")
                 game_dt = pytz.utc.fromutc(game_dt)
                 game_dt = game_dt.astimezone(tz)
-                sched_time = game_dt.strftime(r"%-I:%M %p")
+                sched_time = game_dt.strftime(standard_time_fmt)
                 game_start = sched_time
             else:
                 game_dt = "-"
@@ -5298,7 +5318,7 @@ def schedule(
                 resched_dt = dt.datetime.strptime(resched_date,r"%Y-%m-%dT%H:%M:%SZ")
                 resched_dt = pytz.utc.fromutc(resched_dt)
                 resched_dt = resched_dt.astimezone(tz)
-                resched_time = resched_dt.strftime(r"%-I:%M %p")
+                resched_time = resched_dt.strftime(standard_time_fmt)
                 game_start = resched_time
             else:
                 resched_dt = "-"
