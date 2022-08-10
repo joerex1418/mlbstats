@@ -1,3 +1,4 @@
+import platform
 import requests
 import pandas as pd
 import datetime as dt
@@ -27,7 +28,10 @@ ct_zone = tz.gettz("America/Chicago")
 mt_zone = tz.gettz("America/Denver")
 pt_zone = tz.gettz("America/Los_Angeles")
 
-standard_format = r"%-I:%M %p"
+if platform.system() == "Windows":
+    standard_format = r"%I:%M %p"
+else:
+    standard_format = r"%-I:%M %p"
 military_format = r"%H:%M"
 iso_format = r"%Y-%m-%dT%H:%M:%SZ"
 iso_format_ms = r"%Y-%m-%dT%H:%M:%S.%fZ"
