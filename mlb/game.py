@@ -1,8 +1,6 @@
 import requests
 import datetime as dt
 from dateutil.parser import parse
-from typing import Union, Optional, Dict, List, Literal
-from pprint import pprint as pp
 
 import pandas as pd
 
@@ -25,6 +23,8 @@ from .helpers import player_stats
 from .helpers import team_stats
 
 from .helpers import get_tz
+from .helpers import mlb_team
+from .helpers import mlb_person
 from .helpers import _teams_data_collection
 from .helpers import _people_data_collection
 from .helpers import _parse_team
@@ -32,8 +32,6 @@ from .helpers import _parse_league
 from .helpers import _parse_division
 from .helpers import _parse_person
 from .helpers import _parse_venue
-from .helpers import mlb_team
-from .helpers import mlb_person
 
 from .helpers import umpires
 
@@ -204,7 +202,6 @@ class Game:
         home_probable_mlbam = gameData.get('probablePitchers',{}).get('home',{}).get('id',0)
 
         _away_probable_bio = self.player_bio(away_probable_mlbam)
-        _home_probable_bio = self.player_bio(home_probable_mlbam)
         self.away_probable = person_name_data(mlbam=away_probable_mlbam,
                                               _full=_away_probable_bio.get('fullName'),
                                               _given=_away_probable_bio.get('fullFMLName'),
@@ -212,7 +209,7 @@ class Game:
                                               _middle=_away_probable_bio.get('middleName'),
                                               _last=_away_probable_bio.get('lastName'),
                                               )
-        
+        _home_probable_bio = self.player_bio(home_probable_mlbam)
         self.home_probable = person_name_data(mlbam=home_probable_mlbam,
                                               _full=_home_probable_bio.get('fullName'),
                                               _given=_home_probable_bio.get('fullFMLName'),
@@ -646,8 +643,7 @@ class Game:
         return player
 
     def linescore(self) -> dict:
-        """
-        Returns a tuple of game's current linescore
+        """Returns game's current linescore
         """
 
         ls = self._linescore
@@ -812,43 +808,54 @@ class Game:
 
         diamond = {
             "pitcher": {
+                "position":"pitcher",
                 "name": self._curr_defense["pitcher"]["fullName"],
                 "id": self._curr_defense["pitcher"]["id"],
             },
             "catcher": {
+                "position":"catcher",
                 "name": self._curr_defense["catcher"]["fullName"],
                 "id": self._curr_defense["catcher"]["id"],
             },
             "first": {
+                "position":"first",
                 "name": self._curr_defense["first"]["fullName"],
                 "id": self._curr_defense["first"]["id"],
             },
             "second": {
+                "position":"second",
                 "name": self._curr_defense["second"]["fullName"],
                 "id": self._curr_defense["second"]["id"],
             },
             "third": {
+                "position":"third",
                 "name": self._curr_defense["third"]["fullName"],
                 "id": self._curr_defense["third"]["id"],
             },
             "shortstop": {
+                "position":"shortstop",
                 "name": self._curr_defense["shortstop"]["fullName"],
                 "id": self._curr_defense["shortstop"]["id"],
             },
             "left": {
+                "position":"left",
                 "name": self._curr_defense["left"]["fullName"],
                 "id": self._curr_defense["left"]["id"],
             },
             "center": {
+                "position":"center",
                 "name": self._curr_defense["center"]["fullName"],
                 "id": self._curr_defense["center"]["id"],
             },
             "right": {
+                "position":"right",
                 "name": self._curr_defense["right"]["fullName"],
                 "id": self._curr_defense["right"]["id"],
             },
         }
-
+        
+        if print_as_df:
+            return pd.DataFrame(diamond).transpose().reset_index(drop=True)
         return diamond
 
     def matchup_info(self):

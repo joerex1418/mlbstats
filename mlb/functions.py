@@ -1,10 +1,9 @@
 import platform
-# import lxml
 import time
 import pytz
-# import numpy as np
 import requests
 from urllib.parse import unquote
+from typing import Union, Optional, List
 
 import asyncio
 import aiohttp
@@ -27,14 +26,7 @@ from .mlbdata import (
     get_seasons_df
 )
 
-if platform.system() == "Windows":
-    standard_time_fmt = r"%I:%M %p"
-else:
-    standard_time_fmt = r"%-I:%M %p"
-
 from .utils import curr_year, curr_date, default_season
-
-# from .utils import utc_zone
 from .utils import et_zone, ct_zone, mt_zone, pt_zone
 
 from .constants import (
@@ -55,11 +47,17 @@ from .constants import (
     W_SEASON,
     WO_SEASON,
     YBY_REC_COLS,
-    YBY_REC_SPLIT_COLS
+    YBY_REC_SPLIT_COLS,
+    colors as clr
 )
 from .helpers import _parse_person
 
-from typing import Union, Optional, List
+if platform.system() == "Windows":
+    standard_time_fmt = r"%I:%M %p"
+else:
+    standard_time_fmt = r"%-I:%M %p"
+
+
 
 # ===============================================================
 # ASYNC
@@ -4261,7 +4259,7 @@ def find_team(query,season=None):
     """
 
     df = get_teams_df()
-
+    
     if season is None:
         season = default_season()
         df = df[df["season"]==int(season)]
@@ -4270,15 +4268,13 @@ def find_team(query,season=None):
     else:
         df = df[df["season"]==int(season)]
 
-
-
     query = query.lower()
+    rows = []
+    for idx,row in df.iterrows():
+        if query in row['name_full'].lower():
+            rows.append(row)
 
-    df['fn'] = df['fullName'].str.lower()
-
-    df = df[df['fn'].str.contains(query)]
-
-    return df.drop(columns="fn")
+    return pd.DataFrame(rows).reset_index(drop=True)
 
 def find_venue(query):
     """Search for venues by name
@@ -5477,7 +5473,7 @@ def scores():
     games = schedule(date=date_str,hydrate='linescore')
     tms = get_teams_df(year=today.year).set_index('mlbam')
     score_list = []
-    gm_str = '{:3} {:>2}  vs  {:2} {:3} ({}) | {}'
+    gm_str = '{:3} {:>2}  vs  {:2} {:3} | {:6} | {:12}'
     for idx,gm in games.iterrows():
         aw_mlbam = int(gm.away_mlbam)
         hm_mlbam = int(gm.home_mlbam)
@@ -5501,7 +5497,7 @@ def scores():
             gm_deets = f'{inn_state[:3]} {inn_ord}'
         else:
             gm_deets = gm_start
-
+        
         row_str = gm_str.format(aw_abbrv,aw_score,hm_score,hm_abbrv,gm_deets,gpk)
         score_list.append(row_str)
     
