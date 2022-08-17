@@ -1974,10 +1974,8 @@ def player_hitting(mlbam,*args,**kwargs) -> pd.DataFrame:
 
     df.insert(0,"Season",season_col)
     df.insert(1,"team_mlbam",team_mlbam_col)
-    df.insert(2,"team_name",team_name_col)
-    df.insert(3,"league_mlbam",league_mlbam_col)
-    df.insert(4,"league_name",league_col)
-    df.insert(5,"game_type",game_type_col)
+    df.insert(2,"league_mlbam",league_mlbam_col)
+    df.insert(3,"game_type",game_type_col)
 
     return df
 
@@ -2073,12 +2071,10 @@ def player_pitching(mlbam,*args,**kwargs) -> pd.DataFrame:
     
     df = pd.DataFrame(data=stat_data).rename(columns=STATDICT)
 
-    df.insert(0,"Season",season_col)
+    df.insert(0,"season",season_col)
     df.insert(1,"team_mlbam",team_mlbam_col)
-    df.insert(2,"team_name",team_name_col)
-    df.insert(3,"league_mlbam",league_mlbam_col)
-    df.insert(4,"league_name",league_col)
-    df.insert(5,"game_type",game_type_col)
+    df.insert(2,"league_mlbam",league_mlbam_col)
+    df.insert(3,"game_type",game_type_col)
 
     return df
 
@@ -2175,15 +2171,14 @@ def player_fielding(mlbam,*args,**kwargs) -> pd.DataFrame:
 
                 stat_data.append(season_stats)
     
-    df = pd.DataFrame(data=stat_data).rename(columns=STATDICT).drop(columns="position")
+    df = pd.DataFrame(data=stat_data).rename(columns=STATDICT).drop(columns="pos")
 
-    df.insert(0,"Season",season_col)
+    df.insert(0,"season",season_col)
     df.insert(1,"team_mlbam",team_mlbam_col)
-    df.insert(2,"team_name",team_name_col)
-    df.insert(3,"league_mlbam",league_mlbam_col)
-    df.insert(4,"league_name",league_col)
-    df.insert(5,"Pos",pos_col)
-    df.insert(5,"game_type",game_type_col)
+    df.insert(2,"league_mlbam",league_mlbam_col)
+    df.insert(3,"game_type",game_type_col)
+    df.insert(4,"pos",pos_col)
+    # df.insert(5,"game_type",game_type_col)
 
     return df
 
@@ -2277,12 +2272,10 @@ def player_hitting_advanced(mlbam,*args,**kwargs) -> pd.DataFrame:
     
     df = pd.DataFrame(data=stat_data).rename(columns=STATDICT)
 
-    df.insert(0,"Season",season_col)
+    df.insert(0,"season",season_col)
     df.insert(1,"team_mlbam",team_mlbam_col)
-    df.insert(2,"team_name",team_name_col)
-    df.insert(3,"league_mlbam",league_mlbam_col)
-    df.insert(4,"league_name",league_col)
-    df.insert(5,"game_type",game_type_col)
+    df.insert(2,"league_mlbam",league_mlbam_col)
+    df.insert(3,"game_type",game_type_col)
 
     return df
 
@@ -2378,12 +2371,10 @@ def player_pitching_advanced(mlbam,*args,**kwargs) -> pd.DataFrame:
     
     df = pd.DataFrame(data=stat_data).rename(columns=STATDICT)
 
-    df.insert(0,"Season",season_col)
+    df.insert(0,"season",season_col)
     df.insert(1,"team_mlbam",team_mlbam_col)
-    df.insert(2,"team_name",team_name_col)
-    df.insert(3,"league_mlbam",league_mlbam_col)
-    df.insert(4,"league_name",league_col)
-    df.insert(5,"game_type",game_type_col)
+    df.insert(2,"league_mlbam",league_mlbam_col)
+    df.insert(3,"game_type",game_type_col)
 
     return df
 
@@ -2485,7 +2476,8 @@ def player_game_logs(mlbam,season=None,statGroup=None,gameType=None,**kwargs) ->
     
 
     columns = ['date','isHome','isWin','gamePk','mlbam','name','positions','tm_mlbam','opp_mlbam','opp_name','G','GO','AO','R','2B','3B','HR','SO','BB','IBB','H','HBP','AVG','AB','OBP','SLG','OPS','CS','SB','SB%','GIDP','GITP','P','PA','TB','RBI','LOB','sB','sF','BABIP','GO/AO','CI','AB/HR']
-    df = pd.DataFrame(data=data).rename(columns=STATDICT)[columns]
+    # df = pd.DataFrame(data=data).rename(columns=STATDICT)[columns]
+    df = pd.DataFrame(data=data).rename(columns=STATDICT)#[columns]
 
     return df
 
@@ -2537,8 +2529,8 @@ def player_date_range(mlbam,statGroup,startDate,endDate,gameType=None) -> pd.Dat
             stats["tm_name"] = s.get("team",{}).get("name")
             data.append(pd.Series(stats))
     
-    columns = ['tm_mlbam','Team','G','GO','AO','R','2B','3B','HR','SO','BB','IBB','H','HBP','AVG','AB','OBP','SLG','OPS','CS','SB','SB%','GIDP','GITP','P','PA','TB','RBI','LOB','sB','sF','BABIP','GO/AO','CI','AB/HR']
-    df = pd.DataFrame(data).rename(columns=STATDICT)[columns]
+    columns = ['tm_mlbam','team','G','GO','AO','R','2B','3B','HR','SO','BB','IBB','H','HBP','AVG','AB','OBP','SLG','OPS','CS','SB','SB%','GIDP','GITP','P','PA','TB','RBI','LOB','sB','sF','BABIP','GO/AO','CI','AB/HR']
+    df = pd.DataFrame(data).rename(columns=STATDICT)
 
     return df
 
@@ -2590,8 +2582,9 @@ def player_date_range_advanced(mlbam,statGroup,startDate,endDate,gameType=None) 
             stats["tm_name"] = s.get("team",{}).get("name")
             data.append(pd.Series(stats))
     
-    columns = ['tm_mlbam','Team','PA','TB','sB','sF','BABIP','exBH','HBP','GIDP','P','P/PA','BB/PA','SO/PA','HR/PA','BB/SO','ISO','GO']
-    df = pd.DataFrame(data).rename(columns=STATDICT)[columns]
+    columns = ['tm_mlbam','team','PA','TB','sB','sF','BABIP','exBH','HBP','GIDP','P','P/PA','BB/PA','SO/PA','HR/PA','BB/SO','ISO','GO']
+    # df = pd.DataFrame(data).rename(columns=STATDICT)[columns]
+    df = pd.DataFrame(data).rename(columns=STATDICT)
 
     return df
 
@@ -2646,9 +2639,9 @@ def player_splits(mlbam,statGroup,sitCodes,season=None,gameType=None) -> pd.Data
             stats["split"] = s.get("split",{}).get("description")
             data.append(pd.Series(stats))
     
-    columns = ['season','split_code','split','tm_mlbam','Team','G','GO','AO','R','2B','3B','HR','SO','BB','IBB','H','HBP','AVG','AB','OBP','SLG','OPS','CS','SB','SB%','GIDP','GITP','P','PA','TB','RBI','LOB','sB','sF','BABIP','GO/AO','CI','AB/HR']
-    df = pd.DataFrame(data).rename(columns=STATDICT)[columns]
-    # df = pd.DataFrame(data).rename(columns=STATDICT)
+    columns = ['season','split_code','split','tm_mlbam','team','G','GO','AO','R','2B','3B','HR','SO','BB','IBB','H','HBP','AVG','AB','OBP','SLG','OPS','CS','SB','SB%','GIDP','GITP','P','PA','TB','RBI','LOB','sB','sF','BABIP','GO/AO','CI','AB/HR']
+    # df = pd.DataFrame(data).rename(columns=STATDICT)[columns]
+    df = pd.DataFrame(data).rename(columns=STATDICT)
     return df
 
 def player_splits_advanced(mlbam,statGroup,sitCodes,season=None,gameType=None) -> pd.DataFrame:
@@ -2702,9 +2695,9 @@ def player_splits_advanced(mlbam,statGroup,sitCodes,season=None,gameType=None) -
             stats["split"] = s.get("split",{}).get("description")
             data.append(pd.Series(stats))
     
-    columns = ['season','split_code','split','tm_mlbam','Team','PA','TB','sB','sF','BABIP','exBH','HBP','GIDP','P','P/PA','BB/PA','SO/PA','HR/PA','BB/SO','ISO']
-    df = pd.DataFrame(data).rename(columns=STATDICT)[columns]
-    # df = pd.DataFrame(data).rename(columns=STATDICT)
+    columns = ['season','split_code','split','tm_mlbam','team','PA','TB','sB','sF','BABIP','exBH','HBP','GIDP','P','P/PA','BB/PA','SO/PA','HR/PA','BB/SO','ISO']
+    # df = pd.DataFrame(data).rename(columns=STATDICT)[columns]
+    df = pd.DataFrame(data).rename(columns=STATDICT)#[columns]
     return df
 
 def player_stats(mlbam,statGroup,statType,season=None,**kwargs) -> pd.DataFrame:
@@ -3308,7 +3301,6 @@ def team_pitching(mlbam,season=None) -> pd.DataFrame:
             pass
 
     df = pd.DataFrame(pitching,columns=pitching_cols).rename(columns=STATDICT)
-    # df = pd.DataFrame(pitchingAdvanced,columns=pitchingAdv_cols).rename(columns=STATDICT)
 
     return df
 
