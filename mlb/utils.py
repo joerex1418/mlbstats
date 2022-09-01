@@ -3,6 +3,7 @@ import requests
 import pandas as pd
 import datetime as dt
 from dateutil import tz
+from typing import Union, Optional, List, Dict
 
 from .constants import (
     STATDICT,
@@ -18,7 +19,6 @@ from .constants import (
 )
 
 from .mlbdata import get_season_info
-from typing import Union, Optional, List, Dict
 
 today_date = dt.datetime.today()
 
@@ -29,16 +29,15 @@ mt_zone = tz.gettz("America/Denver")
 pt_zone = tz.gettz("America/Los_Angeles")
 
 if platform.system() == "Windows":
-    standard_format = r"%I:%M %p"
+    standard_time_format = r"%I:%M %p"
 else:
-    standard_format = r"%-I:%M %p"
-military_format = r"%H:%M"
+    standard_time_format = r"%-I:%M %p"
+military_time_format = r"%H:%M"
 iso_format = r"%Y-%m-%dT%H:%M:%SZ"
 iso_format_ms = r"%Y-%m-%dT%H:%M:%S.%fZ"
 
 curr_year = today_date.year
 curr_date = today_date
-
 
 def make_dt_obj(_dt_str: str, _date_only=False):
     if _date_only is False:
@@ -51,7 +50,6 @@ def make_dt_obj(_dt_str: str, _date_only=False):
             return dt.datetime.strptime(_dt_str, r"%Y-%m-%d").date()
         except:
             return dt.datetime.strptime(_dt_str, r"%m/%d/%Y").date()
-
 
 def default_season() -> int:
     """Returns the most recent season with data available.
@@ -66,7 +64,6 @@ def default_season() -> int:
         season = season_info["in_progress"]
     return season
 
-
 def compile_codes(*code_lists, output_list=False) -> str:
     all_codes = []
     for code_list in code_lists:
@@ -74,7 +71,6 @@ def compile_codes(*code_lists, output_list=False) -> str:
     if output_list is False:
         return ",".join(all_codes)
     return all_codes
-
 
 def draw_strikezone(matchup,s=1):
     player_zoneTop = matchup[0]["zone_top"]
@@ -186,7 +182,6 @@ def draw_strikezone(matchup,s=1):
         """
     return batters_box_html
 
-
 def draw_pitches(pCoordinates: list, zoneTop='3.467', pitchCodes=[], ab=''):
     # still need to determine correct 'zoneTop' and 'zoneBottom' values since they may be different for each pitch
 
@@ -214,7 +209,6 @@ def draw_pitches(pCoordinates: list, zoneTop='3.467', pitchCodes=[], ab=''):
 
     return "\n".join(drawn_circles)
 
-
 def simplify_time(iso_time) -> str:
     """Converts ISO formatted datetime string to a timestamp
 
@@ -225,7 +219,6 @@ def simplify_time(iso_time) -> str:
     date = t[0:10].replace("-", "")
     time = t[11:19].replace(":", "")
     return f"{date}_{time}"
-
 
 def prettify_time(
     t=dt.datetime.strftime(dt.datetime.utcnow(), iso_format),
@@ -288,20 +281,20 @@ def prettify_time(
     utc_time_obj = utc_time_obj
     utc_time_iso = dt.datetime.strftime(utc_time_obj, iso_format)
     utc_time_stmp = simplify_time(utc_time_iso)
-    utc_time_12 = dt.datetime.strftime(utc_time_obj, standard_format)
-    utc_time_24 = dt.datetime.strftime(utc_time_obj, military_format)
+    utc_time_12 = dt.datetime.strftime(utc_time_obj, standard_time_format)
+    utc_time_24 = dt.datetime.strftime(utc_time_obj, military_time_format)
 
     ct_time_obj = utc_time_obj.astimezone(ct_zone)
     ct_time_iso = dt.datetime.strftime(ct_time_obj, iso_format)
     ct_time_stmp = simplify_time(ct_time_iso)
-    ct_time_12 = dt.datetime.strftime(ct_time_obj, standard_format)
-    ct_time_24 = dt.datetime.strftime(ct_time_obj, military_format)
+    ct_time_12 = dt.datetime.strftime(ct_time_obj, standard_time_format)
+    ct_time_24 = dt.datetime.strftime(ct_time_obj, military_time_format)
 
     et_time_obj = utc_time_obj.astimezone(et_zone)
     et_time_iso = dt.datetime.strftime(et_time_obj, iso_format)
     et_time_stmp = simplify_time(et_time_iso)
-    et_time_12 = dt.datetime.strftime(et_time_obj, standard_format)
-    et_time_24 = dt.datetime.strftime(et_time_obj, military_format)
+    et_time_12 = dt.datetime.strftime(et_time_obj, standard_time_format)
+    et_time_24 = dt.datetime.strftime(et_time_obj, military_time_format)
 
     shitty_table = """
     \tUSER INPUT: {}
@@ -348,7 +341,6 @@ def prettify_time(
             return utc_time_12
         elif fmt == "military":
             return utc_time_24
-
 
 def prepare_game_data(gm, **params):
     matchup_df = gm.matchup_event_log()
@@ -433,7 +425,6 @@ def prepare_game_data(gm, **params):
     # #########################################################################
 
     return data_dict
-
 
 def game_str_display(game_obj):
     to_print = []
@@ -774,6 +765,21 @@ def game_str_display(game_obj):
     final_output = "\n".join(to_print)
     return final_output.replace("|", vl)
 
+def get_tzinfo(tz_string:str=None):
+    if tz_string is None:
+        # Default Timezone will be "Eastern Time"
+        tz = et_zone
+    else:
+        tz_string = tz_string.lower()
+        if tz_string in ("cst","cdt","ct","central","us/central"):
+            tz = ct_zone
+        elif tz in ("est","edt","et","eastern","us/eastern"):
+            tz = et_zone
+        elif tz in ("mst","mdt","mt","mountain","us/mountain"):
+            tz = mt_zone
+        elif tz in ("pst","pdt","pt","pacific","us/pacific"):
+            tz = pt_zone
+    return tz
 
 class timeutils:
     utc_zone = utc_zone
@@ -783,11 +789,10 @@ class timeutils:
     pt_zone = pt_zone
 
     class fmt:
-        standard = standard_format
-        military = military_format
+        standard = standard_time_format
+        military = military_time_format
         iso = iso_format
         isoms = iso_format_ms
-
 
 class keys:
     stats = STATDICT
@@ -799,18 +804,17 @@ class keys:
     other_cols_with_season = W_SEASON
     other_cols_wo_season = WO_SEASON
 
-
 class metadata:
     def __call__(self) -> list:
         meta_list = [
-            "statGroups",
-            "statTypes", 
-            "leagueLeaderTypes",
-            "baseballStats"]
+            "stat_groups",
+            "sta_types", 
+            "league_leader_types",
+            "baseball_stats"]
         meta_list.sort()
         return meta_list
 
-    def baseballStats(df=False) -> Union[List[Dict], pd.DataFrame]:
+    def baseball_stats(df=False) -> Union[List[Dict], pd.DataFrame]:
         url = "https://statsapi.mlb.com/api/v1/baseballStats"
         data = []
         resp = requests.get(url)
@@ -855,7 +859,7 @@ class metadata:
         else:
             return resp.json()
 
-    def leagueLeaderTypes(df=False) -> Union[list, pd.DataFrame]:
+    def league_leader_types(df=False) -> Union[list, pd.DataFrame]:
         url = "https://statsapi.mlb.com/api/v1/leagueLeaderTypes"
         data = []
         resp = requests.get(url)
@@ -863,7 +867,7 @@ class metadata:
             data.append(i["displayName"])
         return data
 
-    def statGroups(df=False) -> Union[list, pd.DataFrame]:
+    def stat_groups(df=False) -> Union[list, pd.DataFrame]:
         url = "https://statsapi.mlb.com/api/v1/statGroups"
         data = []
         resp = requests.get(url)
@@ -873,7 +877,7 @@ class metadata:
             return pd.DataFrame(data=data)
         return data
 
-    def statTypes(df=False) -> Union[list, pd.DataFrame]:
+    def stat_types(df=False) -> Union[list, pd.DataFrame]:
         url = "https://statsapi.mlb.com/api/v1/statTypes"
         data = []
         resp = requests.get(url)

@@ -1,28 +1,18 @@
+import json
 import requests
 from typing import Union
-
 
 import pandas as pd
 import numpy as np
 
+from .paths import *
+from .mlbdata import get_teams_df
 from .constants import COLS_SEASON
-
-from .paths import (
-    HALL_OF_FAME_CSV,
-    PEOPLE_CSV,
-    YBY_RECORDS_CSV,
-    VENUES_CSV,
-    BBREF_BATTING_DATA_CSV,
-    BBREF_PITCHING_DATA_CSV,
-    BBREF_DATA_CSV,
-    LEAGUES_CSV,
-    SEASONS_CSV,
-    PITCH_CODES_CSV,
-    PITCH_TYPES_CSV,
-    EVENT_TYPES_CSV,
-)
-# from .async_mlb import fetch
+from .async_mlb import fetch
 from .async_mlb import get_updated_records
+from .async_mlb import fetch_coaching_roster
+from .async_mlb import fetch_standings
+from .async_mlb.coaches import roster_json_to_df
 
 def update_people(inplace=True) -> Union[pd.DataFrame,None]:
     """Update 'people' in the library's CSV files
@@ -460,4 +450,33 @@ def update_event_types(inplace=True) -> Union[pd.DataFrame,None]:
         return df
     
     df.to_csv(EVENT_TYPES_CSV,index=False)
+
+def update_standings(inplace=True,**kwargs) -> Union[pd.DataFrame,None]:
+    """Update the year-by-year standings.
     
+    Parameters:
+    -----------
+    inplace : bool default True
+        if False, function will simply return the data retrieved from the API 
+        without updating the current CSV file
+    """
+    df = fetch_standings(**kwargs)
+    df.sort_values(by=['season','sport_rank'],ascending=[False,True],inplace=True)
+    df.reset_index(drop=True)
+    if inplace:
+        df.to_csv(STANDINGS_CSV,index=False)
+        return None
+    return df
+
+def update_coaches():
+    """Update the coaching rosters
+    
+    Parameters:
+    -----------
+    inplace : bool default True
+        if False, function will simply return the data retrieved from the API 
+        without updating the current CSV file
+    """
+    responses = fetch_coaching_roster()
+    df = roster_json_to_df(responses)
+    df.to_csv(COACHES_MASTER_CSV,index=False)

@@ -1,7 +1,8 @@
 import os
+import json
+import datetime as dt
 
 import pandas as pd
-import datetime as dt
 # from sqlalchemy import create_engine
 
 from .paths import *
@@ -28,32 +29,18 @@ def get_teams_df(year=None) -> pd.DataFrame:
         return df
 
 def get_standings_df() -> pd.DataFrame:
-    """Standings dataframe for each season
-    
-    NOTE: DEPRECATED - Data only covered up to 2022. In the future, a new 
-    verision will incorporate async to get updated standings and records on 
-    the fly
-    
-    """
+    """Yearly standings data for each team (dates back to 1876)"""
     try:
-        df = pd.read_csv(YBY_STANDINGS_CSV,index_col=False)
-
+        df = pd.read_csv(STANDINGS_CSV,index_col=False)
         return df
-
     except Exception as e:
         print(e)
         return None
 
 def get_yby_records(raw=False) -> pd.DataFrame:
-    """Record splits by season for each team
-    
-    NOTE: DEPRECATED - Data only covered up to 2022. In the future, a new 
-    verision will incorporate async to get updated standings and records on 
-    the fly
-    
+    """Split records for each team
     """
     
-
     try:
         df = pd.read_csv(YBY_RECORDS_CSV,index_col=False)
         return df
@@ -242,4 +229,7 @@ def get_event_types_df() -> pd.DataFrame:
     df = pd.read_csv(EVENT_TYPES_CSV,index_col=False)
     return df
   
-    
+def get_coaches():
+    """Get a year-by-year dataframe of all coaching staff for each team"""
+    df = pd.read_csv(COACHES_MASTER_CSV,index_col=False)
+    return df

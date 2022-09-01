@@ -4,43 +4,14 @@ from dateutil.parser import parse
 
 import pandas as pd
 
-from .functions import _team_data
-from .functions import _franchise_data
-from .functions import _player_data
-from .functions import fetch as _fetch
+from . import utils
+from . import helpers
+from . import objects as objs
+from . import constants as c
+from . import mlb_dataclasses as dclass
 
-from .helpers import mlb_date as md
-from .helpers import mlb_datetime as mdt
-from .helpers import mlb_wrapper
-from .helpers import venue_name_wrapper
-from .helpers import league_name_wrapper
-from .helpers import team_name_data
-from .helpers import person_name_data
-from .helpers import standings_wrapper
-from .helpers import roster_wrapper
-from .helpers import edu_wrapper
-from .helpers import player_stats
-from .helpers import team_stats
-
-from .helpers import get_tz
-from .helpers import mlb_team
-from .helpers import mlb_person
-from .helpers import _teams_data_collection
-from .helpers import _people_data_collection
-from .helpers import _parse_team
-from .helpers import _parse_league
-from .helpers import _parse_division
-from .helpers import _parse_person
-from .helpers import _parse_venue
-
-from .helpers import umpires
-
-from .constants import BASE, POSITION_DICT, ORDINALS, STATDICT
-
-from .utils import iso_format_ms
-from .utils import utc_zone
-from .utils import prettify_time
-from .utils import default_season
+md = objs.MlbDate
+mdt = objs.MlbDatetime
 
 class Game:
     """# Game
@@ -124,14 +95,14 @@ class Game:
         if timecode is not None and timecode.find('_') == -1:
             timecode = parse(timecode).strftime(r'%Y%m%d_%H%M%S')
         
-        tz_obj = get_tz(tz)
+        tz_obj = objs.get_tz(tz)
         self._tz = tz
         
         self.__game_pk = game_pk
 
-        BASE = 'https://statsapi.mlb.com/api'
+        c.BASE = 'https://statsapi.mlb.com/api'
         
-        game_url = f'{BASE}/v1.1/game/{game_pk}/feed/live?'
+        game_url = f'{c.BASE}/v1.1/game/{game_pk}/feed/live?'
         params = {'hydrate':'venue,flags,preState',
                   'timecode':timecode}
 
@@ -184,7 +155,7 @@ class Game:
             _ump_second = {}
             _ump_third = {}
         
-        self._umpires = umpires(
+        self._umpires = objs.Umpires(
             first  = _ump_first.get('fullName',''),
             second = _ump_second.get('fullName',''),
             third  = _ump_third.get('fullName',''),
@@ -198,26 +169,35 @@ class Game:
         self.__all_players_game_data.update(self._boxscore['teams']['away']['players'])
         self.__all_players_game_data.update(self._boxscore['teams']['home']['players'])
         
-        away_probable_mlbam = gameData.get('probablePitchers',{}).get('away',{}).get('id',0)
-        home_probable_mlbam = gameData.get('probablePitchers',{}).get('home',{}).get('id',0)
+        away_probable_mlbam = (gameData.get('probablePitchers',{})
+                               .get('away',{})
+                               .get('id',0))
+        home_probable_mlbam = (gameData.get('probablePitchers',{})
+                               .get('home',{})
+                               .get('id',0))
 
         _away_probable_bio = self.player_bio(away_probable_mlbam)
-        self.away_probable = person_name_data(mlbam=away_probable_mlbam,
-                                              _full=_away_probable_bio.get('fullName'),
-                                              _given=_away_probable_bio.get('fullFMLName'),
-                                              _first=_away_probable_bio.get('firstName'),
-                                              _middle=_away_probable_bio.get('middleName'),
-                                              _last=_away_probable_bio.get('lastName'),
-                                              )
+        self.away_probable = dclass.PersonName(
+            mlbam=away_probable_mlbam,
+            full=_away_probable_bio.get('fullName'),
+            given=_away_probable_bio.get('fullFMLName'),
+            first=_away_probable_bio.get('firstName'),
+            middle=_away_probable_bio.get('middleName'),
+            last=_away_probable_bio.get('lastName'),
+            nick=_away_probable_bio.get('nickName'),
+            pronunciation=_away_probable_bio.get('pronunciation')
+        )
         _home_probable_bio = self.player_bio(home_probable_mlbam)
-        self.home_probable = person_name_data(mlbam=home_probable_mlbam,
-                                              _full=_home_probable_bio.get('fullName'),
-                                              _given=_home_probable_bio.get('fullFMLName'),
-                                              _first=_home_probable_bio.get('firstName'),
-                                              _middle=_home_probable_bio.get('middleName'),
-                                              _last=_home_probable_bio.get('lastName'),
-                                              )
-        
+        self.home_probable = dclass.PersonName(
+            mlbam=home_probable_mlbam,
+            full=_home_probable_bio.get('fullName'),
+            given=_home_probable_bio.get('fullFMLName'),
+            first=_home_probable_bio.get('firstName'),
+            middle=_home_probable_bio.get('middleName'),
+            last=_home_probable_bio.get('lastName'),
+            nick=_home_probable_bio.get('nickName'),
+            pronunciation=_home_probable_bio.get('pronunciation')
+        )
 
         # AWAY Team Data
         away = gameData['teams']['away']
@@ -243,10 +223,9 @@ class Game:
         self.away_hits = _away_score_data.get('hits')
         self.away_errs = _away_score_data.get('errors')
         self.away_record = f"{away['record']['wins']}-{away['record']['losses']}"
-        
-        self.__away = team_name_data(mlbam=away['id'],full=away['name'],short=away['shortName'],
-                                     franchise=away['franchiseName'],location=away['locationName'],
-                                     club=away['clubName'],season=away['season'],abbreviation=away['abbreviation'])
+
+        self.__away = dclass.TeamName(away['id'],away['name'],away['locationName'],away['franchiseName'],
+                                away['clubName'],away['shortName'],away['abbreviation'])
 
         # HOME Team Data
         home = gameData['teams']['home']
@@ -273,10 +252,8 @@ class Game:
         self.home_errs = _home_score_data.get('errors')
         self.home_record = f"{home['record']['wins']}-{home['record']['losses']}"
         
-        
-        self.__home = team_name_data(mlbam=home['id'],full=home['name'],short=home['shortName'],
-                                     franchise=home['franchiseName'],location=home['locationName'],
-                                     club=home['clubName'],season=home['season'],abbreviation=home['abbreviation'])
+        self.__home = dclass.TeamName(away['id'],home['name'],home['locationName'],home['franchiseName'],
+                                home['clubName'],home['shortName'],home['abbreviation'])
 
         self._curr_defense = self._linescore['defense']
         self._curr_offense = self._linescore['offense']
@@ -348,12 +325,12 @@ class Game:
         return int(self._scheduled_innings)
 
     @property
-    def away(self) -> team_name_data:
+    def away(self) -> dclass.TeamName:
         """Away team info"""
         return self.__away
 
     @property
-    def home(self) -> team_name_data:
+    def home(self) -> dclass.TeamName:
         """Home team info"""
         return self.__home
     
@@ -445,7 +422,7 @@ class Game:
             'phone': phone,
         }
         
-        return mlb_wrapper(**data)
+        return objs.MlbWrapper(**data)
      
     def __get_player_data(self,home_or_away,lineup_type=None,**kwargs):
         team_data = self._boxscore['teams'][home_or_away]
@@ -481,7 +458,7 @@ class Game:
                         
                         for scope in ['game','season']:
                             for group in ['batting','pitching','fielding']:
-                                player_stats[scope][group] = pd.Series(player_stats[scope][group]).rename(STATDICT).to_dict()
+                                player_stats[scope][group] = pd.Series(player_stats[scope][group]).rename(c.c.STATDICT).to_dict()
                         
                         p_data = {'mlbam':mlbam,'name_full':name_full,'name_box':name_box,
                                     'pos':all_positions,'order':batting_order,
@@ -515,26 +492,26 @@ class Game:
     def away_team_stats(self):
         """Away team stats for game and current season"""
         batting = self._away_stats['batting']
-        batting = pd.Series(batting).rename(STATDICT).to_dict()
+        batting = pd.Series(batting).rename(c.STATDICT).to_dict()
         
         pitching = self._away_stats['pitching']
-        pitching = pd.Series(pitching).rename(STATDICT).to_dict()
+        pitching = pd.Series(pitching).rename(c.STATDICT).to_dict()
         
         fielding = self._away_stats['fielding']
-        fielding = pd.Series(fielding).rename(STATDICT).to_dict()
+        fielding = pd.Series(fielding).rename(c.STATDICT).to_dict()
         
         return {'batting':batting,'pitching':pitching,'fielding':fielding}
         
     def home_team_stats(self):
         """Home team stats for game and current season"""
         batting = self._home_stats['batting']
-        batting = pd.Series(batting).rename(STATDICT).to_dict()
+        batting = pd.Series(batting).rename(c.STATDICT).to_dict()
         
         pitching = self._home_stats['pitching']
-        pitching = pd.Series(pitching).rename(STATDICT).to_dict()
+        pitching = pd.Series(pitching).rename(c.STATDICT).to_dict()
         
         fielding = self._home_stats['fielding']
-        fielding = pd.Series(fielding).rename(STATDICT).to_dict()
+        fielding = pd.Series(fielding).rename(c.STATDICT).to_dict()
         
         return {'batting':batting,'pitching':pitching,'fielding':fielding}
         
@@ -676,7 +653,7 @@ class Game:
                         'errors': inn.get('home', {}).get('errors', '-'),
                     },
                     'inning': inn.get('num', '-'),
-                    'inningOrdinal': ORDINALS[str(inn.get('num', '-'))],
+                    'inningOrdinal': c.ORDINALS[str(inn.get('num', '-'))],
                 }
             )
         
@@ -691,7 +668,7 @@ class Game:
                         'away': {'runs': '-', 'hits': '-', 'errors': '-'},
                         'home': {'runs': '-', 'hits': '-', 'errors': '-'},
                         'inning': str(next_inn),
-                        'inningOrdinal': ORDINALS[str(next_inn)],
+                        'inningOrdinal': c.ORDINALS[str(next_inn)],
                     }
                 )
         return {'total': ls_total, 'innings': ls_inns, 'away': {}, 'home': {}}
@@ -802,7 +779,7 @@ class Game:
             return {}
         curr_diamond = []
         for key, value in diamond.items():
-            curr_diamond.append([POSITION_DICT[key], value["fullName"]])
+            curr_diamond.append([c.POSITION_DICT[key], value["fullName"]])
 
         df = pd.DataFrame(curr_diamond)
 
@@ -1105,20 +1082,20 @@ class Game:
             # Time information
             try:
                 startTime = firstEvent["startTime"]
-                startTime_obj = dt.datetime.strptime(startTime, iso_format_ms).replace(
-                    tzinfo=utc_zone
+                startTime_obj = dt.datetime.strptime(startTime, utils.iso_format_ms).replace(
+                    tzinfo=utils.utc_zone
                 )
-                startTime = dt.datetime.strftime(startTime_obj, iso_format_ms)
+                startTime = dt.datetime.strftime(startTime_obj, utils.iso_format_ms)
 
             except:
                 startTime = "--"
             try:
                 endTime = lastEvent["endTime"]
-                endTime_obj = dt.datetime.strptime(endTime, iso_format_ms).replace(
-                    tzinfo=utc_zone
+                endTime_obj = dt.datetime.strptime(endTime, utils.iso_format_ms).replace(
+                    tzinfo=utils.utc_zone
                 )
-                endTime = dt.datetime.strftime(endTime_obj, iso_format_ms)
-                # endTime = dt.datetime.strptime(play["playEvents"][-1]["endTime"],iso_format_ms).replace(tzinfo=utc_zone)
+                endTime = dt.datetime.strftime(endTime_obj, utils.iso_format_ms)
+                # endTime = dt.datetime.strptime(play["playEvents"][-1]["endTime"],utils.iso_format_ms).replace(tzinfo=utils.utc_zone)
 
                 elasped = endTime_obj - startTime_obj
 
@@ -1162,9 +1139,9 @@ class Game:
                         'hX':hX,
                         'hY':hY,
                         'category':category,
-                        'timeElasped':prettify_time(elasped),
-                        'timeStart':prettify_time(startTime),
-                        'timeEnd':prettify_time(endTime),
+                        'timeElasped':utils.prettify_time(elasped),
+                        'timeStart':utils.prettify_time(startTime),
+                        'timeEnd':utils.prettify_time(endTime),
                         'batter_mlbam':batter_mlbam,
                         'pitcher_mlbam':pitcher_mlbam,
                         'is_home':is_home,
@@ -1231,19 +1208,19 @@ class Game:
                 # Times
                 try:
                     startTime = dt.datetime.strptime(
-                        event['startTime'], iso_format_ms
-                    ).replace(tzinfo=utc_zone)
+                        event['startTime'], utils.iso_format_ms
+                    ).replace(tzinfo=utils.utc_zone)
                 except:
                     startTime = '--'
                 try:
                     endTime = dt.datetime.strptime(
-                        event['endTime'], iso_format_ms
-                    ).replace(tzinfo=utc_zone)
+                        event['endTime'], utils.iso_format_ms
+                    ).replace(tzinfo=utils.utc_zone)
                 except:
                     endTime = '--'
                 try:
                     elapsed = endTime - startTime
-                    elapsed = prettify_time(elapsed)
+                    elapsed = utils.prettify_time(elapsed)
                 except:
                     elapsed = '--'
 
@@ -1946,7 +1923,7 @@ class Game:
         return f
 
     def get_content(self):
-        url = BASE + f'/game/{self.gamePk}/content'
+        url = c.BASE + f'/game/{self.gamePk}/content'
         resp = requests.get(url)
         return resp.json()
 
@@ -1984,3 +1961,6 @@ class Game:
     gamePk  = game_pk
     game_id = game_pk
     gameId  = game_pk
+    
+
+

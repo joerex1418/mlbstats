@@ -1,63 +1,26 @@
-import platform
 import time
-import pytz
-import requests
+import datetime as dt
+import platform, requests
 from urllib.parse import unquote
 from typing import Union, Optional, List
 
-import asyncio
-import aiohttp
-import nest_asyncio
-nest_asyncio.apply()
 import pandas as pd
-import datetime as dt
-from bs4 import BeautifulSoup as bs
-from bs4 import SoupStrainer
+import asyncio, aiohttp, nest_asyncio
+from bs4 import BeautifulSoup as bs, SoupStrainer
 
-from .async_mlb import (fetch,_determine_loop)
-from .mlbdata import (
-    get_people_df,
-    get_season_info,
-    get_venues_df,
-    get_teams_df,
-    get_yby_records,
-    get_standings_df,
-    get_leagues_df,
-    get_seasons_df
-)
+from . import mlb_dataclasses as dclass
+from . import constants as c
+from . import parsing, helpers, mlbdata
+from .async_mlb import fetch, _determine_loop
+from .utils import curr_date, default_season, get_tzinfo
+from .helpers import ExtendedDict
 
-from .utils import curr_year, curr_date, default_season
-from .utils import et_zone, ct_zone, mt_zone, pt_zone
-
-from .constants import (
-    BASE,
-    GAME_TYPES_ALL,
-    BAT_FIELDS,
-    BAT_FIELDS_ADV,
-    PITCH_FIELDS,
-    PITCH_FIELDS_ADV,
-    FIELD_FIELDS,
-    STATDICT,
-    LEAGUE_IDS,
-    COLS_HIT,
-    COLS_HIT_ADV,
-    COLS_PIT,
-    COLS_PIT_ADV,
-    COLS_FLD,
-    W_SEASON,
-    WO_SEASON,
-    YBY_REC_COLS,
-    YBY_REC_SPLIT_COLS,
-    colors as clr
-)
-from .helpers import _parse_person
+nest_asyncio.apply()
 
 if platform.system() == "Windows":
     standard_time_fmt = r"%I:%M %p"
 else:
     standard_time_fmt = r"%-I:%M %p"
-
-
 
 # ===============================================================
 # ASYNC
@@ -72,7 +35,7 @@ async def _parse_player_data(
         data = data["people"][0]
         debut = data["mlbDebutDate"]
         query = f"stats=gameLog&startDate={debut}&endDate={debut}&hydrate=team"
-        resp = await session.get(f"{BASE}/people/{_mlbam}/stats?{query}")
+        resp = await session.get(f"{c.BASE}/people/{_mlbam}/stats?{query}")
         data["debut_data"] = await resp.json()
         return data
     elif type(data) is dict:
@@ -320,7 +283,7 @@ async def _parse_team_data(
                                          ])
 
         if kwargs.get('_logtime') is True:
-            print(f"\n{unquote(_url).replace(BASE,'')}")
+            print(f"\n{unquote(_url).replace(c.BASE,'')}")
             print(f'--- {time.time() - start} seconds ---\n')
         return sched_df
     
@@ -371,18 +334,18 @@ async def _parse_team_data(
         added_cols = ['season','mlbam','name','slug','jersey_number','ptype','pos','game_type','tm_mlbam','tm_name']
 
         if 'Advanced' in _url:
-            reordered_cols  = added_cols + COLS_PIT_ADV
+            reordered_cols  = added_cols + c.COLS_PIT_ADV
         else:
-            reordered_cols  = added_cols + COLS_PIT
+            reordered_cols  = added_cols + c.COLS_PIT
 
         try:
-            combined_df = pd.DataFrame(stat_data).rename(columns=STATDICT).reindex(columns=reordered_cols)
+            combined_df = pd.DataFrame(stat_data).rename(columns=c.STATDICT).reindex(columns=reordered_cols)
         except:
-            combined_df = pd.DataFrame(stat_data).rename(columns=STATDICT)
-            # print(pd.DataFrame(stat_data).rename(columns=STATDICT).columns)
+            combined_df = pd.DataFrame(stat_data).rename(columns=c.STATDICT)
+            # print(pd.DataFrame(stat_data).rename(columns=c.STATDICT).columns)
 
         if kwargs.get('_logtime') is True:
-            print(f"\n{unquote(_url).replace(BASE,'')}")
+            print(f"\n{unquote(_url).replace(c.BASE,'')}")
             print(f'--- {time.time() - start} seconds ---\n')
 
         return combined_df
@@ -416,7 +379,7 @@ async def _parse_team_data(
             columns=['job','job_title','job_id','jersey_number_coach','jersey_number_primary','name','birth_date','age','pos','mlb_debut','last_played'])
 
         if kwargs.get('_logtime') is True:
-            print(f"\n{unquote(_url).replace(BASE,'')}")
+            print(f"\n{unquote(_url).replace(c.BASE,'')}")
             print(f'--- {time.time() - start} seconds ---\n')
 
         return df
@@ -468,26 +431,26 @@ async def _parse_team_data(
         pre_cols = ['season','mlbam','name','slug','jersey_number','pos','game_type','tm_mlbam','tm_name']
         if 'hitting' in _url:
             if 'Advanced' in _url:
-                reordered_cols = pre_cols + COLS_HIT_ADV
+                reordered_cols = pre_cols + c.COLS_HIT_ADV
             else:
-                reordered_cols = pre_cols + COLS_HIT
+                reordered_cols = pre_cols + c.COLS_HIT
         elif 'pitching' in _url:
             if 'Advanced' in _url:
-                reordered_cols = pre_cols + COLS_PIT_ADV
+                reordered_cols = pre_cols + c.COLS_PIT_ADV
             else:
-                reordered_cols = pre_cols + COLS_PIT
+                reordered_cols = pre_cols + c.COLS_PIT
         elif 'fielding' in _url:
-            reordered_cols = pre_cols + COLS_FLD
+            reordered_cols = pre_cols + c.COLS_FLD
         # print(reordered_cols)
         # print("line 480")
         try:
-            combined_df = pd.DataFrame(stat_data).rename(columns=STATDICT).reindex(columns=reordered_cols)
+            combined_df = pd.DataFrame(stat_data).rename(columns=c.STATDICT).reindex(columns=reordered_cols)
         except:
-            combined_df = pd.DataFrame(stat_data).rename(columns=STATDICT)
-            # print(pd.DataFrame(stat_data).rename(columns=STATDICT).columns)
+            combined_df = pd.DataFrame(stat_data).rename(columns=c.STATDICT)
+            # print(pd.DataFrame(stat_data).rename(columns=c.STATDICT).columns)
             
         if kwargs.get('_logtime') is True:
-            print(f"\n{unquote(_url).replace(BASE,'')}")
+            print(f"\n{unquote(_url).replace(c.BASE,'')}")
             print(f'--- {time.time() - start} seconds ---\n')
         return combined_df
 
@@ -513,32 +476,32 @@ async def _parse_team_data(
                     if st == 'seasonAdvanced':
                         add_to = 'advanced'
                         if 'hitting' in _url:
-                            reordered_cols = COLS_HIT_ADV
+                            reordered_cols = c.COLS_HIT_ADV
                         elif 'pitching' in _url:
-                            reordered_cols = COLS_PIT_ADV
+                            reordered_cols = c.COLS_PIT_ADV
 
                     else:
                         add_to = 'regular'
                         if 'hitting' in _url:
-                            reordered_cols = COLS_HIT
+                            reordered_cols = c.COLS_HIT
                         elif 'pitching' in _url:
-                            reordered_cols = COLS_PIT
+                            reordered_cols = c.COLS_PIT
                         elif 'fielding' in _url:
-                            reordered_cols = COLS_FLD
+                            reordered_cols = c.COLS_FLD
 
 
                 try:
-                    df = pd.DataFrame(stat_data).rename(columns=STATDICT).reindex(columns=reordered_cols)
+                    df = pd.DataFrame(stat_data).rename(columns=c.STATDICT).reindex(columns=reordered_cols)
                 except:
-                    df = pd.DataFrame(stat_data).rename(columns=STATDICT)
-                    # print(pd.DataFrame(stat_data).rename(columns=STATDICT).columns)
+                    df = pd.DataFrame(stat_data).rename(columns=c.STATDICT)
+                    # print(pd.DataFrame(stat_data).rename(columns=c.STATDICT).columns)
 
                 df['game_type'] = gt
 
                 stat_dict[add_to] = df
             
             if kwargs.get('_logtime') is True:
-                print(f"\n{unquote(_url).replace(BASE,'')}")
+                print(f"\n{unquote(_url).replace(c.BASE,'')}")
                 print(f'--- {time.time() - start} seconds ---\n')
 
             return stat_dict
@@ -636,13 +599,13 @@ async def _parse_team_data(
 
 
         if kwargs.get('_logtime') is True:
-            print(f"\n{unquote(_url).replace(BASE,'')}")
+            print(f"\n{unquote(_url).replace(c.BASE,'')}")
             print(f'--- {time.time() - start} seconds ---\n')
 
         return df
 
     if kwargs.get('_logtime') is True:
-        print(f"\n{unquote(_url).replace(BASE,'')}")
+        print(f"\n{unquote(_url).replace(c.BASE,'')}")
         print(f'--- {time.time() - start} seconds ---\n')
 
     return data
@@ -683,9 +646,9 @@ async def _fetch_team_data(
 
 def _team_data(_mlbam,_season,**kwargs) -> Union[dict,list]:
     start = time.time()
-    lgs_df = get_leagues_df().set_index('mlbam')
-    tms_df = get_teams_df()
-    ssn_df = get_seasons_df().set_index('season')
+    lgs_df = mlbdata.get_leagues_df().set_index('mlbam')
+    tms_df = mlbdata.mlbdata.get_teams_df()
+    ssn_df = mlbdata.get_seasons_df().set_index('season')
     ssn_row = ssn_df.loc[int(_season)]
 
     tms_df = tms_df[tms_df['season']==int(_season)]
@@ -698,55 +661,55 @@ def _team_data(_mlbam,_season,**kwargs) -> Union[dict,list]:
     # Retrieves 'fullSeason' roster
     # -----------------------------
     # url_list = [
-    #     f"{BASE}/teams/{_mlbam}?season={_season}&hydrate=standings",
-    #     f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[season],group=[hitting],season={_season}))",
-    #     f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[season],group=[pitching],season={_season}))",
-    #     f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[season],group=[fielding],season={_season}))",
-    #     f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[hitting],season={_season}))",
-    #     f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[pitching],season={_season}))",
+    #     f"{c.BASE}/teams/{_mlbam}?season={_season}&hydrate=standings",
+    #     f"{c.BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[season],group=[hitting],season={_season}))",
+    #     f"{c.BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[season],group=[pitching],season={_season}))",
+    #     f"{c.BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[season],group=[fielding],season={_season}))",
+    #     f"{c.BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[hitting],season={_season}))",
+    #     f"{c.BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[pitching],season={_season}))",
 
-    #     f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[statSplits],group=[pitching],sitCodes=[sp,rp],season={_season}))",
-    #     f"{BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[statSplitsAdvanced],group=[pitching],sitCodes=[sp,rp],season={_season}))",
+    #     f"{c.BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[statSplits],group=[pitching],sitCodes=[sp,rp],season={_season}))",
+    #     f"{c.BASE}/teams/{_mlbam}/roster/fullSeason?season={_season}&hydrate=person(stats(type=[statSplitsAdvanced],group=[pitching],sitCodes=[sp,rp],season={_season}))",
 
-    #     f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&season={_season}",
-    #     f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&season={_season}",
-    #     f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&season={_season}",
-    #     f"{BASE}/teams/{_mlbam}/roster/coach?season={_season}&hydrate=person",
-    #     f"{BASE}/draft/{_season}?sportId=1&teamId={_mlbam}",
-    #     f"{BASE}/transactions?teamId={_mlbam}&startDate={ssn_start}&endDate={ssn_end}",
+    #     f"{c.BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&season={_season}",
+    #     f"{c.BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&season={_season}",
+    #     f"{c.BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&season={_season}",
+    #     f"{c.BASE}/teams/{_mlbam}/roster/coach?season={_season}&hydrate=person",
+    #     f"{c.BASE}/draft/{_season}?sportId=1&teamId={_mlbam}",
+    #     f"{c.BASE}/transactions?teamId={_mlbam}&startDate={ssn_start}&endDate={ssn_end}",
     # ]
     
     # Retrieves '40Man' roster
     # -----------------------------
     url_list = [
-        f"{BASE}/teams/{_mlbam}?season={_season}&hydrate=standings",
-        f"{BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[season],group=[hitting],season={_season}))",
-        f"{BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[season],group=[pitching],season={_season}))",
-        f"{BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[season],group=[fielding],season={_season}))",
-        f"{BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[hitting],season={_season}))",
-        f"{BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[pitching],season={_season}))",
+        f"{c.BASE}/teams/{_mlbam}?season={_season}&hydrate=standings",
+        f"{c.BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[season],group=[hitting],season={_season}))",
+        f"{c.BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[season],group=[pitching],season={_season}))",
+        f"{c.BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[season],group=[fielding],season={_season}))",
+        f"{c.BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[hitting],season={_season}))",
+        f"{c.BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[seasonAdvanced],group=[pitching],season={_season}))",
 
-        f"{BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[statSplits],group=[pitching],sitCodes=[sp,rp],season={_season}))",
-        f"{BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[statSplitsAdvanced],group=[pitching],sitCodes=[sp,rp],season={_season}))",
+        f"{c.BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[statSplits],group=[pitching],sitCodes=[sp,rp],season={_season}))",
+        f"{c.BASE}/teams/{_mlbam}/roster/40Man?season={_season}&hydrate=person(stats(type=[statSplitsAdvanced],group=[pitching],sitCodes=[sp,rp],season={_season}))",
 
         # Stats for 'gameType = S' (Spring Training)
-        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&gameType=S&season={_season}",
-        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&gameType=S&season={_season}",
-        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&gameType=S&season={_season}",
+        f"{c.BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&gameType=S&season={_season}",
+        f"{c.BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&gameType=S&season={_season}",
+        f"{c.BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&gameType=S&season={_season}",
         
         # Stats for 'gameType = R' (Regular Season)
-        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&gameType=R&season={_season}",
-        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&gameType=R&season={_season}",
-        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&gameType=R&season={_season}",
+        f"{c.BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&gameType=R&season={_season}",
+        f"{c.BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&gameType=R&season={_season}",
+        f"{c.BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&gameType=R&season={_season}",
         
         # Stats for 'gameType = P' (Postseason/Playoffs)
-        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&gameType=P&season={_season}",
-        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&gameType=P&season={_season}",
-        f"{BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&gameType=P&season={_season}",
+        f"{c.BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=hitting&gameType=P&season={_season}",
+        f"{c.BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=pitching&gameType=P&season={_season}",
+        f"{c.BASE}/teams/{_mlbam}/stats?stats=season,seasonAdvanced&group=fielding&gameType=P&season={_season}",
         
-        f"{BASE}/teams/{_mlbam}/roster/coach?season={_season}&hydrate=person",
-        f"{BASE}/draft/{_season}?sportId=1&teamId={_mlbam}",
-        f"{BASE}/transactions?teamId={_mlbam}&startDate={ssn_start}&endDate={ssn_end}",
+        f"{c.BASE}/teams/{_mlbam}/roster/coach?season={_season}&hydrate=person",
+        f"{c.BASE}/draft/{_season}?sportId=1&teamId={_mlbam}",
+        f"{c.BASE}/transactions?teamId={_mlbam}&startDate={ssn_start}&endDate={ssn_end}",
     ]
 
     sched_hydrations = "game(content(media(epg))),team"
@@ -763,7 +726,7 @@ def _team_data(_mlbam,_season,**kwargs) -> Union[dict,list]:
         start_date_query = f"startDate={date_obj_1.strftime(r'%Y-%m-%d')}"
         end_date_query = f"endDate={date_obj_2.strftime(r'%Y-%m-%d')}"
         date_range_query = f"{start_date_query}&{end_date_query}"
-        url_to_add = f"{BASE}/schedule?sportId=1&teamId={_mlbam}&season={_season}&{date_range_query}&gameType={GAME_TYPES_ALL}&hydrate={sched_hydrations}"
+        url_to_add = f"{c.BASE}/schedule?sportId=1&teamId={_mlbam}&season={_season}&{date_range_query}&gameType={c.GAME_TYPES_ALL}&hydrate={sched_hydrations}"
 
         url_list.append(url_to_add)
     _logtime = kwargs.get('_logtime')
@@ -837,9 +800,9 @@ def _player_data(_mlbam,**kwargs) -> dict:
     
     """
     
-    pdf = get_people_df().set_index("mlbam").loc[_mlbam]
-    tdf = get_teams_df()
-    lg_df = get_leagues_df().set_index("mlbam")
+    pdf = mlbdata.get_people_df().set_index("mlbam").loc[_mlbam]
+    tdf = mlbdata.mlbdata.get_teams_df()
+    lg_df = mlbdata.get_leagues_df().set_index("mlbam")
 
     url_list = []
 
@@ -851,10 +814,10 @@ def _player_data(_mlbam,**kwargs) -> dict:
     if kwargs.get("_get_bio") is True:
         url_list.append(f"https://www.baseball-reference.com/redirect.fcgi?player=1&mlb_ID={_mlbam}")       # player_bio
     query = f"stats={statType}&gameType=R,P&group={statGroup}{seasonQuery}"
-    url_list.append(BASE + f"/people/{_mlbam}/stats?{query}")                                               # player_stats
-    url_list.append(BASE + f"/people/{_mlbam}/awards")                                                      # player_awards
-    url_list.append(BASE + f"/transactions?playerId={_mlbam}")                                              # player_transactions
-    url_list.append(BASE + f"/people/{_mlbam}?&appContext=majorLeague&hydrate={hydrations}")                # player_info
+    url_list.append(c.BASE + f"/people/{_mlbam}/stats?{query}")                                               # player_stats
+    url_list.append(c.BASE + f"/people/{_mlbam}/awards")                                                      # player_awards
+    url_list.append(c.BASE + f"/transactions?playerId={_mlbam}")                                              # player_transactions
+    url_list.append(c.BASE + f"/people/{_mlbam}?&appContext=majorLeague&hydrate={hydrations}")                # player_info
     
     # Generator attempt
     url_list = (url for url in url_list)
@@ -893,16 +856,16 @@ def _player_data(_mlbam,**kwargs) -> dict:
         }
 
     df_keys_dict = {
-            "0":WO_SEASON+COLS_HIT,
-            "1":WO_SEASON+COLS_HIT_ADV,
-            "2":WO_SEASON+COLS_PIT,
-            "3":WO_SEASON+COLS_PIT_ADV,
-            "4":WO_SEASON+COLS_FLD,
-            "5":W_SEASON+COLS_HIT,
-            "6":W_SEASON+COLS_HIT_ADV,
-            "7":W_SEASON+COLS_PIT,
-            "8":W_SEASON+COLS_PIT_ADV,
-            "9":W_SEASON+COLS_FLD
+            "0":c.WO_SEASON+c.COLS_HIT,
+            "1":c.WO_SEASON+c.COLS_HIT_ADV,
+            "2":c.WO_SEASON+c.COLS_PIT,
+            "3":c.WO_SEASON+c.COLS_PIT_ADV,
+            "4":c.WO_SEASON+c.COLS_FLD,
+            "5":c.W_SEASON+c.COLS_HIT,
+            "6":c.W_SEASON+c.COLS_HIT_ADV,
+            "7":c.W_SEASON+c.COLS_PIT,
+            "8":c.W_SEASON+c.COLS_PIT_ADV,
+            "9":c.W_SEASON+c.COLS_FLD
         }
     stat_dict = {
         "career_hit":pd.DataFrame(),
@@ -942,7 +905,7 @@ def _player_data(_mlbam,**kwargs) -> dict:
                 stats["lg_name"] = lg_name
 
                 data.append(pd.Series(stats))
-            df = pd.DataFrame(data=data).rename(columns=STATDICT)#[WO_SEASON+COLS_HIT]
+            df = pd.DataFrame(data=data).rename(columns=c.STATDICT)#[c.WO_SEASON+c.COLS_HIT]
             stat_dict["career_hit"] = df
             hitting["career"] = df
 
@@ -967,7 +930,7 @@ def _player_data(_mlbam,**kwargs) -> dict:
                 stats["lg_name"] = lg_name
 
                 data.append(pd.Series(stats))
-            df = pd.DataFrame(data=data).rename(columns=STATDICT)#[WO_SEASON+COLS_HIT_ADV]
+            df = pd.DataFrame(data=data).rename(columns=c.STATDICT)#[c.WO_SEASON+c.COLS_HIT_ADV]
             stat_dict["career_hit_adv"] = df
             hitting["career_advanced"] = df
 
@@ -992,7 +955,7 @@ def _player_data(_mlbam,**kwargs) -> dict:
                 stats["lg_name"] = lg_name
 
                 data.append(pd.Series(stats))
-            df = pd.DataFrame(data=data).rename(columns=STATDICT)#[WO_SEASON+COLS_PIT]
+            df = pd.DataFrame(data=data).rename(columns=c.STATDICT)#[c.WO_SEASON+c.COLS_PIT]
             stat_dict["career_pit"] = df
             pitching["career"] = df
 
@@ -1017,7 +980,7 @@ def _player_data(_mlbam,**kwargs) -> dict:
                 stats["lg_name"] = lg_name
 
                 data.append(pd.Series(stats))
-            df = pd.DataFrame(data=data).rename(columns=STATDICT)#[WO_SEASON+COLS_PIT_ADV]
+            df = pd.DataFrame(data=data).rename(columns=c.STATDICT)#[c.WO_SEASON+c.COLS_PIT_ADV]
             stat_dict["career_pit_adv"] = df
             pitching["career_advanced"] = df
 
@@ -1043,7 +1006,7 @@ def _player_data(_mlbam,**kwargs) -> dict:
                 stats["lg_name"] = lg_name
 
                 data.append(pd.Series(stats))
-            df = pd.DataFrame(data=data).rename(columns=STATDICT)#[WO_SEASON+COLS_FLD]
+            df = pd.DataFrame(data=data).rename(columns=c.STATDICT)#[c.WO_SEASON+c.COLS_FLD]
             stat_dict["career_fld"] = df
             fielding["career"] = df
 
@@ -1069,7 +1032,7 @@ def _player_data(_mlbam,**kwargs) -> dict:
                 stats["lg_name"] = lg_name
 
                 data.append(pd.Series(stats))
-            df = pd.DataFrame(data=data).rename(columns=STATDICT)#[W_SEASON+COLS_HIT].sort_values(by="season",ascending=False)
+            df = pd.DataFrame(data=data).rename(columns=c.STATDICT)#[c.W_SEASON+c.COLS_HIT].sort_values(by="season",ascending=False)
             stat_dict["yby_hit"] = df
             hitting["yby"] = df
 
@@ -1095,7 +1058,7 @@ def _player_data(_mlbam,**kwargs) -> dict:
                 stats["lg_name"] = lg_name
 
                 data.append(pd.Series(stats))
-            df = pd.DataFrame(data=data).rename(columns=STATDICT)#[W_SEASON+COLS_HIT_ADV].sort_values(by="season",ascending=False)
+            df = pd.DataFrame(data=data).rename(columns=c.STATDICT)#[c.W_SEASON+c.COLS_HIT_ADV].sort_values(by="season",ascending=False)
             stat_dict["yby_hit_adv"] = df
             hitting["yby_advanced"] = df
 
@@ -1121,7 +1084,7 @@ def _player_data(_mlbam,**kwargs) -> dict:
                 stats["lg_name"] = lg_name
 
                 data.append(pd.Series(stats))
-            df = pd.DataFrame(data=data).rename(columns=STATDICT)#[W_SEASON+COLS_PIT].sort_values(by="season",ascending=False)
+            df = pd.DataFrame(data=data).rename(columns=c.STATDICT)#[c.W_SEASON+c.COLS_PIT].sort_values(by="season",ascending=False)
             stat_dict["yby_pit"] = df
             pitching["yby"] = df
 
@@ -1147,7 +1110,7 @@ def _player_data(_mlbam,**kwargs) -> dict:
                 stats["lg_name"] = lg_name
 
                 data.append(pd.Series(stats))
-            df = pd.DataFrame(data=data).rename(columns=STATDICT)#[W_SEASON+COLS_PIT_ADV].sort_values(by="season",ascending=False)
+            df = pd.DataFrame(data=data).rename(columns=c.STATDICT)#[c.W_SEASON+c.COLS_PIT_ADV].sort_values(by="season",ascending=False)
             stat_dict["yby_pit_adv"] = df
             pitching["yby_advanced"] = df
 
@@ -1174,7 +1137,7 @@ def _player_data(_mlbam,**kwargs) -> dict:
                 stats["lg_name"] = lg_name
 
                 data.append(pd.Series(stats))
-            df = pd.DataFrame(data=data).rename(columns=STATDICT)#[W_SEASON+COLS_FLD].sort_values(by="season",ascending=False)
+            df = pd.DataFrame(data=data).rename(columns=c.STATDICT)#[c.W_SEASON+c.COLS_FLD].sort_values(by="season",ascending=False)
             stat_dict["yby_fld"] = df
             fielding["yby"] = df
 
@@ -1559,8 +1522,8 @@ def _parse_franchise_standings(data:dict,lgs_df:pd.DataFrame) -> list[pd.DataFra
                             splits_dict['turf'],
                             ])
         
-    records_df = pd.DataFrame(data=records_data,columns=YBY_REC_COLS)
-    splits_df  = pd.DataFrame(data=splits_data, columns=YBY_REC_SPLIT_COLS)
+    records_df = pd.DataFrame(data=records_data,columns=c.YBY_REC_COLS)
+    splits_df  = pd.DataFrame(data=splits_data, columns=c.YBY_REC_SPLIT_COLS)
     records_df.sort_values(by='season',ascending=False,inplace=True)
     splits_df.sort_values(by='season',ascending=False,inplace=True)
     
@@ -1603,14 +1566,14 @@ def _franchise_data(mlbam,**kwargs) -> dict:
     """
     _mlbam = mlbam
 
-    records = get_yby_records()
+    records = mlbdata.get_yby_records()
     records = records[records['tm_mlbam']==int(mlbam)]
-    standings = get_standings_df()
+    standings = mlbdata.get_standings_df()
     standings = standings[standings['mlbam']==int(mlbam)]
 
     # == ASYNC STARTS HERE ===============================================
-    lgs_df = get_leagues_df().set_index('mlbam')
-    team_df = get_teams_df()
+    lgs_df = mlbdata.get_leagues_df().set_index('mlbam')
+    team_df = mlbdata.mlbdata.get_teams_df()
     team_df = team_df[team_df['mlbam']==int(mlbam)]
     firstYear = team_df.iloc[0]["first_year"]
     years = range(firstYear,int(default_season())+1)
@@ -1620,8 +1583,8 @@ def _franchise_data(mlbam,**kwargs) -> dict:
         urls.append(f"https://statsapi.mlb.com/api/v1/teams/{mlbam}?hydrate=standings&season={year}")                   # yby_data
 
     hydrations = f"nextSchedule(limit=5),previousSchedule(limit=1,season={default_season()}),league,division"           # ---- (hydrations for 'team_info') ----
-    urls.append(BASE + f"/teams/{mlbam}?hydrate={hydrations}")                                                          # team_info
-    urls.append((BASE + f"/teams/{mlbam}/stats?stats=yearByYear,yearByYearAdvanced&group=hitting,pitching,fielding"))   # team_stats
+    urls.append(c.BASE + f"/teams/{mlbam}?hydrate={hydrations}")                                                          # team_info
+    urls.append((c.BASE + f"/teams/{mlbam}/stats?stats=yearByYear,yearByYearAdvanced&group=hitting,pitching,fielding"))   # team_stats
     urls.append(f"https://statsapi.mlb.com/api/v1/teams/{mlbam}/roster/allTime")                                        # all_players
     urls.append(f"https://statsapi.mlb.com/api/v1/awards/MLBHOF/recipients")                                            # hof_players
     urls.append(f"https://statsapi.mlb.com/api/v1/awards/RETIREDUNI_{mlbam}/recipients")                                # retired_numbers
@@ -1760,20 +1723,20 @@ def _franchise_data(mlbam,**kwargs) -> dict:
                 field_data.append(stats)
 
     stat_dict = {
-        'hit_df'       : pd.DataFrame(data=hit_data).rename(columns=STATDICT),
-        'hit_adv_df'   : pd.DataFrame(data=hit_adv_data).rename(columns=STATDICT),
-        'pitch_df'     : pd.DataFrame(data=pitch_data).rename(columns=STATDICT),
-        'pitch_adv_df' : pd.DataFrame(data=pitch_adv_data).rename(columns=STATDICT),
-        'field_df'     : pd.DataFrame(data=field_data).rename(columns=STATDICT),
+        'hit_df'       : pd.DataFrame(data=hit_data).rename(columns=c.STATDICT),
+        'hit_adv_df'   : pd.DataFrame(data=hit_adv_data).rename(columns=c.STATDICT),
+        'pitch_df'     : pd.DataFrame(data=pitch_data).rename(columns=c.STATDICT),
+        'pitch_adv_df' : pd.DataFrame(data=pitch_adv_data).rename(columns=c.STATDICT),
+        'field_df'     : pd.DataFrame(data=field_data).rename(columns=c.STATDICT),
     }
 
     # need to remove any stats that are not available at the team-level (e.g. "IR","IRS","BQ","BQS" etc.)
     df_keys_dict = {
-        "0":COLS_HIT,
-        "1":COLS_HIT_ADV,
-        "2":COLS_PIT,
-        "3":COLS_PIT_ADV,
-        "4":COLS_FLD
+        "0":c.COLS_HIT,
+        "1":c.COLS_HIT_ADV,
+        "2":c.COLS_PIT,
+        "3":c.COLS_PIT_ADV,
+        "4":c.COLS_FLD
     }
 
     for idx,df_name in enumerate(stat_dict.keys()):
@@ -1880,827 +1843,7 @@ def _franchise_data(mlbam,**kwargs) -> dict:
 # PLAYER Functions
 # ===============================================================
 
-def player_hitting(mlbam,*args,**kwargs) -> pd.DataFrame:
-    """Get player career & year-by-year hitting stats
-
-    Parameters
-    ----------
-    mlbam : str or int
-        player's official MLB ID
-
-    gameType : str, optional
-        filter results by game type
-
-    """
-
-    if len(args) == 1:
-        if type(args[0]) is list:
-            gameType = ",".join(args[0])
-        else:
-            gameType = args[0]
-
-        gameType = gameType.replace(" ","")
-    else:
-        gameType = None
-
-    gameType = kwargs.get("gameType")
-
-    stats = "career,yearByYear"
-    url = BASE + f"/people/{mlbam}/stats?stats={stats}&group=hitting"
-
-    if gameType is not None:
-        url = url + f"&gameType={gameType}"
-
-    resp = requests.get(url)
-
-    season_col = []
-    team_mlbam_col = []
-    team_name_col = []
-    league_mlbam_col = []
-    league_col = []
-    game_type_col = []
-
-    stat_data = []
-
-    for stat_type in resp.json()['stats']:
-        if stat_type["type"]["displayName"] == "career":
-            for s in stat_type["splits"]:
-                career_stats = pd.Series(s["stat"])
-
-                season_col.append("Career")
-                team_mlbam_col.append("-")
-                team_name_col.append("-")
-                league_mlbam_col.append("-")
-                league_col.append("-")
-                game_type_col.append(s["gameType"])
-                
-                stat_data.append(career_stats)
-
-        elif stat_type["type"]["displayName"] == "yearByYear":
-            for s in stat_type["splits"]:
-                tm_id = s.get("team",{}).get("id")
-                tm_name = s.get("team",{}).get("name")
-                lg_id = s.get("league",{}).get("id")
-
-                season_stats = pd.Series(s["stat"])
-
-                season_col.append(s["season"])
-                team_mlbam_col.append(tm_id)
-                team_name_col.append(tm_name)
-                league_mlbam_col.append(lg_id)
-                league_col.append(LEAGUE_IDS.get(str(lg_id)))
-                game_type_col.append(s["gameType"])
-
-                stat_data.append(season_stats)
-
-        elif stat_type["type"]["displayName"] == "season":
-            for s in stat_type["splits"]:
-                tm_id = s.get("team",{}).get("id")
-                tm_name = s.get("team",{}).get("name")
-                lg_id = s.get("league",{}).get("id")
-
-                season_stats = pd.Series(s["stat"])
-
-                season_col.append(s["season"])
-                team_mlbam_col.append(tm_id)
-                team_name_col.append(tm_name)
-                league_mlbam_col.append(lg_id)
-                league_col.append(LEAGUE_IDS.get(str(lg_id)))
-                game_type_col.append(s["gameType"])
-
-                stat_data.append(season_stats)
-    
-    df = pd.DataFrame(data=stat_data).rename(columns=STATDICT)
-
-    df.insert(0,"Season",season_col)
-    df.insert(1,"team_mlbam",team_mlbam_col)
-    df.insert(2,"league_mlbam",league_mlbam_col)
-    df.insert(3,"game_type",game_type_col)
-
-    return df
-
-def player_pitching(mlbam,*args,**kwargs) -> pd.DataFrame:
-    """Get pitching career & year-by-year stats for a player
-
-    Parameters
-    ----------
-    mlbam : str or int
-        player's official MLB ID
-
-    gameType : str, optional
-        filter results by game type
-
-    """
-
-    if len(args) == 1:
-        if type(args[0]) is list:
-            gameType = ",".join(args[0])
-        else:
-            gameType = args[0]
-
-        gameType = gameType.replace(" ","")
-        # print(gameType)
-    else:
-        gameType = None
-
-    stats = "career,yearByYear"
-    url = BASE + f"/people/{mlbam}/stats?stats={stats}&group=pitching"
-
-    if gameType is not None:
-        url = url + f"&gameType={gameType}"
-
-    resp = requests.get(url)
-
-    season_col = []
-    team_mlbam_col = []
-    team_name_col = []
-    league_mlbam_col = []
-    league_col = []
-    game_type_col = []
-
-
-    stat_data = []
-
-    for stat_type in resp.json()['stats']:
-        if stat_type["type"]["displayName"] == "career":
-            for s in stat_type["splits"]:
-                career_stats = pd.Series(s["stat"])
-
-                season_col.append("Career")
-                team_mlbam_col.append("-")
-                team_name_col.append("-")
-                league_mlbam_col.append("-")
-                league_col.append("-")
-                game_type_col.append(s["gameType"])
-                
-                stat_data.append(career_stats)
-
-        elif stat_type["type"]["displayName"] == "yearByYear":
-            for s in stat_type["splits"]:
-                tm_id = s.get("team",{}).get("id")
-                tm_name = s.get("team",{}).get("name")
-                lg_id = s.get("league",{}).get("id")
-
-                season_stats = pd.Series(s["stat"])
-
-                season_col.append(s["season"])
-                team_mlbam_col.append(tm_id)
-                team_name_col.append(tm_name)
-                league_mlbam_col.append(lg_id)
-                league_col.append(LEAGUE_IDS.get(str(lg_id)))
-                game_type_col.append(s["gameType"])
-
-                stat_data.append(season_stats)
-
-        elif stat_type["type"]["displayName"] == "season":
-            for s in stat_type["splits"]:
-                tm_id = s.get("team",{}).get("id")
-                tm_name = s.get("team",{}).get("name")
-                lg_id = s.get("league",{}).get("id")
-
-                season_stats = pd.Series(s["stat"])
-
-                season_col.append(s["season"])
-                team_mlbam_col.append(tm_id)
-                team_name_col.append(tm_name)
-                league_mlbam_col.append(lg_id)
-                league_col.append(LEAGUE_IDS.get(str(lg_id)))
-                game_type_col.append(s["gameType"])
-
-                stat_data.append(season_stats)
-    
-    df = pd.DataFrame(data=stat_data).rename(columns=STATDICT)
-
-    df.insert(0,"season",season_col)
-    df.insert(1,"team_mlbam",team_mlbam_col)
-    df.insert(2,"league_mlbam",league_mlbam_col)
-    df.insert(3,"game_type",game_type_col)
-
-    return df
-
-def player_fielding(mlbam,*args,**kwargs) -> pd.DataFrame:
-    """Get player career & year-by-year fielding stats
-
-    Parameters
-    ----------
-    mlbam : str or int
-        player's official MLB ID
-
-    gameType : str, optional
-        filter results by game type
-
-    """
-
-    if len(args) == 1:
-        if type(args[0]) is list:
-            gameType = ",".join(args[0])
-        else:
-            gameType = args[0]
-
-        gameType = gameType.replace(" ","")
-        print(gameType)
-    else:
-        gameType = None
-
-    stats = "career,yearByYear"
-    url = BASE + f"/people/{mlbam}/stats?stats={stats}&group=fielding"
-
-    if gameType is not None:
-        url = url + f"&gameType={gameType}"
-
-    resp = requests.get(url)
-
-    season_col = []
-    team_mlbam_col = []
-    team_name_col = []
-    league_mlbam_col = []
-    league_col = []
-    game_type_col = []
-    pos_col = []
-
-    stat_data = []
-
-    for stat_type in resp.json()['stats']:
-        if stat_type["type"]["displayName"] == "career":
-            for s in stat_type["splits"]:
-                pos_col.append(s["stat"]["position"]["abbreviation"])
-                career_stats = pd.Series(s["stat"])
-
-                season_col.append("Career")
-                team_mlbam_col.append("-")
-                team_name_col.append("-")
-                league_mlbam_col.append("-")
-                league_col.append("-")
-                game_type_col.append(s["gameType"])
-                
-                stat_data.append(career_stats)
-
-        elif stat_type["type"]["displayName"] == "yearByYear":
-            for s in stat_type["splits"]:
-                pos_col.append(s["stat"]["position"]["abbreviation"])
-                tm_id = s.get("team",{}).get("id")
-                tm_name = s.get("team",{}).get("name")
-                lg_id = s.get("league",{}).get("id")
-
-                season_stats = pd.Series(s["stat"])
-
-                season_col.append(s["season"])
-                team_mlbam_col.append(tm_id)
-                team_name_col.append(tm_name)
-                league_mlbam_col.append(lg_id)
-                league_col.append(LEAGUE_IDS.get(str(lg_id)))
-                game_type_col.append(s["gameType"])
-
-                stat_data.append(season_stats)
-
-        elif stat_type["type"]["displayName"] == "season":
-            for s in stat_type["splits"]:
-                pos_col.append(s["stat"]["position"]["abbreviation"])
-                tm_id = s.get("team",{}).get("id")
-                tm_name = s.get("team",{}).get("name")
-                lg_id = s.get("league",{}).get("id")
-
-                season_stats = pd.Series(s["stat"])
-
-                season_col.append(s["season"])
-                team_mlbam_col.append(tm_id)
-                team_name_col.append(tm_name)
-                league_mlbam_col.append(lg_id)
-                league_col.append(LEAGUE_IDS.get(str(lg_id)))
-                game_type_col.append(s["gameType"])
-
-                stat_data.append(season_stats)
-    
-    df = pd.DataFrame(data=stat_data).rename(columns=STATDICT).drop(columns="pos")
-
-    df.insert(0,"season",season_col)
-    df.insert(1,"team_mlbam",team_mlbam_col)
-    df.insert(2,"league_mlbam",league_mlbam_col)
-    df.insert(3,"game_type",game_type_col)
-    df.insert(4,"pos",pos_col)
-    # df.insert(5,"game_type",game_type_col)
-
-    return df
-
-def player_hitting_advanced(mlbam,*args,**kwargs) -> pd.DataFrame:
-    """Get advanced hitting stats for a player
-
-    Parameters
-    ----------
-    mlbam : str or int
-        player's official MLB ID
-
-    gameType : str, optional
-        filter results by game type
-    """
-    if len(args) == 1:
-        if type(args[0]) is list:
-            gameType = ",".join(args[0])
-        else:
-            gameType = args[0]
-
-        gameType = gameType.replace(" ","")
-        print(gameType)
-    else:
-        gameType = None
-
-    stats = "careerAdvanced,yearByYearAdvanced"
-    url = BASE + f"/people/{mlbam}/stats?stats={stats}&group=hitting"
-
-    if gameType is not None:
-        url = url + f"&gameType={gameType}"
-
-    resp = requests.get(url)
-
-    season_col = []
-    team_mlbam_col = []
-    team_name_col = []
-    league_mlbam_col = []
-    league_col = []
-    game_type_col = []
-
-
-    stat_data = []
-
-    for stat_type in resp.json()['stats']:
-        if stat_type["type"]["displayName"] == "careerAdvanced":
-            for s in stat_type["splits"]:
-                career_stats = pd.Series(s["stat"])
-
-                season_col.append("Career")
-                team_mlbam_col.append("-")
-                team_name_col.append("-")
-                league_mlbam_col.append("-")
-                league_col.append("-")
-                game_type_col.append(s["gameType"])
-                
-                stat_data.append(career_stats)
-
-        elif stat_type["type"]["displayName"] == "yearByYearAdvanced":
-            for s in stat_type["splits"]:
-                tm_id = s.get("team",{}).get("id")
-                tm_name = s.get("team",{}).get("name")
-                lg_id = s.get("league",{}).get("id")
-
-                season_stats = pd.Series(s["stat"])
-
-                season_col.append(s["season"])
-                team_mlbam_col.append(tm_id)
-                team_name_col.append(tm_name)
-                league_mlbam_col.append(lg_id)
-                league_col.append(LEAGUE_IDS.get(str(lg_id)))
-                game_type_col.append(s["gameType"])
-
-                stat_data.append(season_stats)
-
-        elif stat_type["type"]["displayName"] == "seasonAdvanced":
-            for s in stat_type["splits"]:
-                tm_id = s.get("team",{}).get("id")
-                tm_name = s.get("team",{}).get("name")
-                lg_id = s.get("league",{}).get("id")
-
-                season_stats = pd.Series(s["stat"])
-
-                season_col.append(s["season"])
-                team_mlbam_col.append(tm_id)
-                team_name_col.append(tm_name)
-                league_mlbam_col.append(lg_id)
-                league_col.append(LEAGUE_IDS.get(str(lg_id)))
-                game_type_col.append(s["gameType"])
-
-                stat_data.append(season_stats)
-    
-    df = pd.DataFrame(data=stat_data).rename(columns=STATDICT)
-
-    df.insert(0,"season",season_col)
-    df.insert(1,"team_mlbam",team_mlbam_col)
-    df.insert(2,"league_mlbam",league_mlbam_col)
-    df.insert(3,"game_type",game_type_col)
-
-    return df
-
-def player_pitching_advanced(mlbam,*args,**kwargs) -> pd.DataFrame:
-    """Get advanced player pitching stats
-
-    Parameters
-    ----------
-    mlbam : str or int
-        player's official MLB ID
-
-    gameType : str, optional
-        filter results by game type
-
-    """
-
-    if len(args) == 1:
-        if type(args[0]) is list:
-            gameType = ",".join(args[0])
-        else:
-            gameType = args[0]
-
-        gameType = gameType.replace(" ","")
-        print(gameType)
-    else:
-        gameType = None
-
-    stats = "careerAdvanced,yearByYearAdvanced"
-    url = BASE + f"/people/{mlbam}/stats?stats={stats}&group=pitching"
-
-    if gameType is not None:
-        url = url + f"&gameType={gameType}"
-
-    resp = requests.get(url)
-
-    season_col = []
-    team_mlbam_col = []
-    team_name_col = []
-    league_mlbam_col = []
-    league_col = []
-    game_type_col = []
-
-
-    stat_data = []
-
-    for stat_type in resp.json()['stats']:
-        if stat_type["type"]["displayName"] == "careerAdvanced":
-            for s in stat_type["splits"]:
-                career_stats = pd.Series(s["stat"])
-
-                season_col.append("Career")
-                team_mlbam_col.append("-")
-                team_name_col.append("-")
-                league_mlbam_col.append("-")
-                league_col.append("-")
-                game_type_col.append(s["gameType"])
-                
-                stat_data.append(career_stats)
-
-        elif stat_type["type"]["displayName"] == "yearByYearAdvanced":
-            for s in stat_type["splits"]:
-                tm_id = s.get("team",{}).get("id")
-                tm_name = s.get("team",{}).get("name")
-                lg_id = s.get("league",{}).get("id")
-
-                season_stats = pd.Series(s["stat"])
-
-                season_col.append(s["season"])
-                team_mlbam_col.append(tm_id)
-                team_name_col.append(tm_name)
-                league_mlbam_col.append(lg_id)
-                league_col.append(LEAGUE_IDS.get(str(lg_id)))
-                game_type_col.append(s["gameType"])
-
-                stat_data.append(season_stats)
-
-        elif stat_type["type"]["displayName"] == "seasonAdvanced":
-            for s in stat_type["splits"]:
-                tm_id = s.get("team",{}).get("id")
-                tm_name = s.get("team",{}).get("name")
-                lg_id = s.get("league",{}).get("id")
-
-                season_stats = pd.Series(s["stat"])
-
-                season_col.append(s["season"])
-                team_mlbam_col.append(tm_id)
-                team_name_col.append(tm_name)
-                league_mlbam_col.append(lg_id)
-                league_col.append(LEAGUE_IDS.get(str(lg_id)))
-                game_type_col.append(s["gameType"])
-
-                stat_data.append(season_stats)
-    
-    df = pd.DataFrame(data=stat_data).rename(columns=STATDICT)
-
-    df.insert(0,"season",season_col)
-    df.insert(1,"team_mlbam",team_mlbam_col)
-    df.insert(2,"league_mlbam",league_mlbam_col)
-    df.insert(3,"game_type",game_type_col)
-
-    return df
-
-def player_game_logs(mlbam,season=None,statGroup=None,gameType=None,**kwargs) -> pd.DataFrame:
-    """Get a player's game log stats for a specific season
-
-    Parameters
-    ----------
-    mlbam : str or int
-        player's official MLB ID
-    
-    seasons : str or int, optional (Default is the most recent season)
-        filter by season
-
-    statGroup : str, optional
-        filter results by stat group ('hitting','pitching','fielding')
-
-    gameType : str, optional
-        filter results by game type
-
-    startDate : str, optional
-        include games AFTER a specified date
-    
-    endDate : str, optional
-        include games BEFORE a specified date
-
-    """
-
-    params = {
-        "stats":"gameLog"
-    }
-    if kwargs.get("seasons") is not None:
-        season = kwargs["seasons"]
-
-    if kwargs.get("group") is not None:
-        statGroup = kwargs["group"]
-    elif kwargs.get("groups") is not None:
-        statGroup = kwargs["groups"]
-    elif kwargs.get("statGroups") is not None:
-        statGroup = kwargs["statGroups"]
-    else:
-        statGroup = statGroup
-
-    if kwargs.get("gameTypes") is not None:
-        gameType = kwargs["gameTypes"]
-    elif kwargs.get("game_type") is not None:
-        gameType = kwargs["game_type"]
-
-    if season is not None:
-        params["season"] = season
-    if statGroup is not None:
-        params["group"] = statGroup
-    if gameType is not None:
-        params["gameType"] = gameType
-    if kwargs.get("startDate") is not None:
-        params["startdate"] = kwargs["startDate"]
-    if kwargs.get("endDate") is not None:
-        params["endDate"] = kwargs["endDate"]
-
-    url = BASE + f"/people/{mlbam}/stats?"
-    resp = requests.get(url,params=params)
-
-    data = []
-
-    # "sg" referes to each stat group in the results
-    for sg in resp.json()["stats"]:
-        if sg["group"]["displayName"] == "hitting":
-            # "g" refers to each game
-            for g in sg.get("splits"):
-                game = g.get("stat",{})
-
-                positions = []
-                player = g.get("player",{})
-                mlbam = player.get("id")
-                name = player.get("name")
-                for pos in g.get("positionsPlayed",[]):
-                    positions.append(pos.get("abbreviation"))
-                positions = "|".join(positions)
-                
-                tm = g.get("team",{})
-                tm_opp_mlbam = g.get("opponent",{}).get("id")
-                tm_opp_name = g.get("opponent",{}).get("name")
-                
-                game["date"] = g.get("date","")
-                game["isHome"] = g.get("isHome",False)
-                game["isWin"] = g.get("isWin",False)
-                game["gamePk"] = g.get("game",{}).get("gamePk")
-                game["mlbam"] = mlbam
-                game["name"] = name
-                game["positions"] = positions
-                game["tm_mlbam"] = tm.get("id")
-                game["name"] = tm.get("name")
-                game["opp_mlbam"] = tm_opp_mlbam
-                game["opp_name"] = tm_opp_name
-
-                data.append(pd.Series(game))
-
-            break
-    
-
-    columns = ['date','isHome','isWin','gamePk','mlbam','name','positions','tm_mlbam','opp_mlbam','opp_name','G','GO','AO','R','2B','3B','HR','SO','BB','IBB','H','HBP','AVG','AB','OBP','SLG','OPS','CS','SB','SB%','GIDP','GITP','P','PA','TB','RBI','LOB','sB','sF','BABIP','GO/AO','CI','AB/HR']
-    # df = pd.DataFrame(data=data).rename(columns=STATDICT)[columns]
-    df = pd.DataFrame(data=data).rename(columns=STATDICT)#[columns]
-
-    return df
-
-def player_date_range(mlbam,statGroup,startDate,endDate,gameType=None) -> pd.DataFrame:
-    """Get a player's stats for a specified date range
-
-    Parameters
-    ----------
-    mlbam : str or int, required
-        player's official MLB ID
-    
-    startDate : str, required
-        include games AFTER a specified date (format: "YYYY-mm-dd")
-    
-    endDate : str, required
-        include games BEFORE a specified date (format: "YYYY-mm-dd")
-
-    statGroup : str, required
-        filter results by stat group ('hitting','pitching','fielding')
-
-    gameType : str, optional
-        filter results by game type (only one gameType can be specified per call)
-
-    """
-
-    mlbam = str(mlbam)
-
-    params = {
-        "stats":"byDateRange",
-        "group":statGroup,
-        "startDate":startDate,
-        "endDate":endDate
-    }
-
-    if gameType is not None:
-        params["gameType"] = gameType
-
-    url = BASE + f"/people/{mlbam}/stats?"
-
-    resp = requests.get(url,params=params)
-    resp_json = resp.json()
-
-    data = []
-
-    for s in resp_json["stats"][0]["splits"]:
-        if s.get("sport",{}).get("id") == 1:
-            stats = s.get("stat")
-            stats["tm_mlbam"] = s.get("team",{}).get("id")
-            stats["tm_name"] = s.get("team",{}).get("name")
-            data.append(pd.Series(stats))
-    
-    columns = ['tm_mlbam','team','G','GO','AO','R','2B','3B','HR','SO','BB','IBB','H','HBP','AVG','AB','OBP','SLG','OPS','CS','SB','SB%','GIDP','GITP','P','PA','TB','RBI','LOB','sB','sF','BABIP','GO/AO','CI','AB/HR']
-    df = pd.DataFrame(data).rename(columns=STATDICT)
-
-    return df
-
-def player_date_range_advanced(mlbam,statGroup,startDate,endDate,gameType=None) -> pd.DataFrame:
-    """Get a player's stats for a specified date range
-
-    Parameters
-    ----------
-    mlbam : str or int, required
-        player's official MLB ID
-    
-    startDate : str, required
-        include games AFTER a specified date (format: "YYYY-mm-dd")
-    
-    endDate : str, required
-        include games BEFORE a specified date (format: "YYYY-mm-dd")
-
-    statGroup : str, required
-        filter results by stat group ('hitting','pitching','fielding')
-
-    gameType : str, optional
-        filter results by game type (only one gameType can be specified per call)
-
-    """
-
-    mlbam = str(mlbam)
-
-    params = {
-        "stats":"byDateRangeAdvanced",
-        "group":statGroup,
-        "startDate":startDate,
-        "endDate":endDate
-    }
-
-    if gameType is not None:
-        params["gameType"] = gameType
-
-    url = BASE + f"/people/{mlbam}/stats?"
-
-    resp = requests.get(url,params=params)
-    resp_json = resp.json()
-
-    data = []
-
-    for s in resp_json["stats"][0]["splits"]:
-        if s.get("sport",{}).get("id") == 1:
-            stats = s.get("stat")
-            stats["tm_mlbam"] = s.get("team",{}).get("id")
-            stats["tm_name"] = s.get("team",{}).get("name")
-            data.append(pd.Series(stats))
-    
-    columns = ['tm_mlbam','team','PA','TB','sB','sF','BABIP','exBH','HBP','GIDP','P','P/PA','BB/PA','SO/PA','HR/PA','BB/SO','ISO','GO']
-    # df = pd.DataFrame(data).rename(columns=STATDICT)[columns]
-    df = pd.DataFrame(data).rename(columns=STATDICT)
-
-    return df
-
-def player_splits(mlbam,statGroup,sitCodes,season=None,gameType=None) -> pd.DataFrame:
-    """Get a player's stats for a specified date range
-
-    Parameters
-    ----------
-    mlbam : str or int, required
-        player's official MLB ID
-
-    statGroup : str, required
-        filter results by stat group ('hitting','pitching','fielding')
-    
-    sitCodes : str, required
-        situation code(s) to get stats for ("h" for home games, "a" for away games, "n" for night games, etc.)
-
-    gameType : str, optional
-        filter results by game type (only one gameType can be specified per call)
-
-    """
-
-    mlbam = str(mlbam)
-
-    params = {
-        "stats":"statSplits",
-        "group":statGroup,
-        "sitCodes":sitCodes,
-    }
-
-    if gameType is not None:
-        params["gameType"] = gameType
-    if season is not None:
-        params["season"] = season
-    else:
-        params["season"] = default_season()
-
-    url = BASE + f"/people/{mlbam}/stats?"
-
-    resp = requests.get(url,params=params)
-    resp_json = resp.json()
-
-    data = []
-
-    for s in resp_json["stats"][0]["splits"]:
-        if s.get("sport",{}).get("id") == 1:
-            stats = s.get("stat")
-            stats["tm_mlbam"] = s.get("team",{}).get("id")
-            stats["tm_name"] = s.get("team",{}).get("name")
-            stats["season"] = s.get("season")
-            stats["split_code"] = s.get("split",{}).get("code")
-            stats["split"] = s.get("split",{}).get("description")
-            data.append(pd.Series(stats))
-    
-    columns = ['season','split_code','split','tm_mlbam','team','G','GO','AO','R','2B','3B','HR','SO','BB','IBB','H','HBP','AVG','AB','OBP','SLG','OPS','CS','SB','SB%','GIDP','GITP','P','PA','TB','RBI','LOB','sB','sF','BABIP','GO/AO','CI','AB/HR']
-    # df = pd.DataFrame(data).rename(columns=STATDICT)[columns]
-    df = pd.DataFrame(data).rename(columns=STATDICT)
-    return df
-
-def player_splits_advanced(mlbam,statGroup,sitCodes,season=None,gameType=None) -> pd.DataFrame:
-    """Get a player's stats for a specified date range
-
-    Parameters
-    ----------
-    mlbam : str or int, required
-        player's official MLB ID
-
-    statGroup : str, required
-        filter results by stat group ('hitting','pitching','fielding')
-    
-    sitCodes : str, required
-        situation code(s) to get stats for ("h" for home games, "a" for away games, "n" for night games, etc.)
-
-    gameType : str, optional
-        filter results by game type (only one gameType can be specified per call)
-
-    """
-
-    mlbam = str(mlbam)
-
-    params = {
-        "stats":"statSplitsAdvanced",
-        "group":statGroup,
-        "sitCodes":sitCodes,
-    }
-
-    if gameType is not None:
-        params["gameType"] = gameType
-    if season is not None:
-        params["season"] = season
-    else:
-        params["season"] = default_season()
-
-    url = BASE + f"/people/{mlbam}/stats?"
-
-    resp = requests.get(url,params=params)
-    resp_json = resp.json()
-
-    data = []
-
-    for s in resp_json["stats"][0]["splits"]:
-        if s.get("sport",{}).get("id") == 1:
-            stats = s.get("stat")
-            stats["tm_mlbam"] = s.get("team",{}).get("id")
-            stats["tm_name"] = s.get("team",{}).get("name")
-            stats["season"] = s.get("season")
-            stats["split_code"] = s.get("split",{}).get("code")
-            stats["split"] = s.get("split",{}).get("description")
-            data.append(pd.Series(stats))
-    
-    columns = ['season','split_code','split','tm_mlbam','team','PA','TB','sB','sF','BABIP','exBH','HBP','GIDP','P','P/PA','BB/PA','SO/PA','HR/PA','BB/SO','ISO']
-    # df = pd.DataFrame(data).rename(columns=STATDICT)[columns]
-    df = pd.DataFrame(data).rename(columns=STATDICT)#[columns]
-    return df
-
-def player_stats(mlbam,statGroup,statType,season=None,**kwargs) -> pd.DataFrame:
+def player_stats(mlbam,**kwargs):
     """Get various types of player stats, game logs, and pitch logs
 
     Parameters
@@ -2766,760 +1909,419 @@ def player_stats(mlbam,statGroup,statType,season=None,**kwargs) -> pd.DataFrame:
 
     mlb.gameTypes()
 
-    Notes
-    -----
-    Column labels may differ depending on the stat type; particularly for the 'pitchLog' and 'playLog' stat types
+    """
+    kwargs = ExtendedDict(kwargs)
+    params = {
+        'group':'hitting,pitching,fielding',
+        'stats':'yearByYear,yearByYearAdvanced',
+        'hydrate':'person'
+    }
+    statType = kwargs.dget('stat_type','statType','types','type')
+    if statType is not None:
+        if 'season' in statType:
+            if kwargs.get('season') is None:
+                params['season'] = default_season()
+            else:
+                params['season'] = kwargs['season']
+        params['stats'] = statType
     
+    statGroup = kwargs.dget('statGroup','stat_group','groups','group')
+    if statGroup is not None:
+        params['group'] = statGroup
+        
+    url = c.BASE + f"/people/{mlbam}/stats"
+    resp = requests.get(url,params=params)
+    
+    dfs = {}
+    
+    for s in resp.json().get('stats',[{}]):
+        if 'advanced' not in s.get('type',{}).get('displayName','').lower():
+            if s.get('group',{}).get('displayName') == "hitting":
+                dfs['hitting'] = parsing._parse_player_stats(s.get('splits',[{}]))
+            elif s.get('group',{}).get('displayName') == "pitching":
+                dfs['pitching'] = parsing._parse_player_stats(s.get('splits',[{}]))
+            elif s.get('group',{}).get('displayName') == "fielding":
+                dfs['fielding'] = parsing._parse_player_stats(s.get('splits',[{}]))
+        else:
+            if s.get('group',{}).get('displayName') == "hitting":
+                dfs['hitting_adv'] = parsing._parse_player_stats(s.get('splits',[{}]))
+            elif s.get('group',{}).get('displayName') == "pitching":
+                dfs['pitching_adv'] = parsing._parse_player_stats(s.get('splits',[{}]))
+    
+    return dclass.StatTypeCollection(
+        dfs['hitting'],dfs['pitching'],dfs['fielding'],
+        dfs['hitting_adv'],dfs['pitching_adv']
+    )
+    
+def player_game_logs(mlbam,season=None,statGroup=None,gameType=None,**kwargs) -> pd.DataFrame:
+    """Get a player's game log stats for a specific season
 
-    Examples
-    --------
+    Parameters
+    ----------
+    mlbam : str or int
+        player's official MLB ID
+    
+    seasons : str or int, optional (Default is the most recent season)
+        filter by season
+
+    statGroup : str, optional
+        filter results by stat group ('hitting','pitching','fielding')
+
+    gameType : str, optional
+        filter results by game type
+
+    startDate : str, optional
+        include games AFTER a specified date
+    
+    endDate : str, optional
+        include games BEFORE a specified date
 
     """
-    
-    params = {}
 
-    statType = statType
-    statGroup = statGroup
-
-    # Accounting for possible kwargs and aliases
-    if kwargs.get("type") is not None:
-        statType = kwargs["type"]
+    params = {
+        "stats":"gameLog"
+    }
+    if kwargs.get("seasons") is not None:
+        season = kwargs["seasons"]
 
     if kwargs.get("group") is not None:
         statGroup = kwargs["group"]
-
-    if kwargs.get("eventType") is not None:
-        eventType = kwargs["eventType"]
-    elif kwargs.get("eventTypes") is not None:
-        eventType = kwargs["eventTypes"]
-    elif kwargs.get("event") is not None:
-        eventType = kwargs["event"]
+    elif kwargs.get("groups") is not None:
+        statGroup = kwargs["groups"]
+    elif kwargs.get("statGroups") is not None:
+        statGroup = kwargs["statGroups"]
     else:
-        eventType = None
+        statGroup = statGroup
 
-    if kwargs.get("gameType") is not None:
-        gameType = kwargs["gameType"]
-    elif kwargs.get("gameTypes") is not None:
+    if kwargs.get("gameTypes") is not None:
         gameType = kwargs["gameTypes"]
-    else:
-        gameType = None
-    
-    if kwargs.get("startDate") is not None:
-        startDate = kwargs["startDate"]
-        if kwargs.get("endDate") is not None:
-            endDate = kwargs["endDate"]
-        else:
-            print("'startDate' and 'endDate' params must be used together")
-            return None
-        if type(startDate) is dt.datetime or type(startDate) is dt.date:
-            startDate = startDate.strftime(r"%Y-%m-%d")
-        if type(endDate) is dt.datetime or type(endDate) is dt.date:
-            endDate = endDate.strftime(r"%Y-%m-%d")
-        params["startDate"] = startDate
-        params["endDate"] = endDate
-
-    if kwargs.get("opposingTeamId") is not None:
-        opposingTeamId = kwargs["opposingTeamId"]
-    elif kwargs.get("oppTeamId") is not None:
-        opposingTeamId = kwargs["oppTeamId"]
-    else:
-        opposingTeamId = None
-
-    if kwargs.get("opposingPlayerId") is not None:
-        opposingPlayerId = kwargs["opposingPlayerId"]
-    elif kwargs.get("oppPlayerId") is not None:
-        opposingPlayerId = kwargs["oppPlayerId"]
-    else:
-        opposingPlayerId = None
-
-    if kwargs.get("pitchType") is not None:
-        pitchType = kwargs["pitchType"]
-        if type(pitchType) is str:
-            eventType = eventType
-        elif type(pitchType) is list:
-            pitchType = ",".join(pitchType).upper()
-        params["pitchType"] = pitchType
-
-    if eventType is not None:
-        if type(eventType) is str:
-            eventType = eventType
-        elif type(eventType) is list:
-            eventType = ",".join(eventType)
-        params["eventType"] = eventType
-
-    if gameType is not None:
-        if type(gameType) is str:
-            gameType = gameType.upper()
-        elif type(gameType) is list:
-            gameType = ",".join(gameType).upper()
-        params["gameType"] = gameType
-
-    if statType == "vsTeam" or statType == "vsTeamTotal" or statType == "vsTeam5Y":
-        if opposingTeamId is None:
-            print("Params 'opposingTeamId' is required when using statType 'vsTeam','vsTeamTotal',or 'vsTeam5Y'")
-            return None
-        else:
-            params["opposingTeamId"] = opposingTeamId
-        if season is not None:
-            params["season"] = season
-    elif statType == "vsPlayer" or statType == "vsPlayerTotal" or statType == "vsPlayer5Y":
-        if opposingPlayerId is not None:
-            params["opposingPlayerId"] = opposingPlayerId
-        if opposingTeamId is not None:
-            params["opposingTeamId"] = opposingTeamId
-        if opposingPlayerId is None and opposingTeamId is None:
-            print("Must use either 'opposingTeamId' or 'opposingPlayerId' params for stat types 'vsPlayer','vsPlayerTotal', and 'vsPlayer5Y'")
-            return None
-        if season is not None:
-            params["season"] = season
-    else:
-        if season is not None:
-            params["season"] = season
-        else:
-            params["season"] = default_season()
-    
-    if statType == "pitchLog" or statType == "playLog":
-        params["hydrate"] = "pitchData,hitData"
-    else:
-        params["hydrate"] = "team"
-
-    params["group"]     = statGroup
-    params["stats"]     = statType
-
-    url = BASE + f"/people/{mlbam}/stats?"
-
-    resp = requests.get(url,params=params)
-    resp_data = resp.json()
+    elif kwargs.get("game_type") is not None:
+        gameType = kwargs["game_type"]
 
     if season is not None:
-        season = str(season)
+        params["season"] = season
+    if statGroup is not None:
+        params["group"] = statGroup
+    if gameType is not None:
+        params["gameType"] = gameType
+    if kwargs.get("startDate") is not None:
+        params["startdate"] = kwargs["startDate"]
+    if kwargs.get("endDate") is not None:
+        params["endDate"] = kwargs["endDate"]
 
-    season_col = []
-    player_name_col = []
-    player_id_col = []
-    team_name_col = []
-    team_id_col = []
-    league_abbrv_col = []
-    league_id_col = []
-    game_type_col = []
-
-    opp_player_name_col = []
-    opp_player_id_col = []
-    opp_team_name_col = []
-    opp_team_id_col = []
-    opp_league_abbrv_col = []
-    opp_league_id_col = []
+    url = c.BASE + f"/people/{mlbam}/stats?"
+    resp = requests.get(url,params=params)
 
     data = []
+
+    # "sg" referes to each stat group in the results
+    for sg in resp.json()["stats"]:
+        if sg["group"]["displayName"] == "hitting":
+            # "g" refers to each game
+            for g in sg.get("splits"):
+                game = g.get("stat",{})
+
+                positions = []
+                player = g.get("player",{})
+                mlbam = player.get("id")
+                name = player.get("name")
+                for pos in g.get("positionsPlayed",[]):
+                    positions.append(pos.get("abbreviation"))
+                positions = "|".join(positions)
+                
+                tm = g.get("team",{})
+                tm_opp_mlbam = g.get("opponent",{}).get("id")
+                tm_opp_name = g.get("opponent",{}).get("name")
+                
+                game["date"] = g.get("date","")
+                game["isHome"] = g.get("isHome",False)
+                game["isWin"] = g.get("isWin",False)
+                game["gamePk"] = g.get("game",{}).get("gamePk")
+                game["mlbam"] = mlbam
+                game["name"] = name
+                game["positions"] = positions
+                game["tm_mlbam"] = tm.get("id")
+                game["name"] = tm.get("name")
+                game["opp_mlbam"] = tm_opp_mlbam
+                game["opp_name"] = tm_opp_name
+
+                data.append(pd.Series(game))
+
+            break
     
-    # Depending on the statType and statGroup, the dict key for the player in-question may vary. 
-    # If you're getting stats for mlbam 547989 (Jose Abreu) and statType='vsPlayer', statGroup='hitting',
-        # the player information will be under the "batter" key. While the "opposingPlayerId" player's info is 
-        # found under the "pitcher" key. This is likely the case for statTypes such as "vsPlayer","vsTeam","playLog","pitchLog"
 
-    # The 'player_key' variable is meant to account for this
+    columns = ['date','isHome','isWin','gamePk','mlbam','name','positions','tm_mlbam','opp_mlbam','opp_name','G','GO','AO','R','2B','3B','HR','SO','BB','IBB','H','HBP','AVG','AB','OBP','SLG','OPS','CS','SB','SB%','GIDP','GITP','P','PA','TB','RBI','LOB','sB','sF','BABIP','GO/AO','CI','AB/HR']
+    # df = pd.DataFrame(data=data).rename(columns=c.STATDICT)[columns]
+    df = pd.DataFrame(data=data).rename(columns=c.STATDICT)#[columns]
 
-    if statType in ("vsPlayer","vsPlayer5Y","vsTeam","vsTeamTotal","vsTeam5Y","pitchLog","playLog"):
-        if statGroup == "hitting":
-            player_key      = "batter"
-            opp_player_key  = "pitcher"
-        elif statGroup == "pitching":
-            player_key      = "pitcher"
-            opp_player_key  = "batter"
+    return df
 
+def player_date_range(mlbam,statGroup,startDate,endDate,gameType=None) -> pd.DataFrame:
+    """Get a player's stats for a specified date range
+
+    Parameters
+    ----------
+    mlbam : str or int, required
+        player's official MLB ID
+    
+    startDate : str, required
+        include games AFTER a specified date (format: "YYYY-mm-dd")
+    
+    endDate : str, required
+        include games BEFORE a specified date (format: "YYYY-mm-dd")
+
+    statGroup : str, required
+        filter results by stat group ('hitting','pitching','fielding')
+
+    gameType : str, optional
+        filter results by game type (only one gameType can be specified per call)
+
+    """
+
+    mlbam = str(mlbam)
+
+    params = {
+        "stats":"byDateRange",
+        "group":statGroup,
+        "startDate":startDate,
+        "endDate":endDate
+    }
+
+    if gameType is not None:
+        params["gameType"] = gameType
+
+    url = c.BASE + f"/people/{mlbam}/stats?"
+
+    resp = requests.get(url,params=params)
+    resp_json = resp.json()
+
+    data = []
+
+    for s in resp_json["stats"][0]["splits"]:
+        if s.get("sport",{}).get("id") == 1:
+            stats = s.get("stat")
+            stats["tm_mlbam"] = s.get("team",{}).get("id")
+            stats["tm_name"] = s.get("team",{}).get("name")
+            data.append(pd.Series(stats))
+    
+    columns = ['tm_mlbam','team','G','GO','AO','R','2B','3B','HR','SO','BB','IBB','H','HBP','AVG','AB','OBP','SLG','OPS','CS','SB','SB%','GIDP','GITP','P','PA','TB','RBI','LOB','sB','sF','BABIP','GO/AO','CI','AB/HR']
+    df = pd.DataFrame(data).rename(columns=c.STATDICT)
+
+    return df
+
+def player_date_range_advanced(mlbam,statGroup,startDate,endDate,gameType=None) -> pd.DataFrame:
+    """Get a player's stats for a specified date range
+
+    Parameters
+    ----------
+    mlbam : str or int, required
+        player's official MLB ID
+    
+    startDate : str, required
+        include games AFTER a specified date (format: "YYYY-mm-dd")
+    
+    endDate : str, required
+        include games BEFORE a specified date (format: "YYYY-mm-dd")
+
+    statGroup : str, required
+        filter results by stat group ('hitting','pitching','fielding')
+
+    gameType : str, optional
+        filter results by game type (only one gameType can be specified per call)
+
+    """
+
+    mlbam = str(mlbam)
+
+    params = {
+        "stats":"byDateRangeAdvanced",
+        "group":statGroup,
+        "startDate":startDate,
+        "endDate":endDate
+    }
+
+    if gameType is not None:
+        params["gameType"] = gameType
+
+    url = c.BASE + f"/people/{mlbam}/stats?"
+
+    resp = requests.get(url,params=params)
+    resp_json = resp.json()
+
+    data = []
+
+    for s in resp_json["stats"][0]["splits"]:
+        if s.get("sport",{}).get("id") == 1:
+            stats = s.get("stat")
+            stats["tm_mlbam"] = s.get("team",{}).get("id")
+            stats["tm_name"] = s.get("team",{}).get("name")
+            data.append(pd.Series(stats))
+    
+    columns = ['tm_mlbam','team','PA','TB','sB','sF','BABIP','exBH','HBP','GIDP','P','P/PA','BB/PA','SO/PA','HR/PA','BB/SO','ISO','GO']
+    # df = pd.DataFrame(data).rename(columns=c.STATDICT)[columns]
+    df = pd.DataFrame(data).rename(columns=c.STATDICT)
+
+    return df
+
+def player_splits(mlbam,statGroup,sitCodes,season=None,gameType=None) -> pd.DataFrame:
+    """Get a player's stats for a specified date range
+
+    Parameters
+    ----------
+    mlbam : str or int, required
+        player's official MLB ID
+
+    statGroup : str, required
+        filter results by stat group ('hitting','pitching','fielding')
+    
+    sitCodes : str, required
+        situation code(s) to get stats for ("h" for home games, "a" for away games, "n" for night games, etc.)
+
+    gameType : str, optional
+        filter results by game type (only one gameType can be specified per call)
+
+    """
+
+    mlbam = str(mlbam)
+
+    params = {
+        "stats":"statSplits",
+        "group":statGroup,
+        "sitCodes":sitCodes,
+    }
+
+    if gameType is not None:
+        params["gameType"] = gameType
+    if season is not None:
+        params["season"] = season
     else:
-        player_key          = "player"
-        opp_player_key      = ""
+        params["season"] = default_season()
 
-    if statType != "pitchLog" and statType != "playLog":
-        for i in resp_data["stats"]:
-            stat_type = i["type"]["displayName"]
-            stat_group = i["group"]["displayName"]
-            if statType != stat_type:
-                continue
-            for s in i["splits"]:
-                team        = s.get("team",{})
-                player      = s.get(player_key,{})
-                opp_player  = s.get(opp_player_key,{})
-                opp_team    = s.get("opponent",{})
-                league      = team.get("league",{})
-                opp_league  = opp_team.get("league",{})
-                stats       = s.get("stat")
-                
-                season_col.append(s.get("season","-"))
+    url = c.BASE + f"/people/{mlbam}/stats?"
 
-                game_type_col.append(s.get("gameType"))
+    resp = requests.get(url,params=params)
+    resp_json = resp.json()
 
-                player_name_col.append(player.get("fullName"))
-                player_id_col.append(str(player.get("id",'-')))
+    data = []
 
-                team_name_col.append(team.get("name"))
-                team_id_col.append(str(team.get("id",'-')))
+    for s in resp_json["stats"][0]["splits"]:
+        if s.get("sport",{}).get("id") == 1:
+            stats = s.get("stat")
+            stats["tm_mlbam"] = s.get("team",{}).get("id")
+            stats["tm_name"] = s.get("team",{}).get("name")
+            stats["season"] = s.get("season")
+            stats["split_code"] = s.get("split",{}).get("code")
+            stats["split"] = s.get("split",{}).get("description")
+            data.append(pd.Series(stats))
+    
+    columns = ['season','split_code','split','tm_mlbam','team','G','GO','AO','R','2B','3B','HR','SO','BB','IBB','H','HBP','AVG','AB','OBP','SLG','OPS','CS','SB','SB%','GIDP','GITP','P','PA','TB','RBI','LOB','sB','sF','BABIP','GO/AO','CI','AB/HR']
+    # df = pd.DataFrame(data).rename(columns=c.STATDICT)[columns]
+    df = pd.DataFrame(data).rename(columns=c.STATDICT)
+    return df
 
-                league_id = str(league.get("id"))
-                league_id_col.append(league_id)
-                league_abbrv_col.append(LEAGUE_IDS.get(league_id))
+def player_splits_advanced(mlbam,statGroup,sitCodes,season=None,gameType=None) -> pd.DataFrame:
+    """Get a player's stats for a specified date range
 
-                opp_player_name_col.append(opp_player.get("fullName"))
-                opp_player_id_col.append(str(opp_player.get("id",'-')))
+    Parameters
+    ----------
+    mlbam : str or int, required
+        player's official MLB ID
 
-                opp_team_name_col.append(opp_team.get("name"))
-                opp_team_id_col.append(str(opp_team.get("id",'-')))
+    statGroup : str, required
+        filter results by stat group ('hitting','pitching','fielding')
+    
+    sitCodes : str, required
+        situation code(s) to get stats for ("h" for home games, "a" for away games, "n" for night games, etc.)
 
-                opp_league_id = str(opp_league.get("id"))
-                opp_league_id_col.append(opp_league_id)
-                opp_league_abbrv_col.append(LEAGUE_IDS.get(opp_league_id))
+    gameType : str, optional
+        filter results by game type (only one gameType can be specified per call)
 
-                if stat_group == "fielding":
-                    stats["position"] = stats["position"]["abbreviation"]
+    """
 
-                data.append(pd.Series(stats))
-        df = pd.DataFrame(data=data).rename(columns=STATDICT)
+    mlbam = str(mlbam)
+
+    params = {
+        "stats":"statSplitsAdvanced",
+        "group":statGroup,
+        "sitCodes":sitCodes,
+    }
+
+    if gameType is not None:
+        params["gameType"] = gameType
+    if season is not None:
+        params["season"] = season
     else:
-        for i in resp_data["stats"]:
-            stat_type = i["type"]["displayName"]
-            stat_group = i["group"]["displayName"]
+        params["season"] = default_season()
 
-            for s in i["splits"]:
-                play        = s.get("stat",{}).get("play",{})
-                team        = s.get("team",{})
-                batter      = s.get(player_key,{})
-                opp_player  = s.get(opp_player_key,{})
-                opp_team    = s.get("opponent",{})
-                game        = s.get("game")
-                date        = s.get("date")
-                
-                season_col.append(s.get("season","-"))
+    url = c.BASE + f"/people/{mlbam}/stats?"
 
-                game_type_col.append(s.get("gameType"))
+    resp = requests.get(url,params=params)
+    resp_json = resp.json()
 
-                player_name_col.append(batter.get("fullName"))
-                player_id_col.append(str(batter.get("id",'-')))
+    data = []
 
-                team_name_col.append(team.get("name"))
-                team_id_col.append(str(team.get("id",'-')))
-
-                opp_player_name_col.append(opp_player.get("fullName"))
-                opp_player_id_col.append(str(opp_player.get("id",'-')))
-
-                opp_team_name_col.append(opp_team.get("name"))
-                opp_team_id_col.append(str(opp_team.get("id",'-')))
-
-                game_pk     = game.get("gamePk")
-                game_num    = game.get("gameNumber")
-
-                play_id     = play.get("playId")
-
-                details     = play.get("details",{})
-                count       = details.get("count",{})
-                event       = details.get("event")
-                desc        = details.get("description")
-                ptype       = details.get("type",{}).get("description")
-                ptype_code  = details.get("type",{}).get("code")
-
-                balls       = count.get("balls")
-                strikes     = count.get("strikes")
-                outs        = count.get("outs")
-                inn         = count.get("inning")
-                runner_1b   = count.get("runnerOn1b")
-                runner_2b   = count.get("runnerOn2b")
-                runner_3b   = count.get("runnerOn3b")
-
-                pdata       = play.get("pitchData",{})
-                start_spd   = pdata.get("startSpeed")
-                sz_top      = pdata.get("strikeZoneTop")
-                sz_bot      = pdata.get("strikeZoneBottom")
-                coords      = pdata.get("coordinates",{})
-                zone        = pdata.get("zone")
-                px          = coords.get("pX")
-                py          = coords.get("pY")
-                pitch_hand  = details.get("pitchHand",{}).get("code")
-
-                hdata       = play.get("hitData",{})
-                launch_spd  = hdata.get("launchSpeed")
-                launch_ang  = hdata.get("launchAngle")
-                total_dist  = hdata.get("totalDistance")
-                trajectory  = hdata.get("trajectory")
-                coords      = hdata.get("coordinates",{})
-                hx          = coords.get("landingPosX")
-                hy          = coords.get("landingPosY")
-                bat_side    = details.get("batSide",{}).get("code")
-
-                ab_num      = play.get("atBatNumber")
-                pitch_num   = play.get("pitchNumber")
-
-                stats = {
-                    "gamePk":       game_pk,
-                    "date":         date,
-                    "game_num":     game_num,
-                    "play_id":      play_id,
-                    "ab_num":       ab_num,
-                    "event":        event,
-                    "desc":         desc,
-                    "balls":        balls,
-                    "strikes":      strikes,
-                    "outs":         outs,
-                    "inning":       inn,
-                    "r1b":          runner_1b,
-                    "r2b":          runner_2b,
-                    "r3b":          runner_3b,
-
-                    "pitch_num":    pitch_num,
-                    "pitch_hand":   pitch_hand,
-                    "pitch_type":   ptype,
-                    "pitch_type_id":ptype_code,
-                    "start_spd":    start_spd,
-                    "sz_top":       sz_top,
-                    "sz_bot":       sz_bot,
-                    "zone":         zone,
-                    "px":           px,
-                    "py":           py,
-
-                    "bat_side":     bat_side,
-                    "launch_spd":   launch_spd,
-                    "launch_ang":   launch_ang,
-                    "total_dist":   total_dist,
-                    "trajectory":   trajectory,
-                    "hx":           hx,
-                    "hy":           hy
-                }
-                
-                data.append(pd.Series(stats))
-
-        df = pd.DataFrame(data=data)
-        df.insert(0,"season",season_col)
-        df.insert(1,"player",player_name_col)
-        df.insert(2,"player_mlbam",player_id_col)
-        df.insert(3,"team",team_name_col)
-        df.insert(4,"team_mlbam",team_id_col)
-        df.insert(5,"opp_player",opp_player_name_col)
-        df.insert(6,"opp_player_mlbam",opp_player_id_col)
-        df.insert(7,"opp_team",opp_team_name_col)
-        df.insert(8,"opp_team_mlbam",opp_team_id_col)
-
-        df.dropna(axis="columns",how="all",inplace=True)
-
-        return df
-
-    cols_in_order = []
-
-    if stat_group == "hitting":
-        if "advanced" in stat_type.lower():
-            col_constants = BAT_FIELDS_ADV
-        else:
-            col_constants = BAT_FIELDS
-        for col in col_constants:
-            cols_in_order.append(col)
-
-    elif stat_group == "pitching":
-        if "advanced" in stat_type.lower():
-            col_constants = PITCH_FIELDS_ADV
-        else:
-            col_constants = PITCH_FIELDS
-        for col in col_constants:
-            cols_in_order.append(col)
-
-    elif stat_group == "fielding":
-        col_constants = FIELD_FIELDS
-        for col in col_constants:
-            cols_in_order.append(col)
-
-
-    df.insert(0,"season",season_col)
-    df.insert(1,"player",player_name_col)
-    df.insert(2,"player_mlbam",player_id_col)
-    df.insert(3,"team",team_name_col)
-    df.insert(4,"team_mlbam",team_id_col)
-    df.insert(5,"league",league_abbrv_col)
-    df.insert(6,"league_mlbam",league_id_col)
-    if statType in ("vsPlayer","vsPlayerTotal","vsPlayer5Y","vsTeam","vsTeamTotal","vsTeam5Y","gameLog"):
-        if statType != "gameLog":
-            df.insert(7,"opp_player",opp_player_name_col)
-            df.insert(8,"opp_player_mlbam",opp_player_id_col)
-            df.insert(9,"opp_team",opp_team_name_col)
-            df.insert(10,"opp_team_mlbam",opp_team_id_col)
-            df.insert(11,"opp_league",opp_league_abbrv_col)
-            df.insert(12,"opp_league_mlbam",opp_league_id_col)
-        else:
-            df.insert(7,"opp_team",opp_team_name_col)
-            df.insert(8,"opp_team_mlbam",opp_team_id_col)
-            df.insert(9,"opp_league",opp_league_abbrv_col)
-            df.insert(10,"opp_league_mlbam",opp_league_id_col)
-
-    df.dropna(axis="columns",how="all",inplace=True)
-
+    for s in resp_json["stats"][0]["splits"]:
+        if s.get("sport",{}).get("id") == 1:
+            stats = s.get("stat")
+            stats["tm_mlbam"] = s.get("team",{}).get("id")
+            stats["tm_name"] = s.get("team",{}).get("name")
+            stats["season"] = s.get("season")
+            stats["split_code"] = s.get("split",{}).get("code")
+            stats["split"] = s.get("split",{}).get("description")
+            data.append(pd.Series(stats))
+    
+    columns = ['season','split_code','split','tm_mlbam','team','PA','TB','sB','sF','BABIP','exBH','HBP','GIDP','P','P/PA','BB/PA','SO/PA','HR/PA','BB/SO','ISO']
+    # df = pd.DataFrame(data).rename(columns=c.STATDICT)[columns]
+    df = pd.DataFrame(data).rename(columns=c.STATDICT)#[columns]
     return df
 
 # ===============================================================
 # TEAM Functions
 # ===============================================================
 
-def team_hitting(mlbam,season=None) -> pd.DataFrame:
-    """Get team hitting stats (roster-level)
-
-    Parameters
-    ----------
-    mlbam : str or int
-        team's official MLB ID
-
-    season : str or int, optional (the default is the current season or the most recently completed if in the off-season)
-        the specific season to get stats for
-    """
-
-    if season is None:
-        season = default_season()
-
-    statTypes = "season"
-    statGroups = "hitting"
-    roster_hydrations = f"person(stats(type=[{statTypes}],group=[{statGroups}],season={season}))&season={season}"
-    url = BASE + f"/teams/{mlbam}/roster?rosterType=fullSeason&hydrate={roster_hydrations}"
-
-    response = requests.get(url)
-
-    response = response.json()
+def team_stats(mlbam,**kwargs) -> pd.DataFrame:
+    kwargs = ExtendedDict(kwargs)
+    params = {
+        'group':'hitting,pitching,fielding',
+        'stats':'yearByYear,yearByYearAdvanced'
+    }
+    statType = kwargs.dget('statType','stat_type','types','type')
+    if statType is not None:
+        if 'season' in statType:
+            if kwargs.get('season') is None:
+                params['season'] = default_season()
+            else:
+                params['season'] = kwargs['season']
+        params['stats'] = statType
     
-    hitting = []
-    hittingAdvanced = []
-
-    got_hit = False
-    got_hitAdv = False
-
-    hitting_cols = ["status","mlbam","playerName","primaryPosition"]
-    hittingAdv_cols = ["status","mlbam","playerName","primaryPosition"]
-
-    for player in response["roster"]:
-        status = player["status"]["description"]
-        playerName = player["person"]["fullName"]
-        primaryPosition = player["person"]["primaryPosition"]["abbreviation"]
-        player_mlbam = player["person"]["id"]
-        try:
-            player_groups_types = player["person"]["stats"]
-            for group_type in player_groups_types:
-                statType = group_type["type"]["displayName"]
-                statGroup = group_type["group"]["displayName"]
-
-                # HITTING
-                if statGroup == "hitting" and statType == "season":
-                    single_stat_row = [status,player_mlbam,playerName,primaryPosition]
-                    player_stats = group_type["splits"][0]["stat"]
-                    for stat in BAT_FIELDS:
-                        if got_hit is False:hitting_cols.append(stat)
-                        try:
-                            single_stat_row.append(player_stats[stat])
-                        except:
-                            single_stat_row.append("--")
-                    got_hit = True
-                    hitting.append(single_stat_row)
-                elif statGroup == "hitting" and statType == "seasonAdvanced":
-                    single_stat_row = [status,player_mlbam,playerName,primaryPosition]
-                    player_stats = group_type["splits"][0]["stat"]
-                    for stat in BAT_FIELDS_ADV:
-                        if got_hitAdv is False:hittingAdv_cols.append(stat)
-                        try:
-                            single_stat_row.append(player_stats[stat])
-                        except:
-                            single_stat_row.append("--")
-                    got_hitAdv = True
-                    hittingAdvanced.append(single_stat_row)
-
-        except:
-            # print(f"Error retrieving stats for --- {playerName}")
-            pass
+    statGroup = kwargs.dget('statGroup','stat_group','groups','group')
+    if statGroup is not None:
+        params['group'] = statGroup
     
-    df = pd.DataFrame(hitting,columns=hitting_cols).rename(columns=STATDICT)
-    return df
-
-def team_pitching(mlbam,season=None) -> pd.DataFrame:
-    """Get team pitching stats (roster-level)
-
-    Parameters
-    ----------
-    mlbam : str or int
-        team's official MLB ID
-
-    season : str or int, optional (the default is the current season or the most recently completed if in the off-season)
-        the specific season to get stats for
-    """
-
-    if season is None:
-        season = default_season()
-
-    statTypes = "season"
-    statGroups = "pitching"
-    roster_hydrations = f"person(stats(type=[{statTypes}],group=[{statGroups}],season={season}))&season={season}"
-    url = BASE + f"/teams/{mlbam}/roster?rosterType=fullSeason&hydrate={roster_hydrations}"
-
-    response = requests.get(url)
-
-    response = response.json()
-
-    pitching = []
-    pitchingAdvanced = []
-
-    got_pitch = False
-    got_pitchAdv = False
-
-    pitching_cols = ["status","mlbam","playerName","primaryPosition"]
-    pitchingAdv_cols = ["status","mlbam","playerName","primaryPosition"]
-
-    for player in response["roster"]:
-        status = player["status"]["description"]
-        playerName = player["person"]["fullName"]
-        primaryPosition = player["person"]["primaryPosition"]["abbreviation"]
-        player_mlbam = player["person"]["id"]
-        try:
-            player_groups_types = player["person"]["stats"]
-            for group_type in player_groups_types:
-                statType = group_type["type"]["displayName"]
-                statGroup = group_type["group"]["displayName"]
-
-                # PITCHING
-                if statGroup == "pitching" and statType == "season":
-                    single_stat_row = [status,player_mlbam,playerName,primaryPosition]
-                    player_stats = group_type["splits"][0]["stat"]
-                    for stat in PITCH_FIELDS:
-                        if got_pitch is False: pitching_cols.append(stat)
-                        try:
-                            single_stat_row.append(player_stats[stat])
-                        except:
-                            single_stat_row.append("--")
-                    got_pitch = True
-                    pitching.append(single_stat_row)
-                elif statGroup == "pitching" and statType == "seasonAdvanced":
-                    single_stat_row = [status,player_mlbam,playerName,primaryPosition]
-                    player_stats = group_type["splits"][0]["stat"]
-                    for stat in PITCH_FIELDS_ADV:
-                        if got_pitchAdv is False: pitchingAdv_cols.append(stat)
-                        try:
-                            single_stat_row.append(player_stats[stat])
-                        except:
-                            single_stat_row.append("--")
-                    got_pitchAdv = True
-                    pitchingAdvanced.append(single_stat_row)
-        except:
-            # # print(f"Error retrieving stats for --- {playerName}")
-            pass
-
-    df = pd.DataFrame(pitching,columns=pitching_cols).rename(columns=STATDICT)
-
-    return df
-
-def team_fielding(mlbam,season=None) -> pd.DataFrame:
-    """Get team fielding stats (roster-level)
-
-    Parameters
-    ----------
-    mlbam : str or int
-        team's official MLB ID
-
-    season : str or int, optional (the default is the current season or the most recently completed if in the off-season)
-        the specific season to get stats for
-    """
-
-    if season is None:
-        season = default_season()
-
-    statTypes = "season"
-    statGroups = "fielding"
-    roster_hydrations = f"person(stats(type=[{statTypes}],group=[{statGroups}],season={season}))&season={season}"
-    url = BASE + f"/teams/{mlbam}/roster?rosterType=fullSeason&hydrate={roster_hydrations}"
-
-    response = requests.get(url)
-
-    response = response.json()
-
-    fielding = []
-
-    got_field = False
-
-    fielding_cols = ["status","mlbam","playerName","position"]
-
-    for player in response["roster"]:
-        status = player["status"]["description"]
-        playerName = player["person"]["fullName"]
-        primaryPosition = player["person"]["primaryPosition"]["abbreviation"]
-        player_mlbam = player["person"]["id"]
-        try:
-            player_groups_types = player["person"]["stats"]
-            for group_type in player_groups_types:
-                statType = group_type["type"]["displayName"]
-                statGroup = group_type["group"]["displayName"]
-
-                # FIELDING
-                if statGroup == "fielding" and statType == "season":
-                    player_positions = group_type["splits"]
-                    for position in player_positions:
-                        player_stats = position["stat"]
-                        pos = player_stats["position"]["abbreviation"]
-                        if pos == primaryPosition:
-                            pos = "*"+pos
-                        single_stat_row = [status,player_mlbam,playerName,pos]
-                        for stat in FIELD_FIELDS:
-                            if got_field is False: fielding_cols.append(stat)
-                            try:
-                                single_stat_row.append(player_stats[stat])
-                            except:
-                                single_stat_row.append("--")
-                        got_field = True
-                        fielding.append(single_stat_row)
-        except:
-            # print(f"Error retrieving stats for --- {playerName}")
-            pass
-
-    df = pd.DataFrame(fielding,columns=fielding_cols).rename(columns=STATDICT)
-
-    # df.sort_values(by=["Season","team_mlbam","PO"],ascending=[True,True,False])
-    return df
-
-def team_hitting_advanced(mlbam,season=None) -> pd.DataFrame:
-    """Get advanced team hitting stats (roster-level)
-
-    Parameters
-    ----------
-    mlbam : str or int
-        team's official MLB ID
-
-    season : str or int, optional (the default is the current season or the most recently completed if in the off-season)
-        the specific season to get stats for
-    """
-
-    if season is None:
-        season = default_season()
-
-    statTypes = "seasonAdvanced"
-    statGroups = "hitting"
-    roster_hydrations = f"person(stats(type=[{statTypes}],group=[{statGroups}],season={season}))&season={season}"
-    url = BASE + f"/teams/{mlbam}/roster?rosterType=fullSeason&hydrate={roster_hydrations}"
-
-    response = requests.get(url)
-
-    response = response.json()
+    url = c.BASE + f"/teams/{mlbam}/stats"
+    resp = requests.get(url,params=params)
     
-    hitting = []
-    hittingAdvanced = []
-
-    got_hit = False
-    got_hitAdv = False
-
-    hitting_cols = ["status","mlbam","playerName","primaryPosition"]
-    hittingAdv_cols = ["status","mlbam","playerName","primaryPosition"]
-
-    for player in response["roster"]:
-        status = player["status"]["description"]
-        playerName = player["person"]["fullName"]
-        primaryPosition = player["person"]["primaryPosition"]["abbreviation"]
-        player_mlbam = player["person"]["id"]
-        try:
-            player_groups_types = player["person"]["stats"]
-            for group_type in player_groups_types:
-                statType = group_type["type"]["displayName"]
-                statGroup = group_type["group"]["displayName"]
-
-                # HITTING
-                if statGroup == "hitting" and statType == "season":
-                    single_stat_row = [status,player_mlbam,playerName,primaryPosition]
-                    player_stats = group_type["splits"][0]["stat"]
-                    for stat in BAT_FIELDS:
-                        if got_hit is False:hitting_cols.append(stat)
-                        try:
-                            single_stat_row.append(player_stats[stat])
-                        except:
-                            single_stat_row.append("--")
-                    got_hit = True
-                    hitting.append(single_stat_row)
-                elif statGroup == "hitting" and statType == "seasonAdvanced":
-                    single_stat_row = [status,player_mlbam,playerName,primaryPosition]
-                    player_stats = group_type["splits"][0]["stat"]
-                    for stat in BAT_FIELDS_ADV:
-                        if got_hitAdv is False:hittingAdv_cols.append(stat)
-                        try:
-                            single_stat_row.append(player_stats[stat])
-                        except:
-                            single_stat_row.append("--")
-                    got_hitAdv = True
-                    hittingAdvanced.append(single_stat_row)
-
-        except:
-            # print(f"Error retrieving stats for --- {playerName}")
-            pass
+    dfs = {}
     
-    df = pd.DataFrame(hittingAdvanced,columns=hittingAdv_cols).rename(columns=STATDICT)
-    return df
-
-def team_pitching_advanced(mlbam,season=None) -> pd.DataFrame:
-    """Get advanced team pitching stats (roster-level)
-
-    Parameters
-    ----------
-    mlbam : str or int
-        team's official MLB ID
-
-    season : str or int, optional (the default is the current season or the most recently completed if in the off-season)
-        the specific season to get stats for
-    """
-    if season is None:
-        season = default_season()
-
-    statTypes = "seasonAdvanced"
-    statGroups = "pitching"
-    roster_hydrations = f"person(stats(type=[{statTypes}],group=[{statGroups}],season={season}))&season={season}"
-    url = BASE + f"/teams/{mlbam}/roster?rosterType=fullSeason&hydrate={roster_hydrations}"
-
-    response = requests.get(url)
-
-    response = response.json()
-
-    pitching = []
-    pitchingAdvanced = []
-
-    got_pitch = False
-    got_pitchAdv = False
-
-    pitching_cols = ["status","mlbam","playerName","primaryPosition"]
-    pitchingAdv_cols = ["status","mlbam","playerName","primaryPosition"]
-
-    for player in response["roster"]:
-        status = player["status"]["description"]
-        playerName = player["person"]["fullName"]
-        primaryPosition = player["person"]["primaryPosition"]["abbreviation"]
-        player_mlbam = player["person"]["id"]
-        try:
-            player_groups_types = player["person"]["stats"]
-            for group_type in player_groups_types:
-                statType = group_type["type"]["displayName"]
-                statGroup = group_type["group"]["displayName"]
-
-                # PITCHING
-                if statGroup == "pitching" and statType == "season":
-                    single_stat_row = [status,player_mlbam,playerName,primaryPosition]
-                    player_stats = group_type["splits"][0]["stat"]
-                    for stat in PITCH_FIELDS:
-                        if got_pitch is False: pitching_cols.append(stat)
-                        try:
-                            single_stat_row.append(player_stats[stat])
-                        except:
-                            single_stat_row.append("--")
-                    got_pitch = True
-                    pitching.append(single_stat_row)
-                elif statGroup == "pitching" and statType == "seasonAdvanced":
-                    single_stat_row = [status,player_mlbam,playerName,primaryPosition]
-                    player_stats = group_type["splits"][0]["stat"]
-                    for stat in PITCH_FIELDS_ADV:
-                        if got_pitchAdv is False: pitchingAdv_cols.append(stat)
-                        try:
-                            single_stat_row.append(player_stats[stat])
-                        except:
-                            single_stat_row.append("--")
-                    got_pitchAdv = True
-                    pitchingAdvanced.append(single_stat_row)
-        except:
-            # # print(f"Error retrieving stats for --- {playerName}")
-            pass
-
-    # df = pd.DataFrame(pitching,columns=pitching_cols).rename(columns=STATDICT)
-    df = pd.DataFrame(pitchingAdvanced,columns=pitchingAdv_cols).rename(columns=STATDICT)
-
-    return df
+    for s in resp.json().get('stats',[{}]):
+        if s.get('type',{}).get('displayName').lower().find('advanced') == -1:
+            if s.get('group',{}).get('displayName') == "hitting":
+                dfs['hitting'] = parsing._parse_team_stats(s.get('splits',[{}]),True)
+            elif s.get('group',{}).get('displayName') == "pitching":
+                dfs['pitching'] = parsing._parse_team_stats(s.get('splits',[{}]),True)
+            elif s.get('group',{}).get('displayName') == "fielding":
+                dfs['fielding'] = parsing._parse_team_stats(s.get('splits',[{}]),True)
+        else:
+            if s.get('group',{}).get('displayName') == "hitting":
+                dfs['hitting_adv'] = parsing._parse_team_stats(s.get('splits',[{}]),True)
+            elif s.get('group',{}).get('displayName') == "pitching":
+                dfs['pitching_adv'] = parsing._parse_team_stats(s.get('splits',[{}]),True)
+    
+    return dclass.StatTypeCollection(
+        dfs['hitting'],dfs['pitching'],dfs['fielding'],
+        dfs['hitting_adv'],dfs['pitching_adv']
+    )
+    # return StatTypeCollection(**dfs)
 
 def team_game_logs(mlbam,season=None,statGroup=None,gameType=None,**kwargs) -> pd.DataFrame:
     """Get a team's game log stats for a specific season
@@ -3577,11 +2379,11 @@ def team_game_logs(mlbam,season=None,statGroup=None,gameType=None,**kwargs) -> p
     if kwargs.get("endDate") is not None:
         params["endDate"] = kwargs["endDate"]
 
-    url = BASE + f"/teams/{mlbam}/stats?"
+    url = c.BASE + f"/teams/{mlbam}/stats?"
     resp = requests.get(url,params=params)
 
     data = []
-    tms_df = get_teams_df(year=season).set_index("mlbam")
+    tms_df = mlbdata.get_teams_df(year=season).set_index("mlbam")
 
     # "sg" referes to each stat group in the results
     for sg in resp.json()["stats"]:
@@ -3607,7 +2409,7 @@ def team_game_logs(mlbam,season=None,statGroup=None,gameType=None,**kwargs) -> p
             break
     columns = ['date','isHome','isWin','gamePk','mlbam','name','opp_mlbam','opp_name','G','GO','AO','R','2B','3B','HR','SO','BB','IBB','H','HBP','AVG','AB','OBP','SLG','OPS','CS','SB','SB%','GIDP','P','PA','TB','RBI','LOB','sB','sF','BABIP','GO/AO','AB/HR']
     
-    df = pd.DataFrame(data=data).rename(columns=STATDICT)[columns]
+    df = pd.DataFrame(data=data).rename(columns=c.STATDICT)[columns]
 
     return df
 
@@ -3662,7 +2464,7 @@ def team_roster(mlbam,season=None,rosterType=None,**kwargs) -> pd.DataFrame:
         params["hydrate"] = kwargs["hydrate"]
 
     # hydrate=person(rosterEntries)
-    url = BASE + f"/teams/{mlbam}/roster"
+    url = c.BASE + f"/teams/{mlbam}/roster"
 
     resp = requests.get(url,params=params)
     roster = resp.json()["roster"]
@@ -3738,391 +2540,50 @@ def team_appearances(mlbam):
         
         return df
 
-
 # ===============================================================
 # LEAGUE Functions
 # ===============================================================
-def league_hitting(league="all",**kwargs):
-    """Get league hitting stats (team-level)
 
-    Parameters
-    ----------
-    league : int or str
-        Official League MLB ID or abbreviation - AL, NL (not case-sensitive)
-
-    Default 'season' is the current (or most recently completed if in off-season)
-
-    """
-
-    stats = "season"
-    statGroup = "hitting"
-
-    if kwargs.get("season") is not None:
-        season = kwargs["season"]
+def league_stats(league="all",season=None,hydrate:Optional[str]=None,**kwargs) -> dclass.StatTypeCollection:
+    params = {
+        'group':'hitting,pitching,fielding',
+        'stats':'season,seasonAdvanced',
+        'sportId':'1',
+    }
+    if kwargs.get('statGroup',kwargs.get('group',kwargs.get('groups'))) is not None:
+        params['group'] = kwargs.get('statGroup',kwargs.get('group',kwargs.get('groups')))
+    if kwargs.get('statType',kwargs.get('types',kwargs.get('type'))) is not None:
+        params['stats'] = kwargs.get('statType',kwargs.get('types',kwargs.get('type')))
+    if season is None:
+        params['season'] = default_season()
     else:
-        season = default_season()
+        params['season'] = season
 
     if league == "all":
-        leagueIds = "103,104"
+        params['leagueIds'] = "103,104"
     elif str(league).lower() in ("al","american","103"):
-        leagueIds = 103
+        params['leagueIds'] = 103
     elif str(league).lower() in ("nl","national","104"):
-        leagueIds = 104
-
-
-    url = BASE + f"/teams/stats?sportId=1&group={statGroup}&stats={stats}&season={season}&leagueIds={leagueIds}&hydrate=team"
-
-    resp = requests.get(url)
-
-    lg_data = resp.json()["stats"][0]
-
-    data = []
-
-    season_col = []
-    team_mlbam_col = []
-    team_name_col = []
-    league_mlbam_col = []
-    league_col = []
-    div_mlbam_col = []
-    div_col = []
-
-    for tm in lg_data["splits"]:
-        team_dict = tm.get("team")
-        season = tm.get("season")
-        team_mlbam = tm.get("team",{}).get("id")
-        team_name = tm.get("team",{}).get("name")
-        league_mlbam = str(team_dict.get("league",{}).get("id"))
-        league = LEAGUE_IDS[league_mlbam]
-        div_mlbam = str(team_dict.get("division",{}).get("id"))
-        div = LEAGUE_IDS[div_mlbam]
-
-        season_col.append(season)
-        team_mlbam_col.append(team_mlbam)
-        team_name_col.append(team_name)
-        league_mlbam_col.append(league_mlbam)
-        league_col.append(league)
-        div_mlbam_col.append(div_mlbam)
-        div_col.append(div)
-
-        tm_stats = tm.get("stat")
-
-        data.append(pd.Series(tm_stats))
+        params['leagueIds'] = 104
     
-    df = pd.DataFrame(data=data,columns=tm_stats.keys()).rename(columns=STATDICT)
+    if type(hydrate) is str:
+        params['hydrate'] = hydrate
+
+    url = c.BASE + f"/teams/stats?"
     
-    df.insert(0,"Season",season_col)
-    df.insert(1,"team_mlbam",team_mlbam_col)
-    df.insert(2,"team",team_name_col)
-    df.insert(3,"league_mlbam",league_mlbam_col)
-    df.insert(4,"league",league_col)
-    df.insert(5,"div_mlbam",div_mlbam_col)
-    df.insert(6,"div",div_col)
-
-    return df
-
-def league_pitching(league="all",**kwargs):
-    """Get league pitching stats (team-level)
-
-    Default 'season' is the current (or most recently completed if in off-season)
-    """
-    stats = "season"
-    statGroup = "pitching"
-
-    if kwargs.get("season") is not None:
-        season = kwargs["season"]
-    else:
-        season = default_season()
-
-    # for k in kwargs.keys():
-    #     if k in ("game_type","gametypes","game_types","gameTypes","gameType","gametype"):
-    #         gameType = kwargs[k]
-    #         break
-
-    if league == "all":
-        leagueIds = "103,104"
-    elif str(league).lower() in ("al","american","103"):
-        leagueIds = 103
-    elif str(league).lower() in ("nl","national","104"):
-        leagueIds = 104
-
-
-    url = BASE + f"/teams/stats?sportId=1&group={statGroup}&stats={stats}&season={season}&leagueIds={leagueIds}&hydrate=team"
-
-    resp = requests.get(url)
-
-    lg_data = resp.json()["stats"][0]
-
-    data = []
-
-    season_col = []
-    team_mlbam_col = []
-    team_name_col = []
-    league_mlbam_col = []
-    league_col = []
-    div_mlbam_col = []
-    div_col = []
-
-    for tm in lg_data["splits"]:
-        team_dict = tm.get("team")
-        season = tm.get("season")
-        team_mlbam = tm.get("team",{}).get("id")
-        team_name = tm.get("team",{}).get("name")
-        league_mlbam = str(team_dict.get("league",{}).get("id"))
-        league = LEAGUE_IDS[league_mlbam]
-        div_mlbam = str(team_dict.get("division",{}).get("id"))
-        div = LEAGUE_IDS[div_mlbam]
-
-        season_col.append(season)
-        team_mlbam_col.append(team_mlbam)
-        team_name_col.append(team_name)
-        league_mlbam_col.append(league_mlbam)
-        league_col.append(league)
-        div_mlbam_col.append(div_mlbam)
-        div_col.append(div)
-
-        tm_stats = tm.get("stat")
-
-        data.append(pd.Series(tm_stats))
+    if kwargs.get('url_only'):
+        req = requests.Request("GET",url,params=params)
+        prepared_url = req.prepare().url
+        if kwargs.get("log"):
+            print(prepared_url)
+        return prepared_url
     
-    df = pd.DataFrame(data=data,columns=tm_stats.keys()).rename(columns=STATDICT)
+    resp = requests.get(url,params=params)
+    if kwargs.get("log"):
+        print(resp.url)
     
-    df.insert(0,"Season",season_col)
-    df.insert(1,"team_mlbam",team_mlbam_col)
-    df.insert(2,"team",team_name_col)
-    df.insert(3,"league_mlbam",league_mlbam_col)
-    df.insert(4,"league",league_col)
-    df.insert(5,"div_mlbam",div_mlbam_col)
-    df.insert(6,"div",div_col)
-
-    return df
-
-def league_fielding(league="all",**kwargs):
-    """Get league fielding stats (team-level)
-
-    Default 'season' is the current (or most recently completed if in off-season)
-    """
-    stats = "season"
-    statGroup = "fielding"
-
-    if kwargs.get("season") is not None:
-        season = kwargs["season"]
-    else:
-        season = default_season()
-
-    # for k in kwargs.keys():
-    #     if k in ("game_type","gametypes","game_types","gameTypes","gameType","gametype"):
-    #         gameType = kwargs[k]
-    #         break
-
-    if league == "all":
-        leagueIds = "103,104"
-    elif str(league).lower() in ("al","american","103"):
-        leagueIds = 103
-    elif str(league).lower() in ("nl","national","104"):
-        leagueIds = 104
-
-
-    url = BASE + f"/teams/stats?sportId=1&group={statGroup}&stats={stats}&season={season}&leagueIds={leagueIds}&hydrate=team"
-
-    resp = requests.get(url)
-
-    lg_data = resp.json()["stats"][0]
-
-    data = []
-
-    season_col = []
-    team_mlbam_col = []
-    team_name_col = []
-    league_mlbam_col = []
-    league_col = []
-    div_mlbam_col = []
-    div_col = []
-
-    for tm in lg_data["splits"]:
-        team_dict = tm.get("team")
-        season = tm.get("season")
-        team_mlbam = tm.get("team",{}).get("id")
-        team_name = tm.get("team",{}).get("name")
-        league_mlbam = str(team_dict.get("league",{}).get("id"))
-        league = LEAGUE_IDS[league_mlbam]
-        div_mlbam = str(team_dict.get("division",{}).get("id"))
-        div = LEAGUE_IDS[div_mlbam]
-
-        season_col.append(season)
-        team_mlbam_col.append(team_mlbam)
-        team_name_col.append(team_name)
-        league_mlbam_col.append(league_mlbam)
-        league_col.append(league)
-        div_mlbam_col.append(div_mlbam)
-        div_col.append(div)
-
-        tm_stats = tm.get("stat")
-
-        data.append(pd.Series(tm_stats))
-    
-    df = pd.DataFrame(data=data,columns=tm_stats.keys()).rename(columns=STATDICT)
-    
-    df.insert(0,"Season",season_col)
-    df.insert(1,"team_mlbam",team_mlbam_col)
-    df.insert(2,"team",team_name_col)
-    df.insert(3,"league_mlbam",league_mlbam_col)
-    df.insert(4,"league",league_col)
-    df.insert(5,"div_mlbam",div_mlbam_col)
-    df.insert(6,"div",div_col)
-
-    return df
-
-def league_hitting_advanced(league='all',**kwargs):
-    """Get advanced league hitting stats (team-level)
-
-    Default 'season' is the current (or most recently completed if in off-season)
-    """
-    stats = "seasonAdvanced"
-    statGroup = "hitting"
-
-    if kwargs.get("season") is not None:
-        season = kwargs["season"]
-    else:
-        season = default_season()
-
-    # for k in kwargs.keys():
-    #     if k in ("game_type","gametypes","game_types","gameTypes","gameType","gametype"):
-    #         gameType = kwargs[k]
-    #         break
-
-    if league == "all":
-        leagueIds = "103,104"
-    elif str(league).lower() in ("al","american","103"):
-        leagueIds = 103
-    elif str(league).lower() in ("nl","national","104"):
-        leagueIds = 104
-
-
-    url = BASE + f"/teams/stats?sportId=1&group={statGroup}&stats={stats}&season={season}&leagueIds={leagueIds}&hydrate=team"
-
-    resp = requests.get(url)
-
-    lg_data = resp.json()["stats"][0]
-
-    data = []
-
-    season_col = []
-    team_mlbam_col = []
-    team_name_col = []
-    league_mlbam_col = []
-    league_col = []
-    div_mlbam_col = []
-    div_col = []
-
-    for tm in lg_data["splits"]:
-        team_dict = tm.get("team")
-        season = tm.get("season")
-        team_mlbam = tm.get("team",{}).get("id")
-        team_name = tm.get("team",{}).get("name")
-        league_mlbam = str(team_dict.get("league",{}).get("id"))
-        league = LEAGUE_IDS[league_mlbam]
-        div_mlbam = str(team_dict.get("division",{}).get("id"))
-        div = LEAGUE_IDS[div_mlbam]
-
-        season_col.append(season)
-        team_mlbam_col.append(team_mlbam)
-        team_name_col.append(team_name)
-        league_mlbam_col.append(league_mlbam)
-        league_col.append(league)
-        div_mlbam_col.append(div_mlbam)
-        div_col.append(div)
-
-        tm_stats = tm.get("stat")
-
-        data.append(pd.Series(tm_stats))
-    
-    df = pd.DataFrame(data=data,columns=tm_stats.keys()).rename(columns=STATDICT)
-    
-    df.insert(0,"Season",season_col)
-    df.insert(1,"team_mlbam",team_mlbam_col)
-    df.insert(2,"team",team_name_col)
-    df.insert(3,"league_mlbam",league_mlbam_col)
-    df.insert(4,"league",league_col)
-    df.insert(5,"div_mlbam",div_mlbam_col)
-    df.insert(6,"div",div_col)
-
-    return df
-
-def league_pitching_advanced(league='all',**kwargs):
-    """Get advanced league pitching stats (team-level)
-
-    Default 'season' is the current (or most recently completed if in off-season)
-    """
-    stats = "seasonAdvanced"
-    statGroup = "pitching"
-
-    if kwargs.get("season") is not None:
-        season = kwargs["season"]
-    else:
-        season = default_season()
-
-    # for k in kwargs.keys():
-    #     if k in ("game_type","gametypes","game_types","gameTypes","gameType","gametype"):
-    #         gameType = kwargs[k]
-    #         break
-
-    if league == "all":
-        leagueIds = "103,104"
-    elif str(league).lower() in ("al","american","103"):
-        leagueIds = 103
-    elif str(league).lower() in ("nl","national","104"):
-        leagueIds = 104
-
-
-    url = BASE + f"/teams/stats?sportId=1&group={statGroup}&stats={stats}&season={season}&leagueIds={leagueIds}&hydrate=team"
-
-    resp = requests.get(url)
-
-    lg_data = resp.json()["stats"][0]
-
-    data = []
-
-    season_col = []
-    team_mlbam_col = []
-    team_name_col = []
-    league_mlbam_col = []
-    league_col = []
-    div_mlbam_col = []
-    div_col = []
-
-    for tm in lg_data["splits"]:
-        team_dict = tm.get("team")
-        season = tm.get("season")
-        team_mlbam = tm.get("team",{}).get("id")
-        team_name = tm.get("team",{}).get("name")
-        league_mlbam = str(team_dict.get("league",{}).get("id"))
-        league = LEAGUE_IDS[league_mlbam]
-        div_mlbam = str(team_dict.get("division",{}).get("id"))
-        div = LEAGUE_IDS[div_mlbam]
-
-        season_col.append(season)
-        team_mlbam_col.append(team_mlbam)
-        team_name_col.append(team_name)
-        league_mlbam_col.append(league_mlbam)
-        league_col.append(league)
-        div_mlbam_col.append(div_mlbam)
-        div_col.append(div)
-
-        tm_stats = tm.get("stat")
-
-        data.append(pd.Series(tm_stats))
-    
-    df = pd.DataFrame(data=data,columns=tm_stats.keys()).rename(columns=STATDICT)
-    
-    df.insert(0,"Season",season_col)
-    df.insert(1,"team_mlbam",team_mlbam_col)
-    df.insert(2,"team",team_name_col)
-    df.insert(3,"league_mlbam",league_mlbam_col)
-    df.insert(4,"league",league_col)
-    df.insert(5,"div_mlbam",div_mlbam_col)
-    df.insert(6,"div",div_col)
-
-    return df
+    # return parsing._new_stat_collection(response=resp.json())
+    return dclass.StatTypeCollection.from_json(resp.json())
 
 def league_leaders(season=None,statGroup=None,playerPool="Qualified"):
     """Get league leaders for hitting & pitching
@@ -4147,7 +2608,7 @@ def league_leaders(season=None,statGroup=None,playerPool="Qualified"):
     if statGroup is None:
         statGroup = 'hitting,pitching'
 
-    url = BASE + f"/stats?stats=season&season={season}&group={statGroup}&playerPool={playerPool}"
+    url = c.BASE + f"/stats?stats=season&season={season}&group={statGroup}&playerPool={playerPool}"
 
     resp = requests.get(url)
 
@@ -4220,11 +2681,33 @@ def league_leaders(season=None,statGroup=None,playerPool="Qualified"):
                 
                 top_pitchers.append(pd.Series(stats))
 
-    hit_df = pd.DataFrame(data=top_hitters).rename(columns=STATDICT)[hit_cols]
-    pitch_df = pd.DataFrame(data=top_pitchers).rename(columns=STATDICT)[pit_cols]
+    hit_df = pd.DataFrame(data=top_hitters).rename(columns=c.STATDICT)[hit_cols]
+    pitch_df = pd.DataFrame(data=top_pitchers).rename(columns=c.STATDICT)[pit_cols]
 
     return {"hitting":hit_df,"pitching":pitch_df}
 
+def season_standings(season=None,standingsType=None,**kwargs):
+    if season is None:
+        season = default_season()
+    if standingsType is None:
+        standingsType = "byDivision"
+    params = {
+        "leagueId":"103,104",
+        "season":season,
+        "standingsTypes":standingsType,
+        "hydrate":"team"
+    }
+    url = c.BASE + f"/standings?"
+    if kwargs.get('url_only'):
+        req = requests.Request("GET",url,params=params)
+        return req.prepare().url
+    
+    resp = requests.get(url,params=params)
+    
+    parsed_data = parsing._parse_season_standings_data(resp.json())
+    
+    return pd.DataFrame(parsed_data)
+    
 # ===============================================================
 # MISC Functions
 # ===============================================================
@@ -4250,7 +2733,7 @@ def find_team(query,season=None):
     
     """
 
-    df = get_teams_df()
+    df = mlbdata.get_teams_df()
     
     if season is None:
         season = default_season()
@@ -4278,7 +2761,7 @@ def find_venue(query):
 
     """
 
-    df = get_venues_df()
+    df = mlbdata.get_venues_df()
 
     query = query.lower()
 
@@ -4362,9 +2845,9 @@ def play_search(
     if statGroup is not None:
         params['group'] = statGroup
 
-    teams_df = get_teams_df(year=season).set_index('mlbam')
+    teams_df = mlbdata.get_teams_df(year=season).set_index('mlbam')
 
-    url = BASE + f'/people/{mlbam}/stats'
+    url = c.BASE + f'/people/{mlbam}/stats'
     response = requests.get(url,params=params)
     resp = response.json()
 
@@ -4686,7 +3169,7 @@ def pitch_search(mlbam,seasons=None,statGroup=None,opposingTeamId=None,eventType
 
     queryString = "&".join(queryString)
     
-    url = BASE + f"/people/{mlbam}/stats?stats=pitchLog&{queryString}"
+    url = c.BASE + f"/people/{mlbam}/stats?stats=pitchLog&{queryString}"
 
 
     response = requests.get(url)
@@ -4946,7 +3429,7 @@ def game_search(
               'sportId':1
               }
     
-    url = BASE + f"/schedule"
+    url = c.BASE + f"/schedule"
     response = requests.get(url,params=params)
     all_results = []
 
@@ -5001,7 +3484,7 @@ def last_game(mlbam):
     """
     teamID = str(mlbam)
 
-    season_info = get_season_info()
+    season_info = mlbdata.get_season_info()
     
     if season_info['in_progress'] is None:
         m = 12
@@ -5014,7 +3497,7 @@ def last_game(mlbam):
         y = curr_date.year
         season = season_info['in_progress']
 
-    url = BASE + f"/teams/{teamID}?hydrate=previousSchedule(date={m}/{d}/{y},inclusive=True,limit=1,season={season},gameType=[S,R,D,W,F,C,L])"
+    url = c.BASE + f"/teams/{teamID}?hydrate=previousSchedule(date={m}/{d}/{y},inclusive=True,limit=1,season={season},gameType=[S,R,D,W,F,C,L])"
 
     resp = requests.get(url)
 
@@ -5054,11 +3537,11 @@ def next_game(mlbam):
     y = curr_date.year
 
     try:
-        url = BASE + f"/teams/{teamID}?hydrate=nextSchedule(date={m}/{d}/{y},inclusive=True,limit=1,season={y},gameType=[S,R,P])"
+        url = c.BASE + f"/teams/{teamID}?hydrate=nextSchedule(date={m}/{d}/{y},inclusive=True,limit=1,season={y},gameType=[S,R,P])"
         response = requests.get(url)
         results = response.json()["teams"][0]["nextGameSchedule"]["dates"][0]["games"]
     except:
-        url = BASE + f"/teams/{teamID}?hydrate=nextSchedule(date={m}/{d}/{y},inclusive=True,limit=1,season={y+1},gameType=[S,R,P])"
+        url = c.BASE + f"/teams/{teamID}?hydrate=nextSchedule(date={m}/{d}/{y},inclusive=True,limit=1,season={y+1},gameType=[S,R,P])"
         response = requests.get(url)
         results = response.json()["teams"][0]["nextGameSchedule"]["dates"][0]["games"]
 
@@ -5082,15 +3565,7 @@ def next_game(mlbam):
     
     return df
 
-def schedule(
-    mlbam=None,
-    season=None,
-    date=None,
-    startDate=None,
-    endDate=None,
-    gameType=None,
-    opponentId=None,
-    **kwargs) -> pd.DataFrame:
+def schedule(mlbam=None,season=None,date=None,startDate=None,endDate=None,gameType=None,opponentId=None,**kwargs) -> pd.DataFrame:
     """Get game schedule data.
 
     Parameters
@@ -5122,11 +3597,11 @@ def schedule(
         keyword argument to specify which timezone to view game times
     
     hydrate : str, optional
-        retrieve additional data
+        retrieve additional data (example hydrations - "linescore,person,decisions,lineups(person),probablePitcher")
 
     """
 
-    url = BASE + "/schedule?"
+    url = c.BASE + "/schedule?"
 
     params = {
         "sportId":1
@@ -5141,7 +3616,7 @@ def schedule(
 
     else:
         if date is None and season is None:
-            season_info = get_season_info()
+            season_info = mlbdata.get_season_info()
             if season_info['in_progress'] is None:
                 season = season_info['last_completed']
             else:
@@ -5167,19 +3642,7 @@ def schedule(
         params['teamId'] = mlbam
     
     tz = kwargs.get("tz",kwargs.get("timezone"))
-    if tz is None:
-        # tz = ct_zone
-        tz = et_zone
-    elif type(tz) is str:
-        tz = tz.lower()
-        if tz in ("cst","cdt","ct","central","us/central"):
-            tz = ct_zone
-        elif tz in ("est","edt","et","eastern","us/eastern"):
-            tz = et_zone
-        elif tz in ("mst","mdt","mt","mountain","us/mountain"):
-            tz = mt_zone
-        elif tz in ("pst","pdt","pt","pacific","us/pacific"):
-            tz = pt_zone
+    tz = get_tzinfo(tz_string=tz)
     
     if kwargs.get("oppTeamId") is not None:
         opponentId = kwargs["oppTeamId"]
@@ -5194,264 +3657,21 @@ def schedule(
         hydrate = kwargs["hydrate"]
         params["hydrate"] = hydrate
     
+    if kwargs.get('url_only'):
+        req = requests.Request("GET",url,params=params)
+        prepared_url = req.prepare().url
+        return prepared_url
     resp = requests.get(url,params=params)
 
-    # print("\n================")
     if kwargs.get('log') is True:
+        print("\n================")
         print(resp.url)
-    # print("================\n")
+        print("================\n")
 
-    dates = resp.json()['dates']
-
-    data = []
-    cols = [
-        "game_start",
-        "date_sched",
-        "date_resched",
-        "date_official",
-        "sched_dt",
-        "sched_time",
-        "resched_dt",
-        "resched_time",
-        "gamePk",
-        "game_type",
-        "inn",
-        "inn_ord",
-        "inn_state",
-        "inn_half",
-        "venue_mlbam",
-        "venue_name",
-        "away_mlbam",
-        "away_name",
-        "away_score",
-        "away_record",
-        "aw_pp_name",
-        "aw_pp_mlbam",
-        "home_mlbam",
-        "home_name",
-        "home_score",
-        "home_record",
-        "hm_pp_name",
-        "hm_pp_mlbam",
-        "at_bat_tm",
-        "at_bat_mlbam",
-        "at_bat_bsname",
-        "on_mound_mlbam",
-        "on_mound_bsname",
-        "abstract_state",
-        "abstract_code",
-        "detailed_state",
-        "detailed_code",
-        "status_code",
-        "reason",
-        "bc_tv_aw",
-        "bc_tv_aw_res",
-        "bc_tv_hm",
-        "bc_tv_hm_res",
-        "bc_radio_aw", 
-        "bc_radio_hm",
-        "recap_url",
-        "recap_title",
-        "recap_desc",
-        "recap_avail"
-        ]
-    
-    for d in dates:
-        games = d['games']
-        date = d['date']
-        for g in games:
-            teams = g["teams"]
-            away = teams["away"]
-            home = teams["home"]
-            
-            linescore = g.get('linescore',{})
-            inn = linescore.get('currentInning','')
-            inn_ord = linescore.get('currentInningOrdinal','')
-            inn_state = linescore.get('inningState','')
-            inn_half = linescore.get('inningHalf','')
-            
-            offense = linescore.get('offense',{})
-            defense = linescore.get('defense',{})
-            at_bat_tm = offense.get('team',{}).get('id',0)
-            if at_bat_tm == str(int(away.get("team").get("id"))):
-                at_bat_tm = 'away'
-            else:
-                at_bat_tm = 'home'
-            at_bat = offense.get('batter',{})
-            at_bat_mlbam  = at_bat.get('id',0)
-            at_bat_name   = at_bat.get('fullName','')
-            at_bat_bsname = at_bat.get('lastInitName','')
-            on_mound = defense.get('pitcher',{})
-            on_mound_mlbam  = on_mound.get('id',0)
-            on_mound_name   = on_mound.get('fullName','')
-            on_mound_bsname = on_mound.get('lastInitName','')
-            
-            game_date = g.get("gameDate")
-            resched_date = g.get("rescheduleDate")
-            date_official = g.get("officialDate")
-            date_sched = date
-            date_resched = g.get("rescheduleGameDate")
-
-            if type(game_date) is str:
-                game_dt = dt.datetime.strptime(game_date,r"%Y-%m-%dT%H:%M:%SZ")
-                game_dt = pytz.utc.fromutc(game_dt)
-                game_dt = game_dt.astimezone(tz)
-                sched_time = game_dt.strftime(standard_time_fmt)
-                game_start = sched_time
-            else:
-                game_dt = "-"
-                sched_time = "-"
-
-            if type(resched_date) is str:
-                resched_dt = dt.datetime.strptime(resched_date,r"%Y-%m-%dT%H:%M:%SZ")
-                resched_dt = pytz.utc.fromutc(resched_dt)
-                resched_dt = resched_dt.astimezone(tz)
-                resched_time = resched_dt.strftime(standard_time_fmt)
-                game_start = resched_time
-            else:
-                resched_dt = "-"
-                resched_time = "-"
-
-            gamePk = str(g.get("gamePk","-"))
-            
-            away_score = away.get("score")
-            away_score = "0" if away_score is None else str(int(away_score))
-            home_score = home.get("score")
-            home_score = "0" if home_score is None else str(int(home_score))
-
-            sched_dt = str(game_dt)
-            resched_dt = str(resched_dt)
-            game_type = g.get("gameType")
-
-            venue = g.get("venue",{})
-            venue_mlbam = venue.get("id")
-            venue_name = venue.get("name")
-
-            away_mlbam = str(int(away.get("team").get("id")))
-            away_name = away.get("team").get("name")
-            away_rec = f'{away.get("leagueRecord",{}).get("wins")}-{away.get("leagueRecord",{}).get("losses")}'
-            aw_pp = away.get("probablePitcher",{})
-            aw_pp_mlbam = aw_pp.get("id","")
-            aw_pp_name = aw_pp.get("fullName","")
-
-            
-            home_mlbam = str(int(home.get("team").get("id")))
-            home_name = home.get("team").get("name")
-            home_rec = f'{home.get("leagueRecord",{}).get("wins")}-{home.get("leagueRecord",{}).get("losses")}'
-            hm_pp = home.get("probablePitcher",{})
-            hm_pp_mlbam = hm_pp.get("id","")
-            hm_pp_name = hm_pp.get("fullName","")
-
-
-            status = g.get("status",{})
-            abstract_state = status.get("abstractGameState")
-            abstract_code = status.get("abstractGameCode")
-            detailed_state = status.get("detailedState")
-            detailed_code = status.get("codedGameState")
-            status_code = status.get("statusCode")
-            reason = status.get("reason")
-
-            bc_tv_aw = ""
-            bc_tv_aw_res = ""
-            bc_tv_hm = ""
-            bc_tv_hm_res = ""
-            bc_radio_aw = ""
-            bc_radio_hm = ""
-            broadcasts = g.get("broadcasts",[{}])
-            for bc in broadcasts:
-                if bc.get("language") == "en":
-                    if bc.get("type") == "TV":
-                        if bc.get("homeAway") == "away":
-                            bc_tv_aw = bc.get("name")
-                            bc_tv_aw_res = bc.get("videoResolution",{}).get("resolutionShort","-")
-                        else:
-                            bc_tv_hm = bc.get("name")
-                            bc_tv_hm_res = bc.get("videoResolution",{}).get("resolutionShort","-")
-                    else:
-                        if bc.get("homeAway") == "away":
-                            bc_radio_aw = bc.get("name")
-                        else:
-                            bc_radio_hm = bc.get("name")
-
-            recap_title = ""
-            recap_desc = ""
-            recap_url = ""
-            recap_avail = False
-            media = g.get("content",{}).get("media",{})
-            epgAlt = media.get("epgAlternate",[{}])
-            for e in epgAlt:
-                if e.get("title") == "Daily Recap":
-                    epg_items = e.get("items")
-                    gotUrl = False
-                    for i in epg_items:
-                        recap_title = i.get("title","")
-                        recap_desc = i.get("description")
-                        for p in i.get("playbacks",[{}]):
-                            playback_type = p.get("name")
-                            if playback_type == "mp4Avc" or playback_type == "highBit":
-                                recap_url = p.get("url")
-                                gotUrl = True
-                                recap_avail = True
-                                break
-                        if gotUrl is True:
-                            break
-
-            data.append([
-                game_start,
-                date_sched,
-                date_resched,
-                date_official,
-                sched_dt,
-                sched_time,
-                resched_dt,
-                resched_time,
-                gamePk,
-                game_type,
-                inn,
-                inn_ord,
-                inn_state,
-                inn_half,
-                venue_mlbam,
-                venue_name,
-                away_mlbam,
-                away_name,
-                away_score,
-                away_rec,
-                aw_pp_name,
-                aw_pp_mlbam,
-                home_mlbam,
-                home_name,
-                home_score,
-                home_rec,
-                hm_pp_name,
-                hm_pp_mlbam,
-                at_bat_tm,
-                at_bat_mlbam,
-                at_bat_bsname,
-                on_mound_mlbam,
-                on_mound_bsname,
-                abstract_state,
-                abstract_code,
-                detailed_state,
-                detailed_code,
-                status_code,
-                reason,
-                bc_tv_aw,
-                bc_tv_aw_res,
-                bc_tv_hm,
-                bc_tv_hm_res,
-                bc_radio_aw, 
-                bc_radio_hm,
-                recap_url,
-                recap_title,
-                recap_desc,
-                recap_avail
-            ])
-    
-    df = pd.DataFrame(data=data,columns=cols)
+    parsed_data = parsing._parse_schedule_data(json_response=resp.json(),selected_timezone=tz)
+    df = pd.DataFrame(data=parsed_data)
     official_dt_col = pd.to_datetime(df["date_official"] + " " + df["game_start"],format=r"%Y-%m-%d %I:%M %p")
     df.insert(0,"official_dt",official_dt_col)
-
     return df
 
 def games_today():
@@ -5459,11 +3679,11 @@ def games_today():
     sched = schedule(date=date_str)
     return sched
 
-def scores():
+def scores(return_list=False):
     today = dt.datetime.today()
     date_str = today.strftime(r'%Y-%m-%d')
     games = schedule(date=date_str,hydrate='linescore')
-    tms = get_teams_df(year=today.year).set_index('mlbam')
+    tms = mlbdata.get_teams_df(year=today.year).set_index('mlbam')
     score_list = []
     gm_str = '{:3} {:>2}  vs  {:2} {:3} | {:6} | {:12}'
     for idx,gm in games.iterrows():
@@ -5493,7 +3713,10 @@ def scores():
         row_str = gm_str.format(aw_abbrv,aw_score,hm_score,hm_abbrv,gm_deets,gpk)
         score_list.append(row_str)
     
-    return '\n'.join(score_list)
+    if return_list is True:
+        return '\n'.join(score_list)
+    else:
+        print('\n'.join(score_list))
 
 def game_highlights(
     mlbam=None,
@@ -5526,7 +3749,7 @@ def game_highlights(
 
     hydrations = "game(content(media(all),summary,gamenotes,highlights(highlights)))"
     if date is not None:
-        url = BASE + f"/schedule?sportId=1&teamId={mlbam}&date={date}&hydrate={hydrations}"
+        url = c.BASE + f"/schedule?sportId=1&teamId={mlbam}&date={date}&hydrate={hydrations}"
     elif month is not None:
         if season is not None:
             month = str(month)
@@ -5548,20 +3771,20 @@ def game_highlights(
                 startDate = startDate.strftime(r"%Y-%m-%d")
                 endDate = endDate.strftime(r"%Y-%m-%d")
 
-            url = BASE + f"/schedule?sportId=1&teamId={mlbam}&startDate={startDate}&endDate={endDate}&hydrate={hydrations}"
+            url = c.BASE + f"/schedule?sportId=1&teamId={mlbam}&startDate={startDate}&endDate={endDate}&hydrate={hydrations}"
 
         else:
             print("Must specify a 'season' if using 'month' param")
             return None
     elif season is not None:
-        url = BASE + f"/schedule?sportId=1&teamId={mlbam}&season={season}&hydrate={hydrations}"
+        url = c.BASE + f"/schedule?sportId=1&teamId={mlbam}&season={season}&hydrate={hydrations}"
 
     elif startDate is not None:
         if endDate is not None:
             startDate = dt.datetime.strptime(startDate,r"%m/%d/%Y").strftime(r"%Y-%m-%d")
             endDate = dt.datetime.strptime(endDate,r"%m/%d/%Y").strftime(r"%Y-%m-%d")
 
-            url = BASE + f"/schedule?sportId=1&teamId={mlbam}&startDate={startDate}&endDate={endDate}&hydrate={hydrations}"
+            url = c.BASE + f"/schedule?sportId=1&teamId={mlbam}&startDate={startDate}&endDate={endDate}&hydrate={hydrations}"
 
         else:
             print("Params 'startDate' & 'endDate' must be used together")
@@ -5713,7 +3936,7 @@ def free_agents(
     if hydrate_person is True:
         params['hydrate'] = 'person'
     
-    url = f"{BASE}/people/freeAgents"
+    url = f"{c.BASE}/people/freeAgents"
     resp = requests.get(url,params=params)
     
     data = []
@@ -5733,7 +3956,7 @@ def free_agents(
             'new_tm_mlbam':new_team.get('id',0),
             'new_tm_name':new_team.get('name','-'),
         }
-        parsed_player_data = _parse_person(_obj=fa['player'])
+        parsed_player_data = parsing._parse_person(_obj=fa['player'])
         parsed_player_data.update(**{'pos_code':pos.get('code','-'),
                                      'pos_name':pos.get('name','-'),
                                      'pos_type':pos.get('type','-'),
@@ -5749,3 +3972,11 @@ def free_agents(
         return df.sort_values(by=sort_by,ascending=sort_asc).reset_index(drop=True)
     
     return df
+
+def league(league_id:int,attr:str=None):
+    df = mlbdata.get_leagues_df().set_index("mlbam")
+    league_id = int(league_id)
+    if attr is None:
+        return df.loc[league_id]
+    else:
+        return df.loc[league_id][attr]

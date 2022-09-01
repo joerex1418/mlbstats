@@ -4,8 +4,7 @@ import aiohttp
 import pandas as pd
 
 from ..constants import BASE
-from ..constants import LEAGUE_IDS_SHORT
-
+from .. import mlb_dataclasses as dclass
 from ..mlbdata import get_teams_df
 
 from ..utils import curr_year
@@ -15,14 +14,14 @@ async def parse_data(response,teams_df):
     for league in response["records"]:
         lg_mlbam = league.get("league",{}).get("id","")
         year = int(league["league"]["season"])
-        lg_abbrv = LEAGUE_IDS_SHORT.get(lg_mlbam)
+        lg_abbrv = dclass.Leagues.get(lg_mlbam).abbreviation
         for team in league["teamRecords"]:
         # SEASON RECORDS FOR EACH TEAM
             tm_mlbam = team["team"]["id"]
             tm_name = teams_df[(teams_df["mlbam"]==tm_mlbam) & (teams_df["season"]==year)].fullName.item()
             tm_bbrefID = teams_df[(teams_df["mlbam"]==tm_mlbam) & (teams_df["season"]==year)].bbrefID.item()
             div_mlbam = team.get("team",{}).get("division",{}).get("id","")
-            div_short = LEAGUE_IDS_SHORT.get(div_mlbam,"-")
+            div_short = dclass.Leagues.get(div_mlbam).short_name
             v_mlbam = team.get("team",{}).get("venue",{}).get("id")
             tm_records = [year,tm_mlbam,tm_name,tm_bbrefID,lg_mlbam,lg_abbrv,div_mlbam,div_short,v_mlbam]
             record_cats = team["records"]
