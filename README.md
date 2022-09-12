@@ -50,8 +50,6 @@ Now that we have our Person instance, we can start accessing the data!
 There are 4 primary classes in this library that have been configured to make data retrieval as painless as possible (at least, in my personal opinion)
 * `Person`
   * Get data for a player (person)
-* `Franchise`
-  * Get data for team's parent franchise
 * `Team`
   * Get team data for a specific season
 * `Game`
