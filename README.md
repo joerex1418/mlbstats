@@ -8,7 +8,7 @@ For now the repo will have to be cloned
 
 In the command line, copy and paste the following:
 ```
-git clone https://github.com/joerex1418/simplestats-mlb.git
+git clone https://github.com/joerex1418/mlbstats.git
 ```
 From there, either rename the local repo on your machine to whatever you like or install as a local package
 
