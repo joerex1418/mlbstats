@@ -1,4 +1,7 @@
-# Intro
+# NOTE:
+
+This is the original "pre-release" version of this repository. After some thought, I decided to move things around and rework some of the library's classes and functions (in an effort to clean the repo). The updated working version will be available on the main branch soon.
+
 This is an UNOFFICIAL Python wrapper for the Official MLB StatsAPI (https://statsapi.mlb.com). I wrote this library with the intention of making baseball data retrieval as intuitive and robust as possible.
 ## Copyright Notice
 This repository and its author are not affiliated with the MLB in any way. Use of MLB data is subject to the notice posted at http://gdx.mlb.com/components/copyright.txt.
