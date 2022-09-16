@@ -1,6 +1,4 @@
-## NOTE 
-
-The repository at this location is/will be deprecated. A newer version with much of the same functionality will soon be available.
+### The repository at this location is/will be deprecated. An in-progress dev version of the new repository will be available at the <b>beta</b> branch. Also, please note that the name of the repo has changed from "simplestats-mlb" to "mlbstats"
 
 -------------------------
 This is an UNOFFICIAL Python wrapper for the Official MLB StatsAPI (https://statsapi.mlb.com). I wrote this library with the intention of making baseball data retrieval as intuitive and robust as possible.
