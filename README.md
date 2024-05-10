@@ -1,7 +1,3 @@
-## IMPORTANT, PLEASE READ:
-This version of the library deprecated.
-
--------------------------
 This is an UNOFFICIAL Python wrapper for the Official MLB StatsAPI (https://statsapi.mlb.com). I wrote this library with the intention of making baseball data retrieval as intuitive and robust as possible.
 ## Copyright Notice
 This repository and its author are not affiliated with the MLB in any way. Use of MLB data is subject to the notice posted at http://gdx.mlb.com/components/copyright.txt.
@@ -46,7 +42,6 @@ NOTE:
 
 <br>
 Now that we have our Person instance, we can start accessing the data!
-
 <br>
 
 # Classes
